@@ -24,6 +24,16 @@
 		<!-- plugins -->
 		<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
 		<editorconfig-maven-plugin.version>0.1.3</editorconfig-maven-plugin.version>
+		<!-- sonar -->
+		<sonar.sources>${project.basedir}/src/main/</sonar.sources>
+		<sonar.tests>${project.basedir}/src/test/</sonar.tests>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.exclusions>**/model/**/*_.class</sonar.exclusions>
+		<sonar.coverage.exclusions>**/model/**</sonar.coverage.exclusions>
+		<sonar.cpd.exclusions>**/model/**</sonar.cpd.exclusions>
+		<sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
+		<sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
+		<sonar.coverage.jacoco.xmlReportPaths>${project.coverage.result.path}/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	<dependencies>
 
@@ -167,6 +177,14 @@
 						</configuration>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<!-- Force alphabetical order to have a reproducible build -->
+					<runOrder>alphabetical</runOrder>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
