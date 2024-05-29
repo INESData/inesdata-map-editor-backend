@@ -57,7 +57,6 @@
 			<scope>runtime</scope>
 		</dependency>
 
-
 		<!-- Lombok -->
 
 		<dependency>
@@ -210,4 +209,16 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<distributionManagement>
+		<repository>
+			<id>maven-repo</id>
+			<url>${maven.repo.releases.url}</url>
+		</repository>
+		<snapshotRepository>
+			<id>maven-repo</id>
+			<url>${maven.repo.snapshots.url}</url>
+		</snapshotRepository>
+	</distributionManagement>
+
 </project>
