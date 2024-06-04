@@ -18,7 +18,7 @@ RUN rm target/*.jar.original &&\
     rm target/*-javadoc.jar
 
 # Python base image
-FROM python:3.10-slim
+FROM python:3.10-slim-bullseye
 
 ENV JAVA_HOME=/opt/java/openjdk
 COPY --from=eclipse-temurin:17-jre $JAVA_HOME $JAVA_HOME
