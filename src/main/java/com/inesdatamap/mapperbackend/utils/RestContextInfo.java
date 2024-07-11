@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 
+import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -32,7 +33,10 @@ public class RestContextInfo {
 	 * @return {@link String} the identifier of the trace
 	 */
 	public String getTraceId() {
-		return hasContext() ? tracer.currentSpan().context().traceId() : null;
+		Span span = tracer.currentSpan();
+		boolean hasContext = span != null && span.context() != null;
+		return hasContext ? span.context().traceId() : null;
+
 	}
 
 	/**
@@ -41,7 +45,9 @@ public class RestContextInfo {
 	 * @return {@link String} the identifier of the span
 	 */
 	public String getSpanId() {
-		return hasContext() ? tracer.currentSpan().context().spanId() : null;
+		Span span = tracer.currentSpan();
+		boolean hasContext = span != null && span.context() != null;
+		return hasContext ? span.context().spanId() : null;
 	}
 
 	/**
@@ -62,7 +68,4 @@ public class RestContextInfo {
 		return UNKNOWN;
 	}
 
-	private boolean hasContext() {
-		return tracer.currentSpan() != null && tracer.currentSpan().context() != null;
-	}
 }
