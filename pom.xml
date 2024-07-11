@@ -254,6 +254,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/owasp-suppressions-global.xml</exclude>
+						<exclude>*.ttl</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
