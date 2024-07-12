@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+
+	<changeSet author="gmv" id="0.1.0-data-base-source">
+		<createTable tableName="data_base_source" schemaName="PUBLIC" tablespace="TBS_INESDATA_MAP_DATA">
+			<column name="id" type="BIGINT">
+				<constraints nullable="false" unique="true" primaryKey="true" />
+			</column>
+			<column name="connectionString" type="VARCHAR(255)"/>
+			<column name="user" type="VARCHAR(255)"/>
+			<column name="password" type="VARCHAR(255)"/>
+			<column name="type_id" type="BIGINT"/>
+			<column name="version" type="BIGINT" />
+		</createTable>
+		<addForeignKeyConstraint baseTableName="data_base_source"
+                                 baseColumnNames="type_id"
+                                 constraintName="fk_database_source_type"
+                                 referencedTableName="data_base_type"
+                                 referencedColumnNames="id"/>
+		<sql>
+            ALTER TABLE public.data_base_source OWNER TO inesdata_map;
+            GRANT ALL ON TABLE public.data_base_source TO inesdata_map;
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>

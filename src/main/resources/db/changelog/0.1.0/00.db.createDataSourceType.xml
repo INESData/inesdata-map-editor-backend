@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+
+	<changeSet author="gmv" id="0.1.0-data-source-type">
+		<createTable tableName="data_source_type" schemaName="PUBLIC" tablespace="TBS_INESDATA_MAP_DATA">
+			<column name="id" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="type" type="VARCHAR(150)"/>
+			<column name="version" type="BIGINT" />
+		</createTable>
+		<sql>
+            ALTER TABLE public.data_source_type OWNER TO inesdata_map;
+            GRANT ALL ON TABLE public.data_source_type TO inesdata_map;
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>

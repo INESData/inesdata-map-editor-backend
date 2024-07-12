@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+
+	<changeSet author="gmv" id="0.1.0-ontology">
+		<createTable tableName="ontology" schemaName="PUBLIC" tablespace="TBS_INESDATA_MAP_DATA">
+			<column name="id" type="BIGINT">
+				<constraints nullable="false" unique="true" primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(255)"/>
+			<column name="content" type="VARCHAR(255)" />
+			<column name="title" type="VARCHAR(255)" />
+			<column name="upload_date" type="TIMESTAMP" />
+			<column name="user" type="VARCHAR(255)" />
+			<column name="url" type="VARCHAR(255)" />
+			<column name="version_num" type="BIGINT" />
+			<column name="version" type="BIGINT" />
+		</createTable>
+		<sql>
+			ALTER TABLE public.ontology OWNER TO inesdata_map;
+			GRANT ALL ON TABLE public.ontology TO inesdata_map;
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>

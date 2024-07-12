@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+	<include file="classpath:db/changelog/0.1.0/00.db.createOntology.xml"/>
+	<include file="classpath:db/changelog/0.1.0/00.db.createTabularsource.xml"/>
+	<include file="classpath:db/changelog/0.1.0/00.db.createDataSourceType.xml"/>
+	<include file="classpath:db/changelog/0.1.0/00.db.createDataBaseType.xml"/>
+	<include file="classpath:db/changelog/0.1.0/00.db.createDataBaseSource.xml"/>
+	<include file="classpath:db/changelog/0.1.0/00.db.createDataSource.xml"/>
+
+</databaseChangeLog>

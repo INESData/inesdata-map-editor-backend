@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+
+	<changeSet author="gmv" id="0.1.0-tabular-source">
+		<createTable tableName="tabular_source" schemaName="PUBLIC" tablespace="TBS_INESDATA_MAP_DATA">
+			<column name="id" type="BIGINT">
+				<constraints nullable="false" unique="true" primaryKey="true" />
+			</column>
+			<column name="fileName" type="VARCHAR(255)"/>
+			<column name="minioPath" type="VARCHAR(255)"/>
+			<column name="fields" type="VARCHAR(255)"/>
+			<column name="version" type="BIGINT" />
+		</createTable>
+		<sql>
+            ALTER TABLE public.tabular_source OWNER TO inesdata_map;
+            GRANT ALL ON TABLE public.tabular_source TO inesdata_map;
+		</sql>
+	</changeSet>
+
+</databaseChangeLog>
