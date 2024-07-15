@@ -9,11 +9,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.jena.riot.Lang;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLDataFactory;
@@ -37,44 +39,50 @@ class OWLUtilsTest {
 
 	@Test
 	void testOwlApi() throws OWLOntologyCreationException, IOException {
-
-		getInfo("unesco-thesaurus.ttl");
+		Optional<IRI> ontologyIri = getInfo("unesco-thesaurus.ttl");
+		Assertions.assertTrue(ontologyIri.isPresent());
 	}
 
 	@Test
 	void testGeometry() throws OWLOntologyCreationException, IOException {
-		getInfo("skos/loterre-turtle/absolute_geometry.ttl");
+		Optional<IRI> ontologyIri = getInfo("skos/loterre-turtle/absolute_geometry.ttl");
+		Assertions.assertTrue(ontologyIri.isPresent());
 	}
 
 	@Test
 	void testSkosRdfXml() throws OWLOntologyCreationException, IOException {
-		getInfo("skos/eurovoc-rdf-xml/eurovoc_3952_ciencias_de_la_tierra.xml");
+		Optional<IRI> ontologyIri = getInfo("skos/eurovoc-rdf-xml/eurovoc_3952_ciencias_de_la_tierra.xml");
 		JenaUtils.printWithJena("skos/eurovoc-rdf-xml/eurovoc_3952_ciencias_de_la_tierra.xml", Lang.RDFXML);
+		Assertions.assertFalse(ontologyIri.isPresent());
 	}
 
 	@Test
 	void testSkosTurtle1() throws OWLOntologyCreationException, IOException {
-		getInfo("skos/loterre-turtle/loterre_nutricion_artificial_perioperative_nutrition.ttl");
+		Optional<IRI> ontologyIri = getInfo("skos/loterre-turtle/loterre_nutricion_artificial_perioperative_nutrition.ttl");
+		Assertions.assertTrue(ontologyIri.isPresent());
 	}
 
 	@Test
 	void testSkosTurtle2() throws OWLOntologyCreationException, IOException {
-		getInfo("skos/loterre-turtle/loterre_patologias_humanas_cellule.ttl");
+		Optional<IRI> ontologyIri = getInfo("skos/loterre-turtle/loterre_patologias_humanas_cellule.ttl");
+		Assertions.assertTrue(ontologyIri.isPresent());
 	}
 
 	@Test
 	void testSkosTurtle3() throws OWLOntologyCreationException, IOException {
-		getInfo("skos/loterre-turtle/loterre_tabla_elementos_polonio.ttl");
+		Optional<IRI> ontologyIri = getInfo("skos/loterre-turtle/loterre_tabla_elementos_polonio.ttl");
 		JenaUtils.printWithJena("skos/loterre-turtle/loterre_tabla_elementos_polonio.ttl", Lang.TTL);
+		Assertions.assertFalse(ontologyIri.isPresent());
 	}
 
 	@Test
 	void testOntolexTurtle() throws OWLOntologyCreationException, IOException {
-		getInfo("ontolex/Diccionari_de_dret_administratiu_RDF.ttl");
+		Optional<IRI> ontologyIri = getInfo("ontolex/Diccionari_de_dret_administratiu_RDF.ttl");
 		JenaUtils.printWithJena("ontolex/Diccionari_de_dret_administratiu_RDF.ttl", Lang.TTL);
+		Assertions.assertFalse(ontologyIri.isPresent());
 	}
 
-	private void getInfo(String fileName) throws OWLOntologyCreationException, IOException {
+	private Optional<IRI> getInfo(String fileName) throws OWLOntologyCreationException, IOException {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 
 		InputStream file = getClass().getClassLoader().getResourceAsStream(fileName);
@@ -82,13 +90,14 @@ class OWLUtilsTest {
 
 		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(content));
 
-		getOntologyInfo(ontology, manager);
+		Optional<IRI> ontologyIri = getOntologyInfo(ontology, manager);
 		System.out.println("***** CONTENT *****");
 		getClasses(ontology, manager);
 
 		System.out.println("***** HIERARCHY *****");
 		printHierarchy(ontology, manager);
 
+		return ontologyIri;
 	}
 
 	private void printHierarchy(OWLOntology ontology, OWLOntologyManager manager) {
@@ -100,7 +109,7 @@ class OWLUtilsTest {
 		hierarchy.printHierarchy(topClass);
 	}
 
-	private void getOntologyInfo(OWLOntology owl, OWLOntologyManager manager) {
+	private Optional<IRI> getOntologyInfo(OWLOntology owl, OWLOntologyManager manager) {
 
 		out.println("Ontology Loaded...");
 		out.println("Ontology : " + owl.getOntologyID());
@@ -125,6 +134,7 @@ class OWLUtilsTest {
 			out.println("Annotation Property: " + annotationProperty);
 		});
 
+		return owl.getOntologyID().getOntologyIRI();
 	}
 
 	private void getClasses(OWLOntology owl, OWLOntologyManager manager) {
