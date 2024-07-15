@@ -276,7 +276,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/owasp-suppressions-global.xml</exclude>
-						<exclude>**/test/resources/*</exclude>
+						<exclude>**/test/resources/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
