@@ -122,11 +122,20 @@
 			</exclusions>
 		</dependency>
 
+
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>33.0.0-jre</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>apache-jena-libs</artifactId>
+			<type>pom</type>
+			<version>5.0.0</version>
+		</dependency>
+
 
 		<!-- Testing -->
 
@@ -267,7 +276,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/owasp-suppressions-global.xml</exclude>
-						<exclude>**/*.ttl</exclude>
+						<exclude>**/test/resources/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
