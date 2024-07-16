@@ -1,4 +1,4 @@
-package com.inesdatamap.mapperbackend.utils.enums;
+package com.inesdatamap.mapperbackend.model.enums;
 
 /**
  * Data Source Type enumeration
