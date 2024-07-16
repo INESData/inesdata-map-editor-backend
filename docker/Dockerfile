@@ -18,7 +18,7 @@ RUN rm target/*.jar.original &&\
     rm target/*-javadoc.jar
 
 # Python base image
-FROM python:3.10-slim-bullseye
+FROM python:3.10-slim-bookworm
 
 ENV JAVA_HOME=/opt/java/openjdk
 COPY --from=eclipse-temurin:17-jre $JAVA_HOME $JAVA_HOME
@@ -27,7 +27,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 # Where to download dependencies
 ARG INDEX_URL
 
-RUN pip install inesdata-mov-datasets --index-url $INDEX_URL  --upgrade --pre
+RUN pip install inesdata-mov-datasets --index-url "$INDEX_URL"  --upgrade --pre
 
 # System env vars
 ENV USER_NAME=mapper
