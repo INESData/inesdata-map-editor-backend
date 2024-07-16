@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -51,7 +52,7 @@ public class MappingField extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "mapping_field_id")
-	private List<PredicateObjectMap> predicates;
+	private List<PredicateObjectMap> predicates = new ArrayList<>();
 
 	/**
 	 * @return the logicalTable
@@ -102,7 +103,7 @@ public class MappingField extends BaseEntity implements Serializable {
 	 * @return the predicates
 	 */
 	public List<PredicateObjectMap> getPredicates() {
-		return this.predicates;
+		return new ArrayList<>(this.predicates);
 	}
 
 	/**
@@ -110,7 +111,7 @@ public class MappingField extends BaseEntity implements Serializable {
 	 *            the predicates to set
 	 */
 	public void setPredicates(List<PredicateObjectMap> predicates) {
-		this.predicates = predicates;
+		this.predicates = new ArrayList<>(predicates);
 	}
 
 }

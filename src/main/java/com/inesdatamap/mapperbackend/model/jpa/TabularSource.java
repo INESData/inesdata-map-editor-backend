@@ -38,12 +38,6 @@ public class TabularSource extends DataSource implements Serializable {
 	private String fields;
 
 	/**
-	 * The entity version.
-	 */
-	@Column(name = "version")
-	private Long version;
-
-	/**
 	 * @return the fileName
 	 */
 	public String getFileName() {

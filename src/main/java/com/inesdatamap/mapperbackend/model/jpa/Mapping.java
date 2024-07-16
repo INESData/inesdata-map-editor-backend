@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -36,7 +37,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "mapping_id")
-	private List<MappingRule> mappingRules;
+	private List<MappingRule> mappingRules = new ArrayList<>();
 
 	/**
 	 * Resource Mapping Language (RML) associated with the mapping.
@@ -49,7 +50,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "mapping_id")
-	private List<Namespace> namespaces;
+	private List<Namespace> namespaces = new ArrayList<>();
 
 	/**
 	 * The path in MinIO storage.
@@ -82,7 +83,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	 * @return the mappingRules
 	 */
 	public List<MappingRule> getMappingRules() {
-		return this.mappingRules;
+		return new ArrayList<>(this.mappingRules);
 	}
 
 	/**
@@ -90,7 +91,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	 *            the mappingRules to set
 	 */
 	public void setMappingRules(List<MappingRule> mappingRules) {
-		this.mappingRules = mappingRules;
+		this.mappingRules = new ArrayList<>(mappingRules);
 	}
 
 	/**
@@ -112,7 +113,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	 * @return the namespaces
 	 */
 	public List<Namespace> getNamespaces() {
-		return this.namespaces;
+		return new ArrayList<>(this.namespaces);
 	}
 
 	/**
@@ -120,7 +121,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	 *            the namespaces to set
 	 */
 	public void setNamespaces(List<Namespace> namespaces) {
-		this.namespaces = namespaces;
+		this.namespaces = new ArrayList<>(namespaces);
 	}
 
 	/**
