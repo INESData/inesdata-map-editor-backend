@@ -6,20 +6,15 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
 
-	<changeSet author="gmv" id="0.1.0-tabular-source">
-		<createTable tableName="tabular_source" schemaName="PUBLIC" tablespace="TBS_INESDATA_MAP_DATA">
+	<changeSet author="gmv" id="1.0.0-subject">
+		<createTable tableName="SUBJECT">
 			<column name="id" type="BIGINT">
 				<constraints nullable="false" unique="true" primaryKey="true" />
 			</column>
-			<column name="fileName" type="VARCHAR(255)"/>
-			<column name="minioPath" type="VARCHAR(255)"/>
-			<column name="fields" type="VARCHAR(255)"/>
-			<column name="version" type="BIGINT" />
+			<column name="template" type="VARCHAR(255)"/>
+			<column name="class_name" type="VARCHAR(255)"/>
+			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
 		</createTable>
-		<sql>
-            ALTER TABLE public.tabular_source OWNER TO inesdata_map;
-            GRANT ALL ON TABLE public.tabular_source TO inesdata_map;
-		</sql>
 	</changeSet>
 
 </databaseChangeLog>

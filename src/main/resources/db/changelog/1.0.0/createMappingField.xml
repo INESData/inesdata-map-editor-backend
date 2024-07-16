@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+	<changeSet author="gmv" id="1.0.0-mapping-field">
+		<createTable tableName="MAPPING_FIELD">
+			<column name="id" type="BIGINT">
+				<constraints nullable="false" unique="true" primaryKey="true"/>
+			</column>
+			<column name="logical_table" type="BIGINT">
+				<constraints nullable="true"/>
+			</column>
+			<column name="logical_source" type="BIGINT">
+				<constraints nullable="true"/>
+			</column>
+			<column name="subject" type="BIGINT">
+				<constraints nullable="true"/>
+			</column>
+			<column name="predicates" type="BIGINT">
+				<constraints nullable="true"/>
+			</column>
+			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
+		</createTable>
+
+		<addForeignKeyConstraint baseTableName="MAPPING_FIELD"
+        						 baseColumnNames="logical_table"
+                                 constraintName="FK_mapping_field_logical_table"
+                                 referencedColumnNames="id"
+                                 referencedTableName="LOGICAL_TABLE"/>
+
+		<addForeignKeyConstraint baseTableName="MAPPING_FIELD"
+        						 baseColumnNames="logical_source"
+                                 constraintName="FK_mapping_field_logical_source"
+                                 referencedColumnNames="id"
+                                 referencedTableName="LOGICAL_SOURCE"/>
+
+		<addForeignKeyConstraint baseTableName="MAPPING_FIELD"
+        						 baseColumnNames="subject"
+                                 constraintName="FK_mapping_field_subject"
+                                 referencedColumnNames="id"
+                                 referencedTableName="SUBJECT"/>
+
+		<addForeignKeyConstraint baseTableName="MAPPING_FIELD"
+        						 baseColumnNames="predicates"
+                                 constraintName="FK_mapping_field_predicates"
+                                 referencedColumnNames="id"
+                                 referencedTableName="PREDICATE_OBJECT_MAP"/>
+	</changeSet>
+
+</databaseChangeLog>

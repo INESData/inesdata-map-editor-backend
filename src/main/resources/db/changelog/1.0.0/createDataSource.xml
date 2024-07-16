@@ -6,24 +6,20 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
 
-	<changeSet author="gmv" id="0.1.0-data-source">
-		<createTable tableName="data_source" schemaName="PUBLIC" tablespace="TBS_INESDATA_MAP_DATA">
+	<changeSet author="gmv" id="1.0.0-data-source">
+		<createTable tableName="DATA_SOURCE">
 			<column name="id" type="BIGINT">
 				<constraints nullable="false" unique="true" primaryKey="true" />
 			</column>
 			<column name="name" type="VARCHAR(255)"/>
-			<column name="type_id" type="BIGINT"/>
-			<column name="version" type="BIGINT" />
+			<column name="type" type="BIGINT"/>
+			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
 		</createTable>
-		<addForeignKeyConstraint baseTableName="data_source"
-                                 baseColumnNames="type_id"
+		<addForeignKeyConstraint baseTableName="DATA_SOURCE"
+                                 baseColumnNames="type"
                                  constraintName="fk_data_source_type"
-                                 referencedTableName="data_source_type"
+                                 referencedTableName="DATA_SOURCE_TYPE"
                                  referencedColumnNames="id"/>
-		<sql>
-            ALTER TABLE public.data_source OWNER TO inesdata_map;
-            GRANT ALL ON TABLE public.data_source TO inesdata_map;
-		</sql>
 	</changeSet>
 
 </databaseChangeLog>

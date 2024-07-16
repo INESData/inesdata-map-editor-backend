@@ -5,8 +5,8 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
 
-	<changeSet author="gmv" id="0.1.0-ontology">
-		<createTable tableName="ontology" schemaName="PUBLIC" tablespace="TBS_INESDATA_MAP_DATA">
+	<changeSet author="gmv" id="1.0.0-ontology">
+		<createTable tableName="ONTOLOGY">
 			<column name="id" type="BIGINT">
 				<constraints nullable="false" unique="true" primaryKey="true" />
 			</column>
@@ -16,13 +16,9 @@
 			<column name="upload_date" type="TIMESTAMP" />
 			<column name="user" type="VARCHAR(255)" />
 			<column name="url" type="VARCHAR(255)" />
-			<column name="version_num" type="BIGINT" />
-			<column name="version" type="BIGINT" />
+			<column name="version_name" type="VARCHAR(255)" />
+			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
 		</createTable>
-		<sql>
-			ALTER TABLE public.ontology OWNER TO inesdata_map;
-			GRANT ALL ON TABLE public.ontology TO inesdata_map;
-		</sql>
 	</changeSet>
 
 </databaseChangeLog>
