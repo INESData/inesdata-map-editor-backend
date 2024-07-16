@@ -11,20 +11,29 @@ public enum DataBaseTypeEnum {
 	/**
 	 * Represents a PostgreSQL database type.
 	 */
-	POSTGRESQL("database.type.postgresql"),
+	POSTGRESQL("POSTGRESQL"),
 
 	/**
 	 * Represents a MySQL database type.
 	 */
-	MYSQL("database.type.mysql"),
+	MYSQL("MYSQL"),
 
 	/**
 	 * Represents a MongoDB database type.
 	 */
-	MONGO("database.type.mongo");
+	MONGO("MONGO");
 
+	/**
+	 * The code representing the database type.
+	 */
 	private String code;
 
+	/**
+	 * Constructor for DataBaseTypeEnum.
+	 *
+	 * @param code
+	 *            the code representing the database type.
+	 */
 	private DataBaseTypeEnum(String code) {
 		this.code = code;
 	}
@@ -33,11 +42,6 @@ public enum DataBaseTypeEnum {
 	 * @return the code
 	 */
 	public String getCode() {
-		return this.code;
-	}
-
-	@Override
-	public String toString() {
 		return this.code;
 	}
 

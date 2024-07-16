@@ -10,15 +10,24 @@ public enum DataSourceTypeEnum {
 	/**
 	 * Represents a database data source.
 	 */
-	DATABASE("datasource.type.database"),
+	DATABASE("DATABASE"),
 
 	/**
 	 * Represents a CSV data source.
 	 */
-	CSV("datasource.type.csv");
+	CSV("CSV");
 
+	/**
+	 * The code representing the database type.
+	 */
 	private String code;
 
+	/**
+	 * Constructor for DataSourceTypeEnum.
+	 *
+	 * @param code
+	 *            the code representing the data source type.
+	 */
 	private DataSourceTypeEnum(String code) {
 		this.code = code;
 	}
@@ -27,11 +36,6 @@ public enum DataSourceTypeEnum {
 	 * @return the code
 	 */
 	public String getCode() {
-		return this.code;
-	}
-
-	@Override
-	public String toString() {
 		return this.code;
 	}
 
