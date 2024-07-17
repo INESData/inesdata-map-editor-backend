@@ -1,7 +1,6 @@
 package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -43,5 +42,5 @@ public class PredicateObjectMap extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "predicate_object_map_id")
-	private List<ObjectMap> objectMap = new ArrayList<>();
+	private List<ObjectMap> objectMap;
 }

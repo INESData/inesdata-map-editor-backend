@@ -1,7 +1,6 @@
 package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -58,7 +57,7 @@ public class MappingField extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "mapping_field_id")
-	private List<PredicateObjectMap> predicates = new ArrayList<>();
+	private List<PredicateObjectMap> predicates;
 
 	/**
 	 * The source associated with the mapping field.

@@ -1,7 +1,6 @@
 package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -43,7 +42,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "mapping_id")
-	private List<MappingField> fields = new ArrayList<>();
+	private List<MappingField> fields;
 
 	/**
 	 * Resource Mapping Language (RML) associated with the mapping.
@@ -56,5 +55,5 @@ public class Mapping extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "mapping_id")
-	private List<Namespace> namespaces = new ArrayList<>();
+	private List<Namespace> namespaces;
 }
