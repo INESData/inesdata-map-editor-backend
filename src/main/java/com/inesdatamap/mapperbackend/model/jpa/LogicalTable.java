@@ -38,4 +38,35 @@ public class LogicalTable extends BaseEntity implements Serializable {
 	 */
 	@Column(name = "query")
 	private String query;
+
+	/**
+	 * @return the tableName
+	 */
+	public String getTableName() {
+		return this.tableName;
+	}
+
+	/**
+	 * @param tableName
+	 *            the tableName to set
+	 */
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+
+	/**
+	 * @return the query
+	 */
+	public String getQuery() {
+		return this.query;
+	}
+
+	/**
+	 * @param query
+	 *            the query to set
+	 */
+	public void setQuery(String query) {
+		this.query = query;
+	}
+
 }

@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -57,7 +58,7 @@ public class MappingField extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "mapping_field_id")
-	private List<PredicateObjectMap> predicates;
+	private List<PredicateObjectMap> predicates = new ArrayList<>();
 
 	/**
 	 * The source associated with the mapping field.
@@ -72,4 +73,103 @@ public class MappingField extends BaseEntity implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "ontology_id")
 	private Ontology ontology;
+
+	/**
+	 * @return the logicalTable
+	 */
+
+	public LogicalTable getLogicalTable() {
+		return this.logicalTable;
+	}
+
+	/**
+	 * @param logicalTable
+	 *            the logicalTable to set
+	 */
+
+	public void setLogicalTable(LogicalTable logicalTable) {
+		this.logicalTable = logicalTable;
+	}
+
+	/**
+	 * @return the logicalSource
+	 */
+
+	public LogicalSource getLogicalSource() {
+		return this.logicalSource;
+	}
+
+	/**
+	 * @param logicalSource
+	 *            the logicalSource to set
+	 */
+
+	public void setLogicalSource(LogicalSource logicalSource) {
+		this.logicalSource = logicalSource;
+	}
+
+	/**
+	 * @return the subject
+	 */
+
+	public SubjectMap getSubject() {
+		return this.subject;
+	}
+
+	/**
+	 * @param subject
+	 *            the subject to set
+	 */
+
+	public void setSubject(SubjectMap subject) {
+		this.subject = subject;
+	}
+
+	/**
+	 * @return the predicates
+	 */
+	public List<PredicateObjectMap> getPredicates() {
+		return new ArrayList<>(this.predicates);
+	}
+
+	/**
+	 * @param predicates
+	 *            the predicates to set The ontology associated with the mapping field.
+	 */
+	public void setPredicates(List<PredicateObjectMap> predicates) {
+		this.predicates = new ArrayList<>(predicates);
+	}
+
+	/**
+	 * @return the source
+	 */
+
+	public DataSource getSource() {
+		return this.source;
+	}
+
+	/**
+	 * @param source
+	 *            the source to set
+	 */
+	public void setSource(DataSource source) {
+		this.source = source;
+	}
+
+	/**
+	 * @return the ontology
+	 */
+
+	public Ontology getOntology() {
+		return this.ontology;
+	}
+
+	/**
+	 * @param ontology
+	 *            the ontology to set
+	 */
+	public void setOntology(Ontology ontology) {
+		this.ontology = ontology;
+	}
+
 }

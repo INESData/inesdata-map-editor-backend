@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -42,7 +43,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "mapping_id")
-	private List<MappingField> fields;
+	private List<MappingField> fields = new ArrayList<>();
 
 	/**
 	 * Resource Mapping Language (RML) associated with the mapping.
@@ -55,5 +56,66 @@ public class Mapping extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "mapping_id")
-	private List<Namespace> namespaces;
+	private List<Namespace> namespaces = new ArrayList<>();
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the fields
+	 */
+	public List<MappingField> getFields() {
+		return new ArrayList<>(this.fields);
+	}
+
+	/**
+	 * @param fields
+	 *            the fields to set
+	 */
+	public void setFields(List<MappingField> fields) {
+		this.fields = new ArrayList<>(fields);
+	}
+
+	/**
+	 * @return the rml
+	 */
+	public String getRml() {
+		return this.rml;
+	}
+
+	/**
+	 * @param rml
+	 *            the rml to set
+	 */
+	public void setRml(String rml) {
+		this.rml = rml;
+	}
+
+	/**
+	 * @return the namespaces
+	 */
+	public List<Namespace> getNamespaces() {
+		return new ArrayList<>(this.namespaces);
+	}
+
+	/**
+	 * @param namespaces
+	 *            the namespaces to set
+	 */
+	public void setNamespaces(List<Namespace> namespaces) {
+		this.namespaces = new ArrayList<>(namespaces);
+	}
+
 }

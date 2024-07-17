@@ -48,7 +48,67 @@ public class DataBaseSource extends DataSource implements Serializable {
 	/**
 	 * The type of the database.
 	 */
-	@Column(name = "type")
-	private DataBaseTypeEnum type;
+	@Column(name = "database_type")
+	private DataBaseTypeEnum databaseType;
+
+	/**
+	 * @return the connectionString
+	 */
+	public String getConnectionString() {
+		return this.connectionString;
+	}
+
+	/**
+	 * @param connectionString
+	 *            the connectionString to set
+	 */
+	public void setConnectionString(String connectionString) {
+		this.connectionString = connectionString;
+	}
+
+	/**
+	 * @return the user
+	 */
+	public String getUser() {
+		return this.user;
+	}
+
+	/**
+	 * @param user
+	 *            the user to set
+	 */
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	/**
+	 * @return the password
+	 */
+	public String getPassword() {
+		return this.password;
+	}
+
+	/**
+	 * @param password
+	 *            the password to set
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	/**
+	 * @return the databaseType
+	 */
+	public DataBaseTypeEnum getDatabaseType() {
+		return this.databaseType;
+	}
+
+	/**
+	 * @param databaseType
+	 *            the databaseType to set
+	 */
+	public void setDatabaseType(DataBaseTypeEnum databaseType) {
+		this.databaseType = databaseType;
+	}
 
 }

@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -48,5 +49,53 @@ public class ObjectMap extends BaseEntity implements Serializable {
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "object_map_id")
-	private List<ObjectMap> objectValue;
+	private List<ObjectMap> objectValue = new ArrayList<>();
+
+	/**
+	 * @return the key
+	 */
+
+	public String getKey() {
+		return this.key;
+	}
+
+	/**
+	 * @param key
+	 *            the key to set
+	 */
+	public void setKey(String key) {
+		this.key = key;
+	}
+
+	/**
+	 * @return the literalValue
+	 */
+	public ObjectMap getLiteralValue() {
+		return this.literalValue;
+	}
+
+	/**
+	 * @param literalValue
+	 *            the literalValue to set
+	 */
+	public void setLiteralValue(ObjectMap literalValue) {
+		this.literalValue = literalValue;
+	}
+
+	/**
+	 * @return the objectValue
+	 */
+
+	public List<ObjectMap> getObjectValue() {
+		return new ArrayList<>(this.objectValue);
+	}
+
+	/**
+	 * @param objectValue
+	 *            the objectValue to set
+	 */
+	public void setObjectValue(List<ObjectMap> objectValue) {
+		this.objectValue = new ArrayList<>(objectValue);
+	}
+
 }

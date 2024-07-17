@@ -38,4 +38,35 @@ public class Namespace extends BaseEntity implements Serializable {
 	 */
 	@Column(name = "iri")
 	private String iri;
+
+	/**
+	 * @return the prefix
+	 */
+	public String getPrefix() {
+		return this.prefix;
+	}
+
+	/**
+	 * @param prefix
+	 *            the prefix to set
+	 */
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
+
+	/**
+	 * @return the iri
+	 */
+	public String getIri() {
+		return this.iri;
+	}
+
+	/**
+	 * @param iri
+	 *            the iri to set
+	 */
+	public void setIri(String iri) {
+		this.iri = iri;
+	}
+
 }

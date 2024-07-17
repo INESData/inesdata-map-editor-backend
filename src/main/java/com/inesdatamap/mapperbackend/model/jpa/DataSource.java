@@ -40,4 +40,35 @@ public class DataSource extends BaseEntity implements Serializable {
 	 */
 	@Column(name = "type")
 	private DataSourceTypeEnum type;
+
+	/**
+	 * @return the name
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
+	 * @param name
+	 *            the name to set
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public DataSourceTypeEnum getType() {
+		return this.type;
+	}
+
+	/**
+	 * @param type
+	 *            the type to set
+	 */
+	public void setType(DataSourceTypeEnum type) {
+		this.type = type;
+	}
+
 }

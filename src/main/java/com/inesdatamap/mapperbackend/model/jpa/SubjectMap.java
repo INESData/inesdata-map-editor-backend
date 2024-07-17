@@ -38,4 +38,35 @@ public class SubjectMap extends BaseEntity implements Serializable {
 	 */
 	@Column(name = "class_name")
 	private String className;
+
+	/**
+	 * @return the template
+	 */
+	public String getTemplate() {
+		return this.template;
+	}
+
+	/**
+	 * @param template
+	 *            the template to set
+	 */
+	public void setTemplate(String template) {
+		this.template = template;
+	}
+
+	/**
+	 * @return the className
+	 */
+	public String getClassName() {
+		return this.className;
+	}
+
+	/**
+	 * @param className
+	 *            the className to set
+	 */
+	public void setClassName(String className) {
+		this.className = className;
+	}
+
 }
