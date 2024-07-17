@@ -12,14 +12,9 @@
 				<constraints nullable="false" unique="true" primaryKey="true" />
 			</column>
 			<column name="name" type="VARCHAR(255)"/>
-			<column name="type" type="BIGINT"/>
+			<column name="type" type="VARCHAR(255)"/>
 			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
 		</createTable>
-		<addForeignKeyConstraint baseTableName="DATA_SOURCE"
-                                 baseColumnNames="type"
-                                 constraintName="fk_data_source_type"
-                                 referencedTableName="DATA_SOURCE_TYPE"
-                                 referencedColumnNames="id"/>
 	</changeSet>
 
 </databaseChangeLog>

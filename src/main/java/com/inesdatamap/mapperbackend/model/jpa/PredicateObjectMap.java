@@ -1,10 +1,18 @@
 package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * ObjectMap db entity representation
@@ -12,6 +20,9 @@ import jakarta.persistence.Table;
  * @author gmv
  *
  */
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "PREDICATE_OBJECT_MAP")
 public class PredicateObjectMap extends BaseEntity implements Serializable {
@@ -30,37 +41,7 @@ public class PredicateObjectMap extends BaseEntity implements Serializable {
 	/**
 	 * The object map associated with the predicate.
 	 */
-	@Column(name = "object_map")
-	private ObjectMap objectMap;
-
-	/**
-	 * @return the predicate
-	 */
-	public String getPredicate() {
-		return this.predicate;
-	}
-
-	/**
-	 * @param predicate
-	 *            the predicate to set
-	 */
-	public void setPredicate(String predicate) {
-		this.predicate = predicate;
-	}
-
-	/**
-	 * @return the objectMap
-	 */
-	public ObjectMap getObjectMap() {
-		return this.objectMap;
-	}
-
-	/**
-	 * @param objectMap
-	 *            the objectMap to set
-	 */
-	public void setObjectMap(ObjectMap objectMap) {
-		this.objectMap = objectMap;
-	}
-
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name = "predicate_object_map_id")
+	private List<ObjectMap> objectMap = new ArrayList<>();
 }

@@ -6,19 +6,16 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
 	<include file="classpath:db/changelog/1.0.0/createOntology.xml"/>
-	<include file="classpath:db/changelog/1.0.0/createTabularsource.xml"/>
-	<include file="classpath:db/changelog/1.0.0/createDataSourceType.xml"/>
-	<include file="classpath:db/changelog/1.0.0/createDataBaseType.xml"/>
+	<include file="classpath:db/changelog/1.0.0/createTabularSource.xml"/>
 	<include file="classpath:db/changelog/1.0.0/createDataBaseSource.xml"/>
 	<include file="classpath:db/changelog/1.0.0/createDataSource.xml"/>
 	<include file="classpath:db/changelog/1.0.0/createNamespace.xml"/>
 	<include file="classpath:db/changelog/1.0.0/createObjectMap.xml"/>
 	<include file="classpath:db/changelog/1.0.0/createPredicateObjectMap.xml"/>
-	<include file="classpath:db/changelog/1.0.0/createSubject.xml"/>
+	<include file="classpath:db/changelog/1.0.0/createSubjectMap.xml"/>
 	<include file="classpath:db/changelog/1.0.0/createLogicalSource.xml"/>
 	<include file="classpath:db/changelog/1.0.0/createLogicalTable.xml"/>
 	<include file="classpath:db/changelog/1.0.0/createMappingField.xml"/>
-	<include file="classpath:db/changelog/1.0.0/createMappingRule.xml"/>
 	<include file="classpath:db/changelog/1.0.0/createMapping.xml"/>
 
 

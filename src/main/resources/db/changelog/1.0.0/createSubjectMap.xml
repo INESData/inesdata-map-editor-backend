@@ -6,12 +6,13 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
 
-	<changeSet author="gmv" id="1.0.0-data-source-type">
-		<createTable tableName="DATA_SOURCE_TYPE">
+	<changeSet author="gmv" id="1.0.0-subject-map">
+		<createTable tableName="SUBJECT_MAP">
 			<column name="id" type="BIGINT">
-				<constraints nullable="false" primaryKey="true"/>
+				<constraints nullable="false" unique="true" primaryKey="true" />
 			</column>
-			<column name="type" type="VARCHAR(150)"/>
+			<column name="template" type="VARCHAR(255)"/>
+			<column name="class_name" type="VARCHAR(255)"/>
 			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
 		</createTable>
 	</changeSet>

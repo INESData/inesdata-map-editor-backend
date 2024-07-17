@@ -13,7 +13,7 @@
 			<column name="name" type="VARCHAR(255)">
 				<constraints nullable="true"/>
 			</column>
-			<column name="mapping_rules" type="BIGINT">
+			<column name="fields" type="BIGINT">
 				<constraints nullable="true"/>
 			</column>
 			<column name="rml" type="VARCHAR(255)">
@@ -21,18 +21,14 @@
 			<column name="namespaces" type="BIGINT">
 				<constraints nullable="true"/>
 			</column>
-			<column name="minio_path" type="VARCHAR(255)">
-			</column>
-			<column name="dvc_revision" type="VARCHAR(255)">
-			</column>
 			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
 		</createTable>
 
 		<addForeignKeyConstraint baseTableName="MAPPING"
-        						 baseColumnNames="mapping_rules"
-                                 constraintName="FK_mapping_mapping_rules"
+        						 baseColumnNames="fields"
+                                 constraintName="FK_mapping_fields"
                                  referencedColumnNames="id"
-                                 referencedTableName="MAPPING_RULE"/>
+                                 referencedTableName="MAPPING_FIELD"/>
 
 		<addForeignKeyConstraint baseTableName="MAPPING"
         						 baseColumnNames="namespaces"

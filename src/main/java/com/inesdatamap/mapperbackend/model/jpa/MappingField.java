@@ -10,6 +10,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * MappingField db entity representation
@@ -17,6 +20,9 @@ import jakarta.persistence.Table;
  * @author gmv
  *
  */
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "MAPPING_FIELD")
 public class MappingField extends BaseEntity implements Serializable {
@@ -45,7 +51,7 @@ public class MappingField extends BaseEntity implements Serializable {
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "subject_id")
-	private Subject subject;
+	private SubjectMap subject;
 
 	/**
 	 * The predicates associated with the mapping field.
@@ -55,63 +61,16 @@ public class MappingField extends BaseEntity implements Serializable {
 	private List<PredicateObjectMap> predicates = new ArrayList<>();
 
 	/**
-	 * @return the logicalTable
+	 * The source associated with the mapping field.
 	 */
-	public LogicalTable getLogicalTable() {
-		return this.logicalTable;
-	}
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "source_id")
+	private DataSource source;
 
 	/**
-	 * @param logicalTable
-	 *            the logicalTable to set
+	 * The ontology associated with the mapping field.
 	 */
-	public void setLogicalTable(LogicalTable logicalTable) {
-		this.logicalTable = logicalTable;
-	}
-
-	/**
-	 * @return the logicalSource
-	 */
-	public LogicalSource getLogicalSource() {
-		return this.logicalSource;
-	}
-
-	/**
-	 * @param logicalSource
-	 *            the logicalSource to set
-	 */
-	public void setLogicalSource(LogicalSource logicalSource) {
-		this.logicalSource = logicalSource;
-	}
-
-	/**
-	 * @return the subject
-	 */
-	public Subject getSubject() {
-		return this.subject;
-	}
-
-	/**
-	 * @param subject
-	 *            the subject to set
-	 */
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
-
-	/**
-	 * @return the predicates
-	 */
-	public List<PredicateObjectMap> getPredicates() {
-		return new ArrayList<>(this.predicates);
-	}
-
-	/**
-	 * @param predicates
-	 *            the predicates to set
-	 */
-	public void setPredicates(List<PredicateObjectMap> predicates) {
-		this.predicates = new ArrayList<>(predicates);
-	}
-
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ontology_id")
+	private Ontology ontology;
 }

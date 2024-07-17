@@ -2,12 +2,14 @@ package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
 
+import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * DataSource db entity representation
@@ -15,6 +17,9 @@ import jakarta.persistence.Table;
  * @author gmv
  *
  */
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "DATA_SOURCE")
 public class DataSource extends BaseEntity implements Serializable {
@@ -33,38 +38,6 @@ public class DataSource extends BaseEntity implements Serializable {
 	/**
 	 * The type of the data source.
 	 */
-	@JoinColumn(name = "type")
-	@ManyToOne(fetch = FetchType.LAZY)
-	private DataSourceType type;
-
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return this.name;
-	}
-
-	/**
-	 * @param name
-	 *            the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * @return the type
-	 */
-	public DataSourceType getType() {
-		return this.type;
-	}
-
-	/**
-	 * @param type
-	 *            the type to set
-	 */
-	public void setType(DataSourceType type) {
-		this.type = type;
-	}
-
+	@Column(name = "type")
+	private DataSourceTypeEnum type;
 }

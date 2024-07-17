@@ -13,15 +13,18 @@
 			<column name="key" type="VARCHAR(255)">
 				<constraints nullable="true"/>
 			</column>
-			<column name="value" type="BIGINT">
+			<column name="literal_value" type="VARCHAR(255)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="object_value" type="BIGINT">
 				<constraints nullable="true"/>
 			</column>
 			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
 		</createTable>
 
 		<addForeignKeyConstraint baseTableName="OBJECT_MAP"
-        						 baseColumnNames="value"
-                                 constraintName="FK_object_map_value"
+        						 baseColumnNames="object_value"
+                                 constraintName="FK_object_map_object_value"
                                  referencedColumnNames="id"
                                  referencedTableName="OBJECT_MAP"/>
 	</changeSet>

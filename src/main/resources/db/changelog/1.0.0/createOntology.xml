@@ -11,10 +11,9 @@
 				<constraints nullable="false" unique="true" primaryKey="true" />
 			</column>
 			<column name="name" type="VARCHAR(255)"/>
-			<column name="content" type="VARCHAR(255)" />
+			<column name="content" type="TEXT" />
 			<column name="title" type="VARCHAR(255)" />
 			<column name="upload_date" type="TIMESTAMP" />
-			<column name="user" type="VARCHAR(255)" />
 			<column name="url" type="VARCHAR(255)" />
 			<column name="version_name" type="VARCHAR(255)" />
 			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
