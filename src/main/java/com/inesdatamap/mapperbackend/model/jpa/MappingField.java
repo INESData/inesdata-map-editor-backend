@@ -50,21 +50,21 @@ public class MappingField extends BaseEntity implements Serializable {
 	 * The subject associated with the mapping field.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "subject_id")
+	@JoinColumn(name = "subject_map_id")
 	private SubjectMap subject;
 
 	/**
 	 * The predicates associated with the mapping field.
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "mapping_field_id")
+	@JoinColumn(name = "predicate_object_map_id")
 	private List<PredicateObjectMap> predicates = new ArrayList<>();
 
 	/**
 	 * The source associated with the mapping field.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "source_id")
+	@JoinColumn(name = "data_source_id")
 	private DataSource source;
 
 	/**

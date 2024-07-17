@@ -42,7 +42,7 @@ public class ObjectMap extends BaseEntity implements Serializable {
 	 * The object map literalValue.
 	 */
 	@Column(name = "literal_value")
-	private ObjectMap literalValue;
+	private String literalValue;
 
 	/**
 	 * The object map value.
@@ -70,7 +70,7 @@ public class ObjectMap extends BaseEntity implements Serializable {
 	/**
 	 * @return the literalValue
 	 */
-	public ObjectMap getLiteralValue() {
+	public String getLiteralValue() {
 		return this.literalValue;
 	}
 
@@ -78,7 +78,7 @@ public class ObjectMap extends BaseEntity implements Serializable {
 	 * @param literalValue
 	 *            the literalValue to set
 	 */
-	public void setLiteralValue(ObjectMap literalValue) {
+	public void setLiteralValue(String literalValue) {
 		this.literalValue = literalValue;
 	}
 

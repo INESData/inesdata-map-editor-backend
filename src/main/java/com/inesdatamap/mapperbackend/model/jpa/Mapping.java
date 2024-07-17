@@ -42,7 +42,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	 * Fields associated with the mapping.
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "mapping_id")
+	@JoinColumn(name = "mapping_field_id")
 	private List<MappingField> fields = new ArrayList<>();
 
 	/**
@@ -55,7 +55,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	 * Namespaces associated with the mapping.
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "mapping_id")
+	@JoinColumn(name = "namespace_id")
 	private List<Namespace> namespaces = new ArrayList<>();
 
 	/**

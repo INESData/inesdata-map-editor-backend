@@ -42,7 +42,7 @@ public class PredicateObjectMap extends BaseEntity implements Serializable {
 	 * The object map associated with the predicate.
 	 */
 	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "predicate_object_map_id")
+	@JoinColumn(name = "object_map_id")
 	private List<ObjectMap> objectMap = new ArrayList<>();
 
 	/**
