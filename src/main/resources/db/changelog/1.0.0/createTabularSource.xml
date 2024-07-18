@@ -12,7 +12,6 @@
 				<constraints nullable="false" unique="true" primaryKey="true" />
 			</column>
 			<column name="file_name" type="VARCHAR(255)"/>
-			<column name="minio_path" type="VARCHAR(255)"/>
 			<column name="fields" type="VARCHAR(255)"/>
 			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
 		</createTable>

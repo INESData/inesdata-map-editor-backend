@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,6 +38,7 @@ public class Ontology extends BaseEntity implements Serializable {
 	/**
 	 * The content of the ontology.
 	 */
+	@Lob
 	@Column(name = "content")
 	private String content;
 

@@ -4,11 +4,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,42 +36,42 @@ public class MappingField extends BaseEntity implements Serializable {
 	/**
 	 * The logical table associated with the mapping field.
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "logical_table_id")
 	private LogicalTable logicalTable;
 
 	/**
 	 * The logical source associated with the mapping field.
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "logical_source_id")
 	private LogicalSource logicalSource;
 
 	/**
 	 * The subject associated with the mapping field.
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "subject_map_id")
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "subject_id")
 	private SubjectMap subject;
 
 	/**
 	 * The predicates associated with the mapping field.
 	 */
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "predicate_object_map_id")
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "mapping_field_id")
 	private List<PredicateObjectMap> predicates = new ArrayList<>();
 
 	/**
 	 * The source associated with the mapping field.
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "data_source_id")
 	private DataSource source;
 
 	/**
 	 * The ontology associated with the mapping field.
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@OneToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ontology_id")
 	private Ontology ontology;
 

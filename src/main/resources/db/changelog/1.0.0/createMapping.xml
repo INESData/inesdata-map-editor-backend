@@ -11,30 +11,13 @@
 				<constraints nullable="false" unique="true" primaryKey="true"/>
 			</column>
 			<column name="name" type="VARCHAR(255)">
-				<constraints nullable="true"/>
+				<constraints nullable="false"/>
 			</column>
-			<column name="fields" type="BIGINT">
-				<constraints nullable="true"/>
-			</column>
-			<column name="rml" type="VARCHAR(255)">
-			</column>
-			<column name="namespaces" type="BIGINT">
+			<column name="rml" type="TEXT">
 				<constraints nullable="true"/>
 			</column>
 			<column name="version" type="BIGINT" defaultValueNumeric="0"/>
 		</createTable>
-
-		<addForeignKeyConstraint baseTableName="MAPPING"
-        						 baseColumnNames="fields"
-                                 constraintName="FK_mapping_fields"
-                                 referencedColumnNames="id"
-                                 referencedTableName="MAPPING_FIELD"/>
-
-		<addForeignKeyConstraint baseTableName="MAPPING"
-        						 baseColumnNames="namespaces"
-                                 constraintName="FK_mapping_namespaces"
-                                 referencedColumnNames="id"
-                                 referencedTableName="NAMESPACE"/>
 	</changeSet>
 
 </databaseChangeLog>
