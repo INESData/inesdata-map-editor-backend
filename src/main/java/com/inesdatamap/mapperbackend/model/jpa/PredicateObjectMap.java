@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,7 +42,7 @@ public class PredicateObjectMap extends BaseEntity implements Serializable {
 	/**
 	 * The object map associated with the predicate.
 	 */
-	@OneToMany(fetch = FetchType.LAZY)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "object_map_id")
 	private List<ObjectMap> objectMap = new ArrayList<>();
 
