@@ -12,6 +12,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import com.inesdatamap.mapperbackend.controllers.errors.BaseErrorCode;
 import com.inesdatamap.mapperbackend.controllers.errors.ErrorResponse;
 import com.inesdatamap.mapperbackend.controllers.errors.ErrorValidation;
+import com.inesdatamap.mapperbackend.exceptions.DataValidationException;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;

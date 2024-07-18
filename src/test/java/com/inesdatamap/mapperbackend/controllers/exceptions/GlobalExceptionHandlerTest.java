@@ -28,6 +28,8 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import com.inesdatamap.mapperbackend.controllers.errors.BaseErrorCode;
 import com.inesdatamap.mapperbackend.controllers.errors.ErrorResponse;
 import com.inesdatamap.mapperbackend.controllers.errors.ErrorValidation;
+import com.inesdatamap.mapperbackend.controllers.errors.GlobalExceptionHandler;
+import com.inesdatamap.mapperbackend.exceptions.DataValidationException;
 import com.inesdatamap.mapperbackend.properties.RestApiInfoProperties;
 import com.inesdatamap.mapperbackend.utils.RestContextInfo;
 

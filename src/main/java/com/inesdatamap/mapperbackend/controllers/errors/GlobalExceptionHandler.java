@@ -1,4 +1,4 @@
-package com.inesdatamap.mapperbackend.controllers.exceptions;
+package com.inesdatamap.mapperbackend.controllers.errors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.inesdatamap.mapperbackend.controllers.errors.BaseErrorCode;
-import com.inesdatamap.mapperbackend.controllers.errors.ErrorResponse;
+import com.inesdatamap.mapperbackend.exceptions.BaseException;
+import com.inesdatamap.mapperbackend.exceptions.DataValidationException;
 import com.inesdatamap.mapperbackend.properties.RestApiInfoProperties;
 import com.inesdatamap.mapperbackend.utils.HttpStatusUtils;
 import com.inesdatamap.mapperbackend.utils.RestContextInfo;
