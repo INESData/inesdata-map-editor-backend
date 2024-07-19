@@ -63,10 +63,10 @@ public class OntologyServiceImpl implements OntologyService {
 	public OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto) {
 
 		// Get DB entity
-		Ontology ontologyDB = this.getEntity(id); // existing
+		Ontology ontologyDB = this.getEntity(id);
 
 		// New ontology to save
-		Ontology ontologySource = this.ontologyMapper.dtoToEntity(ontologyDto); // source
+		Ontology ontologySource = this.ontologyMapper.dtoToEntity(ontologyDto);
 
 		// Updated ontology
 		Ontology ontologyUpdated = this.ontologyRepo.saveAndFlush(this.ontologyMapper.merge(ontologySource, ontologyDB));
