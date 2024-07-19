@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.apache.jena.riot.Lang;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.semanticweb.owlapi.apibinding.OWLManager;
@@ -76,6 +77,7 @@ class OWLUtilsTest {
 	}
 
 	@Test
+	@Disabled("This test is disabled because the output is too verbose for CI")
 	void testOntolexTurtle() throws OWLOntologyCreationException, IOException {
 		Optional<IRI> ontologyIri = getInfo("ontolex/Diccionari_de_dret_administratiu_RDF.ttl");
 		JenaUtils.printWithJena("ontolex/Diccionari_de_dret_administratiu_RDF.ttl", Lang.TTL);
@@ -142,14 +144,14 @@ class OWLUtilsTest {
 		// Get all classes in a ontology
 		owl.classesInSignature()
 
-				// Map them into a OntologyObjectDto
-				//.map(clazz -> getLabel(clazz, owl, manager))
-				.forEach(clazz -> {
-					List<OWLIndividual> individuals = getIndividuals(clazz, owl, manager);
-					individuals.forEach(individual -> {
-						getIndividualAttributes(individual, owl, manager);
-					});
+			// Map them into a OntologyObjectDto
+			//.map(clazz -> getLabel(clazz, owl, manager))
+			.forEach(clazz -> {
+				List<OWLIndividual> individuals = getIndividuals(clazz, owl, manager);
+				individuals.forEach(individual -> {
+					getIndividualAttributes(individual, owl, manager);
 				});
+			});
 	}
 
 	private List<OWLIndividual> getIndividuals(OWLClass clazz, OWLOntology owl, OWLOntologyManager manager) {
@@ -167,8 +169,7 @@ class OWLUtilsTest {
 
 			if (isDomain || isRange) {
 				System.out.println(
-						"\tObject Property: " + objectProperty.getIRI().getShortForm() + " (Domain: " + isDomain + ", Range: " + isRange
-								+ ")");
+					"\tObject Property: " + objectProperty.getIRI().getShortForm() + " (Domain: " + isDomain + ", Range: " + isRange + ")");
 			}
 		}
 
@@ -185,28 +186,28 @@ class OWLUtilsTest {
 
 		owl.axioms(AxiomType.OBJECT_PROPERTY_DOMAIN)
 
-				// Filter by the ones which class is the one we are looking for
-				.filter(axiom -> axiom.getDomain().equals(individual))
+			// Filter by the ones which class is the one we are looking for
+			.filter(axiom -> axiom.getDomain().equals(individual))
 
-				// Get the properties of the axiom
-				.flatMap(OWLObjectPropertyDomainAxiom::objectPropertiesInSignature)
+			// Get the properties of the axiom
+			.flatMap(OWLObjectPropertyDomainAxiom::objectPropertiesInSignature)
 
-				// Map them into a OntologyObjectDto
-				.forEach(property -> {
-					System.out.println("ObjectPropertyDomain: " + property);
-				});
+			// Map them into a OntologyObjectDto
+			.forEach(property -> {
+				System.out.println("ObjectPropertyDomain: " + property);
+			});
 
 		owl.axioms(AxiomType.DATA_PROPERTY_DOMAIN)
 
-				// Filter by the ones which class is the one we are looking for
-				.filter(axiom -> axiom.getDomain().equals(individual))
+			// Filter by the ones which class is the one we are looking for
+			.filter(axiom -> axiom.getDomain().equals(individual))
 
-				// Get the properties of the axiom
-				.flatMap(OWLDataPropertyDomainAxiom::dataPropertiesInSignature)
-				// Map them into a OntologyObjectDto
-				.forEach(property -> {
-					System.out.println("DataPropertyDomain: " + property);
-				});
+			// Get the properties of the axiom
+			.flatMap(OWLDataPropertyDomainAxiom::dataPropertiesInSignature)
+			// Map them into a OntologyObjectDto
+			.forEach(property -> {
+				System.out.println("DataPropertyDomain: " + property);
+			});
 
 		EntitySearcher.getObjectPropertyValues(individual, owl).forEach((property, value) -> {
 			System.out.println("ObjectProperty: " + property);
@@ -228,19 +229,19 @@ class OWLUtilsTest {
 
 		Optional<String> label =
 
-				// Get annotation labels of the entity
-				EntitySearcher.getAnnotationObjects(owlEntity, owl, rdfsLabel)
+			// Get annotation labels of the entity
+			EntitySearcher.getAnnotationObjects(owlEntity, owl, rdfsLabel)
 
-						// Map each annotation as a OWLLiteral
-						.map(annotation -> annotation.getValue().asLiteral())
+				// Map each annotation as a OWLLiteral
+				.map(annotation -> annotation.getValue().asLiteral())
 
-						// Filter the ones present
-						.filter(Optional::isPresent)
+				// Filter the ones present
+				.filter(Optional::isPresent)
 
-						// Map the literal to return its value
-						.map(value -> value.get().getLiteral())
+				// Map the literal to return its value
+				.map(value -> value.get().getLiteral())
 
-						.findFirst();
+				.findFirst();
 
 		return label.isPresent() ? label.get() : "";
 	}
