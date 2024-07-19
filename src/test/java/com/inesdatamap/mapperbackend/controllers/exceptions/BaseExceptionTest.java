@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import com.inesdatamap.mapperbackend.controllers.errors.BaseErrorCode;
 import com.inesdatamap.mapperbackend.controllers.errors.ErrorCode;
 import com.inesdatamap.mapperbackend.controllers.errors.ErrorResponse;
+import com.inesdatamap.mapperbackend.exceptions.BaseException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;

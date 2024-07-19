@@ -1,4 +1,4 @@
-package com.inesdatamap.mapperbackend.controllers.exceptions;
+package com.inesdatamap.mapperbackend.controllers.errors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -12,12 +12,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.inesdatamap.mapperbackend.controllers.errors.BaseErrorCode;
-import com.inesdatamap.mapperbackend.controllers.errors.ErrorResponse;
+import com.inesdatamap.mapperbackend.exceptions.BaseException;
+import com.inesdatamap.mapperbackend.exceptions.DataValidationException;
 import com.inesdatamap.mapperbackend.properties.RestApiInfoProperties;
 import com.inesdatamap.mapperbackend.utils.HttpStatusUtils;
 import com.inesdatamap.mapperbackend.utils.RestContextInfo;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -82,6 +83,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(ConstraintViolationException.class)
 	public final ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
 		return addContext(ex, new DataValidationException(ex).getErrorResponse());
+	}
+
+	/**
+	 * Exception handler for {@link EntityNotFoundException}
+	 *
+	 * @param ex
+	 *        {@link EntityNotFoundException} the exception
+	 *
+	 * @return {@link ResponseEntity}&lt;{@link ErrorResponse}&gt; the error response
+	 */
+	@ExceptionHandler(EntityNotFoundException.class)
+	public final ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException ex) {
+		return buildResponse(ex, BaseErrorCode.NOT_FOUND.name(), NOT_FOUND);
 	}
 
 	/**

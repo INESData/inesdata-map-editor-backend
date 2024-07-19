@@ -14,7 +14,7 @@ import org.springframework.web.context.request.async.AsyncRequestTimeoutExceptio
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-import com.inesdatamap.mapperbackend.controllers.exceptions.BaseException;
+import com.inesdatamap.mapperbackend.exceptions.BaseException;
 
 import jakarta.validation.ConstraintViolationException;
 

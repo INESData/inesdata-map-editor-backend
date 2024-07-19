@@ -3,22 +3,23 @@ package com.inesdatamap.mapperbackend.model.jpa;
 import java.io.Serializable;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Tabular Source db entity representation
+ * File Source db entity representation
  *
  * @author gmv
- *
  */
 @Getter
 @Setter
 @ToString
 @Entity
-public class TabularSource extends DataSource implements Serializable {
+@DiscriminatorValue("FILE")
+public class FileSource extends DataSource implements Serializable {
 
 	/**
 	 * serialVersionUID
@@ -46,7 +47,7 @@ public class TabularSource extends DataSource implements Serializable {
 
 	/**
 	 * @param fileName
-	 *            the fileName to set
+	 * 	the fileName to set
 	 */
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
@@ -61,7 +62,7 @@ public class TabularSource extends DataSource implements Serializable {
 
 	/**
 	 * @param fields
-	 *            the fields to set
+	 * 	the fields to set
 	 */
 	public void setFields(String fields) {
 		this.fields = fields;

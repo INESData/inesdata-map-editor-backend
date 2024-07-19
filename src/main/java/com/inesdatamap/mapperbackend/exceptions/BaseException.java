@@ -1,4 +1,4 @@
-package com.inesdatamap.mapperbackend.controllers.exceptions;
+package com.inesdatamap.mapperbackend.exceptions;
 
 import java.io.Serial;
 
