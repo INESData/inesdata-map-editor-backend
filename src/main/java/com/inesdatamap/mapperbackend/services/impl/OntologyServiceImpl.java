@@ -47,6 +47,7 @@ public class OntologyServiceImpl implements OntologyService {
 		Page<Ontology> ontologieList = this.ontologyRepo.findAll(pageable);
 
 		return ontologieList.map(this.ontologyMapper::entityToDto);
+
 	}
 
 	/**
@@ -54,19 +55,24 @@ public class OntologyServiceImpl implements OntologyService {
 	 *
 	 * @param id
 	 *            the ID of the ontology to update
-	 * @param ontology
+	 * @param ontologyDto
 	 *            the OntologyDTO
 	 * @return the updated ontology
 	 */
 	@Override
-	public OntologyDTO updateOntology(Long id, OntologyDTO ontology) {
+	public OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto) {
 
 		// Get DB entity
-		Ontology ontologyDB = this.getEntity(id);
+		Ontology ontologyDB = this.getEntity(id); // existing
 
-		Ontology ontologyToSave = ontologyDB;
+		// New ontology to save
+		Ontology ontologySource = this.ontologyMapper.dtoToEntity(ontologyDto); // source
 
-		return this.ontologyMapper.entityToDto(this.ontologyRepo.saveAndFlush(ontologyToSave));
+		// Updated ontology
+		Ontology ontologyUpdated = this.ontologyRepo.saveAndFlush(this.ontologyMapper.merge(ontologySource, ontologyDB));
+
+		return this.ontologyMapper.entityToDto(ontologyUpdated);
+
 	}
 
 	/**

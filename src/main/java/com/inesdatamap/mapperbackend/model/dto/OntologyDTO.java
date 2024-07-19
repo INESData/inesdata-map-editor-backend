@@ -22,6 +22,6 @@ public class OntologyDTO extends BaseEntityDTO {
 
 	private String url;
 
-	private int versionName;
+	private String versionName;
 
 }

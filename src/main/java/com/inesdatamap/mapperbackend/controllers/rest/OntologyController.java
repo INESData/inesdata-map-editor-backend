@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,7 +20,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -56,7 +56,7 @@ public class OntologyController {
 	@ApiResponse(responseCode = "200", description = "Succes", content = {
 			@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = OntologyDTO.class))) })
 	public ResponseEntity<Page<OntologyDTO>> listOntologies() {
-		Page<OntologyDTO> ontologies = this.ontologyService.listOntologies(PageRequest.of(0, Constants.NUMBER_10));
+		Page<OntologyDTO> ontologies = this.ontologyService.listOntologies(PageRequest.of(Constants.NUMBER_0, Constants.NUMBER_10));
 		return ResponseEntity.ok(ontologies);
 	}
 
@@ -65,7 +65,7 @@ public class OntologyController {
 	 *
 	 * @param id
 	 *            ontology identifier
-	 * @param ontology
+	 * @param ontologyDto
 	 *            to update
 	 * @return updated ontology
 	 */
@@ -75,8 +75,8 @@ public class OntologyController {
 			@Content(mediaType = "application/json", schema = @Schema(implementation = OntologyDTO.class)) })
 	public ResponseEntity<OntologyDTO> updateOntology(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier to update", required = true) Long id,
-			@Valid @RequestBody @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontology) {
-		return ResponseEntity.ok(this.ontologyService.updateOntology(id, ontology));
+			@Valid @RequestBody @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontologyDto) {
+		return ResponseEntity.ok(this.ontologyService.updateOntology(id, ontologyDto));
 	}
 
 }

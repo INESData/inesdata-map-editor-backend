@@ -14,11 +14,6 @@ import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 @Repository
 public interface OntologyRepository extends JpaRepository<Ontology, Long> {
 
-	/**
-	 * Retrieves all ontologies.
-	 *
-	 * @return a list of Ontology objects
-	 */
 	@Override
 	Page<Ontology> findAll(Pageable pageable);
 

@@ -36,10 +36,10 @@ public interface OntologyService {
 	 *
 	 * @param id
 	 *            the ID of the ontology to update
-	 * @param ontology
+	 * @param ontologyDto
 	 *            the OntologyDTO
 	 * @return the updated ontology
 	 */
-	OntologyDTO updateOntology(Long id, OntologyDTO ontology);
+	OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto);
 
 }
