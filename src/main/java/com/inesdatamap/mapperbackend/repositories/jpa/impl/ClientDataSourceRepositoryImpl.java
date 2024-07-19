@@ -15,8 +15,17 @@ import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import com.inesdatamap.mapperbackend.exceptions.ClientDataSourceException;
 import com.inesdatamap.mapperbackend.repositories.jpa.ClientDataSourceRepository;
 
+/**
+ * Repository for client data source operations.
+ */
 public class ClientDataSourceRepositoryImpl extends JdbcDaoSupport implements ClientDataSourceRepository {
 
+	/**
+	 * Constructor.
+	 *
+	 * @param dataSource
+	 * 	the configured data source
+	 */
 	public ClientDataSourceRepositoryImpl(DataSource dataSource) {
 		setDataSource(dataSource);
 	}

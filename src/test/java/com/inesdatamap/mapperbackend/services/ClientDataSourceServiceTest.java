@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
 import com.inesdatamap.mapperbackend.model.routing.ClientDataSourceRouter;
 import com.inesdatamap.mapperbackend.services.impl.ClientDataSourceServiceImpl;
 
@@ -27,16 +28,15 @@ class ClientDataSourceServiceTest {
 		long dataSourceAId = 1L;
 		String urlDatasourceA = "jdbc:h2:mem:testdba";
 		String urlDatasourceB = "jdbc:h2:mem:testdbb";
-		String driver = "org.h2.Driver";
 		String username = "";
 		String password = "";
 
 		ClientDataSourceRouter router = new ClientDataSourceRouter();
 
-		DataSource dsA = router.getDatasource(dataSourceAId, urlDatasourceA, driver, username, password);
+		DataSource dsA = router.getDatasource(dataSourceAId, urlDatasourceA, DataBaseTypeEnum.H2, username, password);
 		List<String> dsATables = clientDataSourceService.getTableNames(dataSourceAId, dsA);
 
-		DataSource dsB = router.getDatasource(dataSourceAId, urlDatasourceB, driver, username, password);
+		DataSource dsB = router.getDatasource(dataSourceAId, urlDatasourceB, DataBaseTypeEnum.H2, username, password);
 		List<String> dsBTables = clientDataSourceService.getTableNames(dataSourceAId, dsB);
 
 		dsATables.forEach(System.out::println);

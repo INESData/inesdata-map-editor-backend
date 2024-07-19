@@ -1,11 +1,9 @@
-
 package com.inesdatamap.mapperbackend.model.enums;
 
 /**
  * Data Base Type enumeration
  *
  * @author gmv
- *
  */
 public enum DataBaseTypeEnum {
 	/**
@@ -18,6 +16,10 @@ public enum DataBaseTypeEnum {
 	 */
 	MYSQL("MYSQL"),
 
+	/**
+	 * Represents a H2 database type.
+	 */
+	H2("H2"),
 	/**
 	 * Represents a MongoDB database type.
 	 */
@@ -32,7 +34,7 @@ public enum DataBaseTypeEnum {
 	 * Constructor for DataBaseTypeEnum.
 	 *
 	 * @param code
-	 *            the code representing the database type.
+	 * 	the code representing the database type.
 	 */
 	private DataBaseTypeEnum(String code) {
 		this.code = code;

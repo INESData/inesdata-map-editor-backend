@@ -5,5 +5,11 @@ import org.springframework.stereotype.Repository;
 
 import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 
+/**
+ * Data source repository
+ *
+ * @param <T>
+ * 	the data source type
+ */
 @Repository
-public interface DataSourceRepository extends JpaRepository<DataSource, Long> {}
+public interface DataSourceRepository<T extends DataSource> extends JpaRepository<T, Long> {}

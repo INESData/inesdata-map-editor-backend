@@ -12,6 +12,9 @@ import com.inesdatamap.mapperbackend.repositories.jpa.ClientDataSourceRepository
 import com.inesdatamap.mapperbackend.repositories.jpa.impl.ClientDataSourceRepositoryImpl;
 import com.inesdatamap.mapperbackend.services.ClientDataSourceService;
 
+/**
+ * Service for client data source operations.
+ */
 @Service
 @Transactional
 public class ClientDataSourceServiceImpl implements ClientDataSourceService {

@@ -18,6 +18,7 @@ import com.inesdatamap.mapperbackend.properties.RestApiInfoProperties;
 import com.inesdatamap.mapperbackend.utils.HttpStatusUtils;
 import com.inesdatamap.mapperbackend.utils.RestContextInfo;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -82,6 +83,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(ConstraintViolationException.class)
 	public final ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
 		return addContext(ex, new DataValidationException(ex).getErrorResponse());
+	}
+
+	/**
+	 * Exception handler for {@link EntityNotFoundException}
+	 *
+	 * @param ex
+	 *        {@link EntityNotFoundException} the exception
+	 *
+	 * @return {@link ResponseEntity}&lt;{@link ErrorResponse}&gt; the error response
+	 */
+	@ExceptionHandler(EntityNotFoundException.class)
+	public final ResponseEntity<ErrorResponse> handleEntityNotFoundException(EntityNotFoundException ex) {
+		return buildResponse(ex, BaseErrorCode.NOT_FOUND.name(), NOT_FOUND);
 	}
 
 	/**
