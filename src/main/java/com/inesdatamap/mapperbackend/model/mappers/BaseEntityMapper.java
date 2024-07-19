@@ -8,10 +8,9 @@ import com.inesdatamap.mapperbackend.model.jpa.BaseEntity;
 
 /**
  * Mapper interface to define the mapper between the entity and its DTO
- * 
+ *
  * @param <D>
  *            DTO class
- * 
  * @param <E>
  *            Entity class
  *
