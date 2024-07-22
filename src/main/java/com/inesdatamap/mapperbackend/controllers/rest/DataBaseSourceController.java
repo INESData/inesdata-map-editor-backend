@@ -64,6 +64,8 @@ public class DataBaseSourceController {
 	 *
 	 * @param id
 	 * 	the data source ID
+	 * @param table
+	 * 	the table name
 	 *
 	 * @return the list of table names
 	 */
