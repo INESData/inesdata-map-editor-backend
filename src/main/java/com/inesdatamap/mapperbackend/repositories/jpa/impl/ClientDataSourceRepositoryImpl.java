@@ -34,11 +34,9 @@ public class ClientDataSourceRepositoryImpl extends JdbcDaoSupport implements Cl
 	public List<String> getTableNames() {
 
 		ArrayList<String> tableNames = new ArrayList<>();
+		DataSource dataSource = getDataSourceSafely();
 
-		JdbcTemplate template = getJdbcTemplate();
-		DataSource dataSource = template != null ? template.getDataSource() : null;
-
-		if (template != null && dataSource != null) {
+		if (dataSource != null) {
 
 			try (Connection connection = dataSource.getConnection()) {
 				DatabaseMetaData metaData = connection.getMetaData();
@@ -52,5 +50,38 @@ public class ClientDataSourceRepositoryImpl extends JdbcDaoSupport implements Cl
 			}
 		}
 		return tableNames;
+	}
+
+	@Override
+	public List<String> getColumnNames(String table) {
+
+		ArrayList<String> columnNames = new ArrayList<>();
+		DataSource dataSource = getDataSourceSafely();
+
+		if (dataSource != null) {
+			try (Connection connection = dataSource.getConnection()) {
+				DatabaseMetaData metaData = connection.getMetaData();
+				ResultSet columns = metaData.getColumns(null, null, table, "%");
+				while (columns.next()) {
+					String columnName = columns.getString("COLUMN_NAME");
+					columnNames.add(columnName);
+				}
+			} catch (SQLException e) {
+				throw new ClientDataSourceException(e.getMessage(), e);
+			}
+		}
+
+		return columnNames;
+	}
+
+	/**
+	 * Get the data source checking nulls.
+	 *
+	 * @return the data source
+	 */
+	private DataSource getDataSourceSafely() {
+
+		JdbcTemplate template = getJdbcTemplate();
+		return template != null ? template.getDataSource() : null;
 	}
 }

@@ -1,9 +1,12 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import javax.sql.DataSource;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.inesdatamap.mapperbackend.model.jpa.DataBaseSource;
+import com.inesdatamap.mapperbackend.model.routing.ClientDataSourceRouter;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
 import com.inesdatamap.mapperbackend.services.DataSourceService;
 
@@ -33,6 +36,15 @@ public class DataSourceServiceImpl implements DataSourceService {
 	@Override
 	public DataBaseSource findById(Long dataSourceId) {
 		return dataBaseSourceRepository.findById(dataSourceId).orElseThrow(() -> new EntityNotFoundException(dataSourceId.toString()));
+	}
+
+	@Override
+	public DataSource getClientDataSource(Long dataSourceId) {
+
+		DataBaseSource ds = this.findById(dataSourceId);
+		ClientDataSourceRouter router = new ClientDataSourceRouter();
+
+		return router.getDatasource(dataSourceId, ds.getConnectionString(), ds.getDatabaseType(), ds.getUser(), ds.getPassword());
 	}
 
 }

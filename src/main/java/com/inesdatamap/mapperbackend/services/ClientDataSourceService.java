@@ -21,4 +21,17 @@ public interface ClientDataSourceService {
 	 */
 	List<String> getTableNames(Long dataSourceId, DataSource dataSource);
 
+	/**
+	 * Get column names from a database table.
+	 *
+	 * @param dataSourceId
+	 * 	the data source id
+	 * @param table
+	 * 	the table name
+	 * @param dataSource
+	 * 	the configured data source
+	 *
+	 * @return the list of column names
+	 */
+	List<String> getColumnNames(Long dataSourceId, String table, DataSource dataSource);
 }
