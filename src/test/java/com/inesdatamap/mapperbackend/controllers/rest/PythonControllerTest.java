@@ -1,4 +1,4 @@
-package com.inesdatamap.mapperbackend.controllers;
+package com.inesdatamap.mapperbackend.controllers.rest;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import com.inesdatamap.mapperbackend.controllers.rest.PythonController;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

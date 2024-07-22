@@ -31,4 +31,16 @@ public class ClientDataSourceServiceImpl implements ClientDataSourceService {
 		return result;
 
 	}
+
+	@Override
+	public List<String> getColumnNames(Long dataSourceId, String table, DataSource dataSource) {
+
+		ClientDataSourceRepository clientDataSourceRepository = new ClientDataSourceRepositoryImpl(dataSource);
+
+		ClientDatabaseContextHolder.set(dataSourceId);
+		List<String> result = clientDataSourceRepository.getColumnNames(table);
+		ClientDatabaseContextHolder.clear();
+
+		return result;
+	}
 }

@@ -46,4 +46,24 @@ class ClientDataSourceServiceTest {
 
 	}
 
+	@Test
+	void testGetColumnNames() {
+
+		long dataSourceAId = 1L;
+		String urlDatasourceA = "jdbc:h2:mem:testdba";
+		String username = "";
+		String password = "";
+		String tableName = "SESSIONS";
+
+		ClientDataSourceRouter router = new ClientDataSourceRouter();
+
+		DataSource dsA = router.getDatasource(dataSourceAId, urlDatasourceA, DataBaseTypeEnum.H2, username, password);
+		List<String> dsAColumns = clientDataSourceService.getColumnNames(dataSourceAId, tableName, dsA);
+
+		dsAColumns.forEach(System.out::println);
+
+		Assertions.assertFalse(dsAColumns.isEmpty());
+
+	}
+
 }

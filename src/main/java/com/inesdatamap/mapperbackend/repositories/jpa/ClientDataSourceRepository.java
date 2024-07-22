@@ -14,4 +14,13 @@ public interface ClientDataSourceRepository {
 	 */
 	List<String> getTableNames();
 
+	/**
+	 * Get column names from a database table.
+	 *
+	 * @param table
+	 * 	the table name
+	 *
+	 * @return the list of column names
+	 */
+	List<String> getColumnNames(String table);
 }

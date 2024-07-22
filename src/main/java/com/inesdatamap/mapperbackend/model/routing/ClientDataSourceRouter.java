@@ -24,15 +24,15 @@ public class ClientDataSourceRouter extends AbstractRoutingDataSource {
 	 * Create a data source
 	 *
 	 * @param dataSourceId
-	 * 		the data source id
+	 * 	the data source id
 	 * @param url
-	 * 		the data source url
+	 * 	the data source url
 	 * @param dbType
-	 * 		the data source type
+	 * 	the data source type
 	 * @param username
-	 * 		the data source username
+	 * 	the data source username
 	 * @param password
-	 * 		the data source password
+	 * 	the data source password
 	 *
 	 * @return the configured data source
 	 */
@@ -41,7 +41,7 @@ public class ClientDataSourceRouter extends AbstractRoutingDataSource {
 		Map<Object, Object> dataSourceMap = new HashMap<>();
 
 		DataSource ds = DataSourceBuilder.create().driverClassName(getDriver(dbType)).url(url).username(username).password(password)
-				.build();
+			.build();
 		dataSourceMap.put(dataSourceId, ds);
 
 		this.setTargetDataSources(dataSourceMap);
@@ -54,11 +54,11 @@ public class ClientDataSourceRouter extends AbstractRoutingDataSource {
 	 * Get the driver for the data source
 	 *
 	 * @param dbType
-	 * 		the database type
+	 * 	the database type
 	 *
 	 * @return the driver
 	 */
-	private String getDriver(DataBaseTypeEnum dbType) {
+	private static String getDriver(DataBaseTypeEnum dbType) {
 		return switch (dbType) {
 			case H2 -> "org.h2.Driver";
 			case MYSQL -> "com.mysql.cj.jdbc.Driver";
