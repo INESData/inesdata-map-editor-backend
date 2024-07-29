@@ -14,6 +14,14 @@ import io.swagger.v3.oas.models.info.Info;
 @Configuration
 public class OpenAPIConfig {
 
+	/**
+	 * Gets the OpenAPI info from properties
+	 *
+	 * @param restApiInfoProperties
+	 * 	the REST API info properties
+	 *
+	 * @return the OpenAPI info
+	 */
 	@Bean
 	public OpenAPI getOpenApiInfo(RestApiInfoProperties restApiInfoProperties) {
 		return new OpenAPI().info(new Info().title(restApiInfoProperties.getName()).version(restApiInfoProperties.getVersion())
