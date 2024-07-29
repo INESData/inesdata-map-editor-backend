@@ -11,13 +11,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Unit test for the {@link RestApiInfoProperties} class
- *
- * @author gmv
  */
 @ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties(value = RestApiInfoProperties.class)
 @TestPropertySource(properties = { "info.rest-api.name=test-name", "info.rest-api.description=test-description",
-		"info.rest-api.version=test-version" })
+	"info.rest-api.version=test-version" })
 class RestApiInfoPropertiesTest {
 
 	@Autowired
