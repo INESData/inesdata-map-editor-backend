@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -30,8 +29,7 @@ public class Ontology extends BaseEntity implements Serializable {
 	/**
 	 * The name of the ontology.
 	 */
-	@NotNull
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	private String name;
 
 	/**

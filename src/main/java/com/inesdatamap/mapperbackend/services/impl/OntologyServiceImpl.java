@@ -6,7 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
@@ -42,11 +42,11 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @return List of OntologyDTOs
 	 */
 	@Override
-	public Page<OntologyDTO> listOntologies(Pageable pageable) {
+	public Page<SearchOntologyDTO> listOntologies(Pageable pageable) {
 
-		Page<Ontology> ontologieList = this.ontologyRepo.findAll(pageable);
+		Page<Ontology> ontologiesList = this.ontologyRepo.findAll(pageable);
 
-		return ontologieList.map(this.ontologyMapper::entityToDto);
+		return ontologiesList.map(this.ontologyMapper::entitytoSearchOntologyDTO);
 
 	}
 
@@ -55,23 +55,23 @@ public class OntologyServiceImpl implements OntologyService {
 	 *
 	 * @param id
 	 *            the ID of the ontology to update
-	 * @param ontologyDto
+	 * @param searchOntologyDto
 	 *            the OntologyDTO
 	 * @return the updated ontology
 	 */
 	@Override
-	public OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto) {
+	public SearchOntologyDTO updateOntology(Long id, SearchOntologyDTO searchOntologyDto) {
 
 		// Get DB entity
 		Ontology ontologyDB = this.getEntity(id);
 
 		// New ontology to save
-		Ontology ontologySource = this.ontologyMapper.dtoToEntity(ontologyDto);
+		Ontology ontologySource = this.ontologyMapper.searchOntologyDtoToEntity(searchOntologyDto, ontologyDB);
 
 		// Updated ontology
 		Ontology ontologyUpdated = this.ontologyRepo.saveAndFlush(this.ontologyMapper.merge(ontologySource, ontologyDB));
 
-		return this.ontologyMapper.entityToDto(ontologyUpdated);
+		return this.ontologyMapper.entitytoSearchOntologyDTO(ontologyUpdated);
 
 	}
 
