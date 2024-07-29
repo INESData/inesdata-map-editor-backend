@@ -24,7 +24,7 @@ import com.inesdatamap.mapperbackend.utils.Constants;
 
 /**
  * Unit tests for the {@link OntologyController}
- * 
+ *
  * @author gmv
  */
 @ExtendWith(SpringExtension.class)

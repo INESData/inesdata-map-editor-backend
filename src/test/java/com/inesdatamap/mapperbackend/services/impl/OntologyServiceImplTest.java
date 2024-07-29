@@ -26,7 +26,7 @@ import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 
 /**
  * Unit tests for the {@link OntologyServiceImpl}
- * 
+ *
  * @author gmv
  */
 @ExtendWith(MockitoExtension.class)
