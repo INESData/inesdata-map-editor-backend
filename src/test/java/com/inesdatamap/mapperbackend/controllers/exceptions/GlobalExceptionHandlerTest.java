@@ -28,9 +28,12 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import com.inesdatamap.mapperbackend.controllers.errors.BaseErrorCode;
 import com.inesdatamap.mapperbackend.controllers.errors.ErrorResponse;
 import com.inesdatamap.mapperbackend.controllers.errors.ErrorValidation;
+import com.inesdatamap.mapperbackend.controllers.errors.GlobalExceptionHandler;
+import com.inesdatamap.mapperbackend.exceptions.DataValidationException;
 import com.inesdatamap.mapperbackend.properties.RestApiInfoProperties;
 import com.inesdatamap.mapperbackend.utils.RestContextInfo;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -115,6 +118,18 @@ class GlobalExceptionHandlerTest {
 		// asserts
 		assertEquals(BaseErrorCode.VALIDATION.getCode(), Objects.requireNonNull(response.getBody()).getCode());
 		assertEquals(HttpStatus.UNPROCESSABLE_ENTITY.value(), response.getBody().getStatus());
+	}
+
+	@Test
+	void handleEntityNotFoundExceptionTest() {
+		// prepare
+		mockTraceContext();
+		EntityNotFoundException ex = mock(EntityNotFoundException.class);
+		// test
+		ResponseEntity<ErrorResponse> response = handler.handleEntityNotFoundException(ex);
+		// asserts
+		assertEquals(BaseErrorCode.NOT_FOUND.getCode(), Objects.requireNonNull(response.getBody()).getCode());
+		assertEquals(HttpStatus.NOT_FOUND.value(), response.getBody().getStatus());
 	}
 
 	@Test

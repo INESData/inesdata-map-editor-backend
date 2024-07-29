@@ -5,7 +5,10 @@ import java.io.Serializable;
 import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -14,12 +17,12 @@ import lombok.ToString;
  * Data Base Source db entity representation
  *
  * @author gmv
- *
  */
 @Getter
 @Setter
 @ToString
 @Entity
+@DiscriminatorValue("DATABASE")
 public class DataBaseSource extends DataSource implements Serializable {
 
 	/**
@@ -49,6 +52,7 @@ public class DataBaseSource extends DataSource implements Serializable {
 	 * The type of the database.
 	 */
 	@Column(name = "database_type")
+	@Enumerated(EnumType.STRING)
 	private DataBaseTypeEnum databaseType;
 
 	/**
@@ -60,7 +64,7 @@ public class DataBaseSource extends DataSource implements Serializable {
 
 	/**
 	 * @param connectionString
-	 *            the connectionString to set
+	 * 	the connectionString to set
 	 */
 	public void setConnectionString(String connectionString) {
 		this.connectionString = connectionString;
@@ -75,7 +79,7 @@ public class DataBaseSource extends DataSource implements Serializable {
 
 	/**
 	 * @param user
-	 *            the user to set
+	 * 	the user to set
 	 */
 	public void setUser(String user) {
 		this.user = user;
@@ -90,7 +94,7 @@ public class DataBaseSource extends DataSource implements Serializable {
 
 	/**
 	 * @param password
-	 *            the password to set
+	 * 	the password to set
 	 */
 	public void setPassword(String password) {
 		this.password = password;
@@ -105,7 +109,7 @@ public class DataBaseSource extends DataSource implements Serializable {
 
 	/**
 	 * @param databaseType
-	 *            the databaseType to set
+	 * 	the databaseType to set
 	 */
 	public void setDatabaseType(DataBaseTypeEnum databaseType) {
 		this.databaseType = databaseType;

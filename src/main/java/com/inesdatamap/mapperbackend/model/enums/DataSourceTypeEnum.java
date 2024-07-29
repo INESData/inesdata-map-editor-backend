@@ -4,7 +4,6 @@ package com.inesdatamap.mapperbackend.model.enums;
  * Data Source Type enumeration
  *
  * @author gmv
- *
  */
 public enum DataSourceTypeEnum {
 	/**
@@ -13,9 +12,9 @@ public enum DataSourceTypeEnum {
 	DATABASE("DATABASE"),
 
 	/**
-	 * Represents a CSV data source.
+	 * Represents a file data source.
 	 */
-	CSV("CSV");
+	FILE("FILE");
 
 	/**
 	 * The code representing the database type.
@@ -26,7 +25,7 @@ public enum DataSourceTypeEnum {
 	 * Constructor for DataSourceTypeEnum.
 	 *
 	 * @param code
-	 *            the code representing the data source type.
+	 * 	the code representing the data source type.
 	 */
 	private DataSourceTypeEnum(String code) {
 		this.code = code;
