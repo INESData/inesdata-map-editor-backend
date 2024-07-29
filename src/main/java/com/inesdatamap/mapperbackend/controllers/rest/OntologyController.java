@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -77,6 +78,23 @@ public class OntologyController {
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier to update", required = true) Long id,
 			@Valid @RequestBody @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontologyDto) {
 		return ResponseEntity.ok(this.ontologyService.updateOntology(id, ontologyDto));
+	}
+
+	/**
+	 * Deletes ontology
+	 *
+	 * @param id
+	 *            ontology identifier
+	 * @return status code response
+	 */
+	@DeleteMapping("/{id}")
+	@Operation(summary = "Delete ontology")
+	@ApiResponse(responseCode = "204", description = "Deleted", content = {
+			@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = OntologyDTO.class))) })
+	public ResponseEntity<Void> deleteOntology(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier to delete", required = true) Long id) {
+		this.ontologyService.deleteOntology(id);
+		return ResponseEntity.noContent().build();
 	}
 
 }

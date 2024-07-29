@@ -42,4 +42,12 @@ public interface OntologyService {
 	 */
 	OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto);
 
+	/**
+	 * Deletes an ontology by its id.
+	 *
+	 * @param id
+	 *            the ID of the ontology to delete
+	 */
+	void deleteOntology(Long id);
+
 }

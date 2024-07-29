@@ -76,6 +76,22 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
+	 * Deletes an ontology by its id.
+	 *
+	 * @param id
+	 *            the ID of the ontology to delete
+	 */
+	@Override
+	public void deleteOntology(Long id) {
+
+		// Get entity if exists
+		this.getEntity(id);
+
+		this.ontologyRepo.deleteById(id);
+
+	}
+
+	/**
 	 * Retrieves an ontology entity by its ID.
 	 *
 	 * @param id
