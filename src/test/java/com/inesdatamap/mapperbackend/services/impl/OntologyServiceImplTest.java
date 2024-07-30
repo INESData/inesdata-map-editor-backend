@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
@@ -49,23 +50,23 @@ class OntologyServiceImplTest {
 		List<Ontology> ontologies = Arrays.asList(ontology1, ontology2);
 		Page<Ontology> ontologyPage = new PageImpl<>(ontologies);
 
-		OntologyDTO ontologyDTO1 = new OntologyDTO();
-		OntologyDTO ontologyDTO2 = new OntologyDTO();
-		List<OntologyDTO> ontologyDTOs = Arrays.asList(ontologyDTO1, ontologyDTO2);
-		Page<OntologyDTO> ontologyDTOPage = new PageImpl<>(ontologyDTOs);
+		SearchOntologyDTO searchOntologyDTO1 = new SearchOntologyDTO();
+		SearchOntologyDTO searchOntologyDTO2 = new SearchOntologyDTO();
+		List<SearchOntologyDTO> searchOntologyDTOs = Arrays.asList(searchOntologyDTO1, searchOntologyDTO2);
+		Page<SearchOntologyDTO> searchOntologyDTOPage = new PageImpl<>(searchOntologyDTOs);
 
 		// Mock behavior
 		Mockito.when(this.ontologyRepo.findAll(Mockito.any(Pageable.class))).thenReturn(ontologyPage);
-		Mockito.when(this.ontologyMapper.entityToDto(ontology1)).thenReturn(ontologyDTO1);
-		Mockito.when(this.ontologyMapper.entityToDto(ontology2)).thenReturn(ontologyDTO2);
+		Mockito.when(this.ontologyMapper.entitytoSearchOntologyDTO(ontology1)).thenReturn(searchOntologyDTO1);
+		Mockito.when(this.ontologyMapper.entitytoSearchOntologyDTO(ontology2)).thenReturn(searchOntologyDTO2);
 
 		// Test
 		Pageable pageable = PageRequest.of(0, 10);
-		Page<OntologyDTO> result = this.ontologyService.listOntologies(pageable);
+		Page<SearchOntologyDTO> result = this.ontologyService.listOntologies(pageable);
 
 		// Verify
-		assertEquals(ontologyDTOPage.getTotalElements(), result.getTotalElements());
-		assertEquals(ontologyDTOPage.getContent().size(), result.getContent().size());
+		assertEquals(searchOntologyDTOPage.getTotalElements(), result.getTotalElements());
+		assertEquals(searchOntologyDTOPage.getContent().size(), result.getContent().size());
 	}
 
 	@Test

@@ -10,11 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.services.OntologyService;
-import com.inesdatamap.mapperbackend.utils.Constants;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -49,15 +50,20 @@ public class OntologyController {
 	/**
 	 * Lists all ontologies.
 	 *
+	 * @param page
+	 *            page number
+	 *
+	 * @param size
+	 *            page size
 	 *
 	 * @return List of all ontologies
 	 */
 	@GetMapping(path = "")
 	@Operation(summary = "List all ontologies")
 	@ApiResponse(responseCode = "200", description = "Succes", content = {
-			@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = OntologyDTO.class))) })
-	public ResponseEntity<Page<OntologyDTO>> listOntologies() {
-		Page<OntologyDTO> ontologies = this.ontologyService.listOntologies(PageRequest.of(Constants.NUMBER_0, Constants.NUMBER_10));
+			@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = SearchOntologyDTO.class))) })
+	public ResponseEntity<Page<SearchOntologyDTO>> listOntologies(@RequestParam int page, @RequestParam int size) {
+		Page<SearchOntologyDTO> ontologies = this.ontologyService.listOntologies(PageRequest.of(page, size));
 		return ResponseEntity.ok(ontologies);
 	}
 

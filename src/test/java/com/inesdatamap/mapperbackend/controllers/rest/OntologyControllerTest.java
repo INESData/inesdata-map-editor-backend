@@ -19,6 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 import com.inesdatamap.mapperbackend.utils.Constants;
 
@@ -41,15 +42,15 @@ class OntologyControllerTest {
 	void testListOntologies() {
 
 		// mock
-		OntologyDTO ontology1 = new OntologyDTO();
-		OntologyDTO ontology2 = new OntologyDTO();
-		List<OntologyDTO> ontologies = Arrays.asList(ontology1, ontology2);
-		Page<OntologyDTO> page = new PageImpl<>(ontologies);
+		SearchOntologyDTO ontology1 = new SearchOntologyDTO();
+		SearchOntologyDTO ontology2 = new SearchOntologyDTO();
+		List<SearchOntologyDTO> ontologies = Arrays.asList(ontology1, ontology2);
+		Page<SearchOntologyDTO> page = new PageImpl<>(ontologies);
 
 		Mockito.when(this.ontologyService.listOntologies(PageRequest.of(Constants.NUMBER_0, Constants.NUMBER_10))).thenReturn(page);
 
 		// test
-		ResponseEntity<Page<OntologyDTO>> result = this.controller.listOntologies();
+		ResponseEntity<Page<SearchOntologyDTO>> result = this.controller.listOntologies(Constants.NUMBER_0, Constants.NUMBER_10);
 
 		// verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -61,13 +62,13 @@ class OntologyControllerTest {
 
 		// mock
 		Long id = 1L;
-		OntologyDTO ontologyDTO = new OntologyDTO();
+		OntologyDTO searchOntologyDTO = new OntologyDTO();
 		OntologyDTO updatedOntology = new OntologyDTO();
 
-		Mockito.when(this.ontologyService.updateOntology(id, ontologyDTO)).thenReturn(updatedOntology);
+		Mockito.when(this.ontologyService.updateOntology(id, searchOntologyDTO)).thenReturn(updatedOntology);
 
 		// test
-		ResponseEntity<OntologyDTO> result = this.controller.updateOntology(id, ontologyDTO);
+		ResponseEntity<OntologyDTO> result = this.controller.updateOntology(id, searchOntologyDTO);
 
 		// verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());

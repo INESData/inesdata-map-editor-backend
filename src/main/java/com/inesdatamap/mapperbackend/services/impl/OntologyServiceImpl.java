@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
@@ -42,11 +43,11 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @return List of OntologyDTOs
 	 */
 	@Override
-	public Page<OntologyDTO> listOntologies(Pageable pageable) {
+	public Page<SearchOntologyDTO> listOntologies(Pageable pageable) {
 
-		Page<Ontology> ontologieList = this.ontologyRepo.findAll(pageable);
+		Page<Ontology> ontologiesList = this.ontologyRepo.findAll(pageable);
 
-		return ontologieList.map(this.ontologyMapper::entityToDto);
+		return ontologiesList.map(this.ontologyMapper::entitytoSearchOntologyDTO);
 
 	}
 
