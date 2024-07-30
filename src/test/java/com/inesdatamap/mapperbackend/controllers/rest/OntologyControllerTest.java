@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 import com.inesdatamap.mapperbackend.utils.Constants;
@@ -61,13 +62,13 @@ class OntologyControllerTest {
 
 		// mock
 		Long id = 1L;
-		SearchOntologyDTO searchOntologyDTO = new SearchOntologyDTO();
-		SearchOntologyDTO updatedOntology = new SearchOntologyDTO();
+		OntologyDTO searchOntologyDTO = new OntologyDTO();
+		OntologyDTO updatedOntology = new OntologyDTO();
 
 		Mockito.when(this.ontologyService.updateOntology(id, searchOntologyDTO)).thenReturn(updatedOntology);
 
 		// test
-		ResponseEntity<SearchOntologyDTO> result = this.controller.updateOntology(id, searchOntologyDTO);
+		ResponseEntity<OntologyDTO> result = this.controller.updateOntology(id, searchOntologyDTO);
 
 		// verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());
