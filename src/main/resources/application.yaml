@@ -26,6 +26,15 @@ spring:
     changeLog: db/db.changelog-master.xml
     default-schema: public
 
+# security
+security:
+  cors:
+    - path: /**
+      allowed-origins: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
+      exposed-headers: "*"
+
 # REST API info
 info:
   rest-api:
