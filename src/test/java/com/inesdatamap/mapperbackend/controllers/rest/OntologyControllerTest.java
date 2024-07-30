@@ -74,4 +74,20 @@ class OntologyControllerTest {
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals(updatedOntology, result.getBody());
 	}
+
+	@Test
+	void testDeleteOntology() {
+
+		// mock
+		Long id = 1L;
+
+		// test
+		ResponseEntity<Void> result = this.controller.deleteOntology(id);
+
+		// verifies & asserts
+		assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+
+		// Verify that the service method was called once
+		Mockito.verify(this.ontologyService, Mockito.times(1)).deleteOntology(id);
+	}
 }
