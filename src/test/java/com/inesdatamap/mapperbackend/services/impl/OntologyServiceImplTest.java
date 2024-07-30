@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
@@ -73,22 +74,22 @@ class OntologyServiceImplTest {
 		// Mock data
 		Long id = 1L;
 		Ontology ontologyDB = new Ontology();
-		SearchOntologyDTO searchOntologyDTO = new SearchOntologyDTO();
+		OntologyDTO ontologyDTO = new OntologyDTO();
 		Ontology ontologySource = new Ontology();
 		Ontology ontologyUpdated = new Ontology();
 
 		// Mock behavior
 		Mockito.when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontologyDB));
-		Mockito.when(this.ontologyMapper.searchOntologyDtoToEntity(searchOntologyDTO, ontologyDB)).thenReturn(ontologySource);
+		Mockito.when(this.ontologyMapper.dtoToEntity(ontologyDTO)).thenReturn(ontologySource);
 		Mockito.when(this.ontologyMapper.merge(ontologySource, ontologyDB)).thenReturn(ontologyUpdated);
 		Mockito.when(this.ontologyRepo.saveAndFlush(ontologyUpdated)).thenReturn(ontologyUpdated);
-		Mockito.when(this.ontologyMapper.entitytoSearchOntologyDTO(ontologyUpdated)).thenReturn(searchOntologyDTO);
+		Mockito.when(this.ontologyMapper.entityToDto(ontologyUpdated)).thenReturn(ontologyDTO);
 
 		// Test
-		SearchOntologyDTO result = this.ontologyService.updateOntology(id, searchOntologyDTO);
+		OntologyDTO result = this.ontologyService.updateOntology(id, ontologyDTO);
 
 		// Verify
-		assertEquals(searchOntologyDTO, result);
+		assertEquals(ontologyDTO, result);
 	}
 
 	@Test

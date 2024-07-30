@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
@@ -55,23 +56,23 @@ public class OntologyServiceImpl implements OntologyService {
 	 *
 	 * @param id
 	 *            the ID of the ontology to update
-	 * @param searchOntologyDto
+	 * @param ontologyDto
 	 *            the OntologyDTO
 	 * @return the updated ontology
 	 */
 	@Override
-	public SearchOntologyDTO updateOntology(Long id, SearchOntologyDTO searchOntologyDto) {
+	public OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto) {
 
 		// Get DB entity
 		Ontology ontologyDB = this.getEntity(id);
 
 		// New ontology to save
-		Ontology ontologySource = this.ontologyMapper.searchOntologyDtoToEntity(searchOntologyDto, ontologyDB);
+		Ontology ontologySource = this.ontologyMapper.dtoToEntity(ontologyDto);
 
 		// Updated ontology
 		Ontology ontologyUpdated = this.ontologyRepo.saveAndFlush(this.ontologyMapper.merge(ontologySource, ontologyDB));
 
-		return this.ontologyMapper.entitytoSearchOntologyDTO(ontologyUpdated);
+		return this.ontologyMapper.entityToDto(ontologyUpdated);
 
 	}
 

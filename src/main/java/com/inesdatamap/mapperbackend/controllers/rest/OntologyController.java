@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 
@@ -70,18 +71,18 @@ public class OntologyController {
 	 *
 	 * @param id
 	 *            ontology identifier
-	 * @param searchOntologyDto
+	 * @param ontologyDto
 	 *            to update
 	 * @return updated ontology
 	 */
 	@PutMapping(value = "/{id}")
 	@Operation(summary = "Update given ontology")
 	@ApiResponse(responseCode = "200", description = "Sucess", content = {
-			@Content(mediaType = "application/json", schema = @Schema(implementation = SearchOntologyDTO.class)) })
-	public ResponseEntity<SearchOntologyDTO> updateOntology(
+			@Content(mediaType = "application/json", schema = @Schema(implementation = OntologyDTO.class)) })
+	public ResponseEntity<OntologyDTO> updateOntology(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier to update", required = true) Long id,
-			@Valid @RequestBody @Parameter(name = "ontology", description = "The ontology to update", required = true) SearchOntologyDTO searchOntologyDto) {
-		return ResponseEntity.ok(this.ontologyService.updateOntology(id, searchOntologyDto));
+			@Valid @RequestBody @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontologyDto) {
+		return ResponseEntity.ok(this.ontologyService.updateOntology(id, ontologyDto));
 	}
 
 }

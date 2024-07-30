@@ -3,6 +3,7 @@ package com.inesdatamap.mapperbackend.services;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 
@@ -36,10 +37,10 @@ public interface OntologyService {
 	 *
 	 * @param id
 	 *            the ID of the ontology to update
-	 * @param searchOntologyDto
+	 * @param ontologyDto
 	 *            the OntologyDTO
 	 * @return the updated ontology
 	 */
-	SearchOntologyDTO updateOntology(Long id, SearchOntologyDTO searchOntologyDto);
+	OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto);
 
 }
