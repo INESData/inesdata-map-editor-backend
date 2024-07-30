@@ -95,8 +95,7 @@ public class OntologyController {
 	 */
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete ontology")
-	@ApiResponse(responseCode = "204", description = "Deleted", content = {
-			@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = OntologyDTO.class))) })
+	@ApiResponse(responseCode = "204", description = "Deleted", content = { @Content(mediaType = "application/json") })
 	public ResponseEntity<Void> deleteOntology(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier to delete", required = true) Long id) {
 		this.ontologyService.deleteOntology(id);
