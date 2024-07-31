@@ -19,7 +19,6 @@ import com.inesdatamap.mapperbackend.services.OntologyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -60,8 +59,6 @@ public class OntologyController {
 	 */
 	@GetMapping(path = "")
 	@Operation(summary = "List all ontologies")
-	@ApiResponse(responseCode = "200", description = "Succes", content = {
-			@Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = SearchOntologyDTO.class))) })
 	public ResponseEntity<Page<SearchOntologyDTO>> listOntologies(@RequestParam int page, @RequestParam int size) {
 		Page<SearchOntologyDTO> ontologies = this.ontologyService.listOntologies(PageRequest.of(page, size));
 		return ResponseEntity.ok(ontologies);
