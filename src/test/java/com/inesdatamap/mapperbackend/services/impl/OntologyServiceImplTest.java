@@ -93,6 +93,22 @@ class OntologyServiceImplTest {
 	}
 
 	@Test
+	void testDeleteOntology() {
+		// Mock data
+		Long id = 1L;
+		Ontology ontology = new Ontology();
+
+		// Mock behavior
+		Mockito.when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontology));
+
+		// Test
+		this.ontologyService.deleteOntology(id);
+
+		// Verify
+		Mockito.verify(this.ontologyRepo, Mockito.times(1)).deleteById(id);
+	}
+
+	@Test
 	void testGetEntity() {
 		// Mock data
 		Long id = 1L;
