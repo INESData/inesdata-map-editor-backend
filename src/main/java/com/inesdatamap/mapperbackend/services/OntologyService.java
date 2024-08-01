@@ -61,6 +61,6 @@ public interface OntologyService {
 	 *            file content to save
 	 * @return the saved ontology
 	 */
-	SearchOntologyDTO createOntology(SearchOntologyDTO ontologyDto, MultipartFile file);
+	OntologyDTO createOntology(OntologyDTO ontologyDto, MultipartFile file);
 
 }

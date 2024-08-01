@@ -103,10 +103,10 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @return the saved ontology
 	 */
 	@Override
-	public SearchOntologyDTO createOntology(SearchOntologyDTO ontologyDto, MultipartFile file) {
+	public OntologyDTO createOntology(OntologyDTO ontologyDto, MultipartFile file) {
 
 		// DTO to entity
-		Ontology ontology = this.ontologyMapper.searchOntologyDtoToEntity(ontologyDto);
+		Ontology ontology = this.ontologyMapper.dtoToEntity(ontologyDto);
 
 		if (file != null && !file.isEmpty()) {
 			try {
@@ -123,7 +123,7 @@ public class OntologyServiceImpl implements OntologyService {
 		// Save new entity
 		Ontology savedOntology = this.ontologyRepo.save(ontology);
 
-		return this.ontologyMapper.entitytoSearchOntologyDTO(savedOntology);
+		return this.ontologyMapper.entityToDto(savedOntology);
 
 	}
 
