@@ -103,7 +103,7 @@ class OntologyControllerTest {
 	@Test
 	void createOntology_withFile() throws Exception {
 		// Arrange
-		SearchOntologyDTO ontologyDto = new SearchOntologyDTO();
+		OntologyDTO ontologyDto = new OntologyDTO();
 		ontologyDto.setName("Test Ontology");
 
 		MockMultipartFile file = new MockMultipartFile("file", "test.txt", MediaType.TEXT_PLAIN_VALUE,
@@ -112,7 +112,7 @@ class OntologyControllerTest {
 		MockMultipartFile jsonBody = new MockMultipartFile("body", "body", MediaType.APPLICATION_JSON_VALUE,
 				"{\"name\":\"Test Ontology\"}".getBytes());
 
-		when(this.ontologyService.createOntology(Mockito.any(SearchOntologyDTO.class), Mockito.any())).thenReturn(ontologyDto);
+		when(this.ontologyService.createOntology(Mockito.any(OntologyDTO.class), Mockito.any())).thenReturn(ontologyDto);
 
 		// Act & Assert
 		this.mockMvc.perform(multipart("/ontologies").file(file).file(jsonBody).contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
@@ -122,13 +122,13 @@ class OntologyControllerTest {
 	@Test
 	void createOntology_withoutFile() throws Exception {
 		// Arrange
-		SearchOntologyDTO ontologyDto = new SearchOntologyDTO();
+		OntologyDTO ontologyDto = new OntologyDTO();
 		ontologyDto.setName("Test Ontology");
 
 		MockMultipartFile jsonBody = new MockMultipartFile("body", "body", MediaType.APPLICATION_JSON_VALUE,
 				"{\"name\":\"Test Ontology\"}".getBytes());
 
-		when(this.ontologyService.createOntology(Mockito.any(SearchOntologyDTO.class), Mockito.isNull())).thenReturn(ontologyDto);
+		when(this.ontologyService.createOntology(Mockito.any(OntologyDTO.class), Mockito.isNull())).thenReturn(ontologyDto);
 
 		// Act & Assert
 		this.mockMvc.perform(multipart("/ontologies").file(jsonBody).contentType(MediaType.MULTIPART_FORM_DATA_VALUE))

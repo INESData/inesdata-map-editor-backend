@@ -134,7 +134,7 @@ class OntologyServiceImplTest {
 	@Test
 	void testCreateOntology_withFile() throws IOException {
 		// Arrange
-		SearchOntologyDTO dto = new SearchOntologyDTO();
+		OntologyDTO dto = new OntologyDTO();
 		dto.setName("Test Ontology");
 
 		MockMultipartFile file = new MockMultipartFile("file", "testfile.txt", "text/plain", "File content".getBytes());
@@ -143,12 +143,12 @@ class OntologyServiceImplTest {
 		Ontology savedOntology = new Ontology();
 		savedOntology.setId(1L);
 
-		when(this.ontologyMapper.searchOntologyDtoToEntity(dto)).thenReturn(ontology);
+		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(ontology);
 		when(this.ontologyRepo.save(ontology)).thenReturn(savedOntology);
-		when(this.ontologyMapper.entitytoSearchOntologyDTO(savedOntology)).thenReturn(dto);
+		when(this.ontologyMapper.entityToDto(savedOntology)).thenReturn(dto);
 
 		// Act
-		SearchOntologyDTO result = this.ontologyService.createOntology(dto, file);
+		OntologyDTO result = this.ontologyService.createOntology(dto, file);
 
 		// Assert
 		assertEquals(dto, result);
@@ -159,14 +159,14 @@ class OntologyServiceImplTest {
 	@Test
 	void testCreateOntology_fileReadException() throws IOException {
 		// Arrange
-		SearchOntologyDTO dto = new SearchOntologyDTO();
+		OntologyDTO dto = new OntologyDTO();
 		dto.setName("Test Ontology");
 
 		MultipartFile file = mock(MultipartFile.class);
 		when(file.getBytes()).thenThrow(new IOException("Failed to read file"));
 
 		Ontology ontology = new Ontology();
-		when(this.ontologyMapper.searchOntologyDtoToEntity(dto)).thenReturn(ontology);
+		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(ontology);
 
 		// Act & Assert
 		assertThrows(UncheckedIOException.class, () -> {
