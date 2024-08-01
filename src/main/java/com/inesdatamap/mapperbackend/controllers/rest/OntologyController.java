@@ -112,7 +112,7 @@ public class OntologyController {
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(summary = "Create given ontology")
 	public ResponseEntity<SearchOntologyDTO> createOntology(
-			@RequestPart(value = "body") @Parameter(name = "ontology", description = "The ontology to save", required = true) SearchOntologyDTO ontologyDto,
+			@RequestPart("body") @Parameter(name = "ontology", description = "The ontology to save", required = true) SearchOntologyDTO ontologyDto,
 			@RequestPart(value = "file", required = false) MultipartFile file) {
 		return ResponseEntity.ok(this.ontologyService.createOntology(ontologyDto, file));
 	}

@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -100,23 +101,38 @@ class OntologyControllerTest {
 	}
 
 	@Test
-	void createOntology() throws Exception {
+	void createOntology_withFile() throws Exception {
 		// Arrange
 		SearchOntologyDTO ontologyDto = new SearchOntologyDTO();
-		ontologyDto.setId(1L);
 		ontologyDto.setName("Test Ontology");
 
 		MockMultipartFile file = new MockMultipartFile("file", "test.txt", MediaType.TEXT_PLAIN_VALUE,
 				"This is the file content".getBytes());
 
-		Mockito.when(this.ontologyService.createOntology(Mockito.any(SearchOntologyDTO.class), Mockito.any(MockMultipartFile.class)))
-				.thenReturn(ontologyDto);
+		MockMultipartFile jsonBody = new MockMultipartFile("body", "body", MediaType.APPLICATION_JSON_VALUE,
+				"{\"name\":\"Test Ontology\"}".getBytes());
+
+		when(this.ontologyService.createOntology(Mockito.any(SearchOntologyDTO.class), Mockito.any())).thenReturn(ontologyDto);
 
 		// Act & Assert
-		this.mockMvc
-				.perform(multipart("/ontologies").file(file).param("body", "{\"id\":1,\"name\":\"Test Ontology\"}")
-						.contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(1)).andExpect(jsonPath("$.name").value("Test Ontology"));
+		this.mockMvc.perform(multipart("/ontologies").file(file).file(jsonBody).contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Test Ontology"));
+	}
+
+	@Test
+	void createOntology_withoutFile() throws Exception {
+		// Arrange
+		SearchOntologyDTO ontologyDto = new SearchOntologyDTO();
+		ontologyDto.setName("Test Ontology");
+
+		MockMultipartFile jsonBody = new MockMultipartFile("body", "body", MediaType.APPLICATION_JSON_VALUE,
+				"{\"name\":\"Test Ontology\"}".getBytes());
+
+		when(this.ontologyService.createOntology(Mockito.any(SearchOntologyDTO.class), Mockito.isNull())).thenReturn(ontologyDto);
+
+		// Act & Assert
+		this.mockMvc.perform(multipart("/ontologies").file(jsonBody).contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+				.andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Test Ontology"));
 	}
 
 }
