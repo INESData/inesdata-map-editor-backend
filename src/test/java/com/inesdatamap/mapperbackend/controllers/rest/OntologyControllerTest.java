@@ -116,7 +116,8 @@ class OntologyControllerTest {
 
 		// Act & Assert
 		this.mockMvc.perform(multipart("/ontologies").file(file).file(jsonBody).contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Test Ontology"));
+				.andExpect(status().isCreated()) // Changed from isOk() to isCreated()
+				.andExpect(jsonPath("$.name").value("Test Ontology"));
 	}
 
 	@Test
@@ -132,7 +133,8 @@ class OntologyControllerTest {
 
 		// Act & Assert
 		this.mockMvc.perform(multipart("/ontologies").file(jsonBody).contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
-				.andExpect(status().isOk()).andExpect(jsonPath("$.name").value("Test Ontology"));
+				.andExpect(status().isCreated()) // Changed from isOk() to isCreated()
+				.andExpect(jsonPath("$.name").value("Test Ontology"));
 	}
 
 }
