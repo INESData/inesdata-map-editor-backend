@@ -14,7 +14,7 @@ public class OntologyDTO extends BaseEntityDTO {
 
 	private String name;
 
-	private String content;
+	private byte[] content;
 
 	private String title;
 

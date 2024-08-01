@@ -7,7 +7,7 @@
 
 	<changeSet author="gmv" id="1.0.0-predicate-object-map">
 		<createTable tableName="PREDICATE_OBJECT_MAP">
-			<column name="id" type="BIGINT">
+			<column name="id" type="BIGINT" autoIncrement="true">
 				<constraints nullable="false" unique="true" primaryKey="true"/>
 			</column>
 			<column name="predicate" type="VARCHAR(255)">

@@ -2,6 +2,7 @@ package com.inesdatamap.mapperbackend.services;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
@@ -50,5 +51,16 @@ public interface OntologyService {
 	 *            the ID of the ontology to delete
 	 */
 	void deleteOntology(Long id);
+
+	/**
+	 * Saves an ontology
+	 *
+	 * @param ontologyDto
+	 *            the OntologyDTO
+	 * @param file
+	 *            file content to save
+	 * @return the saved ontology
+	 */
+	SearchOntologyDTO createOntology(SearchOntologyDTO ontologyDto, MultipartFile file);
 
 }

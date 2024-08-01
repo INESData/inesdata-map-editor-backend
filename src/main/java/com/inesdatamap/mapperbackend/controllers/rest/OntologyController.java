@@ -3,17 +3,21 @@ package com.inesdatamap.mapperbackend.controllers.rest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
@@ -21,9 +25,6 @@ import com.inesdatamap.mapperbackend.services.OntologyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -77,8 +78,6 @@ public class OntologyController {
 	 */
 	@PutMapping(value = "/{id}")
 	@Operation(summary = "Update given ontology")
-	@ApiResponse(responseCode = "200", description = "Sucess", content = {
-			@Content(mediaType = "application/json", schema = @Schema(implementation = OntologyDTO.class)) })
 	public ResponseEntity<OntologyDTO> updateOntology(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier to update", required = true) Long id,
 			@Valid @RequestBody @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontologyDto) {
@@ -101,4 +100,20 @@ public class OntologyController {
 		return ResponseEntity.noContent().build();
 	}
 
+	/**
+	 * Saves the given ontology
+	 *
+	 * @param ontologyDto
+	 *            to save
+	 * @param file
+	 *            file content to save
+	 * @return saved ontology
+	 */
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@Operation(summary = "Create given ontology")
+	public ResponseEntity<SearchOntologyDTO> createOntology(
+			@RequestPart(value = "body") @Parameter(name = "ontology", description = "The ontology to save", required = true) SearchOntologyDTO ontologyDto,
+			@RequestPart(value = "file", required = false) MultipartFile file) {
+		return ResponseEntity.ok(this.ontologyService.createOntology(ontologyDto, file));
+	}
 }
