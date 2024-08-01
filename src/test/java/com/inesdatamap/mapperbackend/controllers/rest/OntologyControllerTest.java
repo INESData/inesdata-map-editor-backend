@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,7 +21,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
@@ -34,8 +33,8 @@ import com.inesdatamap.mapperbackend.utils.Constants;
  *
  * @author gmv
  */
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = OntologyController.class)
+@WebMvcTest(OntologyController.class)
 class OntologyControllerTest {
 
 	@MockBean
