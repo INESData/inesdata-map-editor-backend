@@ -2,7 +2,9 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -18,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
@@ -122,6 +125,36 @@ class OntologyServiceImplTest {
 
 		// Verify
 		assertEquals(ontology, result);
+	}
+
+	@Test
+	void testCreateOntology_withFile() throws IOException {
+		// Arrange
+		SearchOntologyDTO ontologyDto = new SearchOntologyDTO();
+		ontologyDto.setId(1L);
+		ontologyDto.setName("Test Ontology");
+
+		MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "This is the file content".getBytes());
+
+		Ontology ontology = new Ontology();
+		ontology.setId(1L);
+		ontology.setName("Test Ontology");
+
+		Ontology savedOntology = new Ontology();
+		savedOntology.setId(1L);
+		savedOntology.setName("Test Ontology");
+		savedOntology.setContent(file.getBytes());
+
+		when(this.ontologyMapper.searchOntologyDtoToEntity(ontologyDto)).thenReturn(ontology);
+		when(this.ontologyRepo.save(ontology)).thenReturn(savedOntology);
+		when(this.ontologyMapper.entitytoSearchOntologyDTO(savedOntology)).thenReturn(ontologyDto);
+
+		// Act
+		SearchOntologyDTO result = this.ontologyService.createOntology(ontologyDto, file);
+
+		// Assert
+		assertEquals(ontologyDto, result);
+		assertEquals(file.getBytes(), savedOntology.getContent());
 	}
 
 	@Test
