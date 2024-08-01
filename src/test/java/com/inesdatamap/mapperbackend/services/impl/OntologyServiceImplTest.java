@@ -2,9 +2,12 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -21,6 +24,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
@@ -130,31 +134,44 @@ class OntologyServiceImplTest {
 	@Test
 	void testCreateOntology_withFile() throws IOException {
 		// Arrange
-		SearchOntologyDTO ontologyDto = new SearchOntologyDTO();
-		ontologyDto.setId(1L);
-		ontologyDto.setName("Test Ontology");
+		SearchOntologyDTO dto = new SearchOntologyDTO();
+		dto.setName("Test Ontology");
 
-		MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "This is the file content".getBytes());
+		MockMultipartFile file = new MockMultipartFile("file", "testfile.txt", "text/plain", "File content".getBytes());
 
 		Ontology ontology = new Ontology();
-		ontology.setId(1L);
-		ontology.setName("Test Ontology");
-
 		Ontology savedOntology = new Ontology();
 		savedOntology.setId(1L);
-		savedOntology.setName("Test Ontology");
-		savedOntology.setContent(file.getBytes());
 
-		when(this.ontologyMapper.searchOntologyDtoToEntity(ontologyDto)).thenReturn(ontology);
+		when(this.ontologyMapper.searchOntologyDtoToEntity(dto)).thenReturn(ontology);
 		when(this.ontologyRepo.save(ontology)).thenReturn(savedOntology);
-		when(this.ontologyMapper.entitytoSearchOntologyDTO(savedOntology)).thenReturn(ontologyDto);
+		when(this.ontologyMapper.entitytoSearchOntologyDTO(savedOntology)).thenReturn(dto);
 
 		// Act
-		SearchOntologyDTO result = this.ontologyService.createOntology(ontologyDto, file);
+		SearchOntologyDTO result = this.ontologyService.createOntology(dto, file);
 
 		// Assert
-		assertEquals(ontologyDto, result);
-		assertEquals(file.getBytes(), savedOntology.getContent());
+		assertEquals(dto, result);
+		verify(this.ontologyRepo).save(ontology);
+		assertEquals("File content".getBytes().length, ontology.getContent().length);
+	}
+
+	@Test
+	void testCreateOntology_fileReadException() throws IOException {
+		// Arrange
+		SearchOntologyDTO dto = new SearchOntologyDTO();
+		dto.setName("Test Ontology");
+
+		MultipartFile file = mock(MultipartFile.class);
+		when(file.getBytes()).thenThrow(new IOException("Failed to read file"));
+
+		Ontology ontology = new Ontology();
+		when(this.ontologyMapper.searchOntologyDtoToEntity(dto)).thenReturn(ontology);
+
+		// Act & Assert
+		assertThrows(UncheckedIOException.class, () -> {
+			this.ontologyService.createOntology(dto, file);
+		});
 	}
 
 	@Test
