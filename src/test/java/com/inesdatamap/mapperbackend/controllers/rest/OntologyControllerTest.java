@@ -95,7 +95,7 @@ class OntologyControllerTest {
 		// test
 		ResponseEntity<Void> result = this.controller.deleteOntology(id);
 
-		// verifies & asserts
+		// Verifies & asserts
 		assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
 
 		// Verify that the service method was called once
