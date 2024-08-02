@@ -76,13 +76,12 @@ class OntologyControllerTest {
 		OntologyDTO updatedOntology = new OntologyDTO();
 		MultipartFile file = new MockMultipartFile("file", "filename.txt", "text/plain", "file content".getBytes());
 
-		// Configura el mock para el servicio
+		// Configure mock for service
 		Mockito.when(this.ontologyService.updateOntology(id, ontologyDto, file)).thenReturn(updatedOntology);
 
-		// Llama al método del controlador
 		ResponseEntity<OntologyDTO> result = this.controller.updateOntology(id, ontologyDto, file);
 
-		// Verifica y asertaciones
+		// verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals(updatedOntology, result.getBody());
 	}
