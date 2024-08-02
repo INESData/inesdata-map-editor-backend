@@ -84,6 +84,7 @@ class OntologyServiceImplTest {
 		OntologyDTO ontologyDTO = new OntologyDTO();
 		Ontology ontologySource = new Ontology();
 		Ontology ontologyUpdated = new Ontology();
+		MultipartFile file = new MockMultipartFile("file", "filename.txt", "text/plain", "file content".getBytes());
 
 		// Mock behavior
 		Mockito.when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontologyDB));
@@ -92,11 +93,17 @@ class OntologyServiceImplTest {
 		Mockito.when(this.ontologyRepo.saveAndFlush(ontologyUpdated)).thenReturn(ontologyUpdated);
 		Mockito.when(this.ontologyMapper.entityToDto(ontologyUpdated)).thenReturn(ontologyDTO);
 
-		// Test
-		OntologyDTO result = this.ontologyService.updateOntology(id, ontologyDTO);
+		try {
+			// Test
+			OntologyDTO result = this.ontologyService.updateOntology(id, ontologyDTO, file);
 
-		// Verify
-		assertEquals(ontologyDTO, result);
+			// Verify
+			assertEquals(ontologyDTO, result);
+			assertEquals(file.getBytes(), ontologyDB.getContent()); // Verify that the file content was set correctly
+		} catch (IOException e) {
+			// Handle the exception (e.g., fail the test)
+			throw new RuntimeException("IOException occurred during test execution", e);
+		}
 	}
 
 	@Test

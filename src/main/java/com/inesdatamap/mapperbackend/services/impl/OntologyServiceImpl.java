@@ -61,13 +61,27 @@ public class OntologyServiceImpl implements OntologyService {
 	 *            the ID of the ontology to update
 	 * @param ontologyDto
 	 *            the OntologyDTO
+	 * @param file
+	 *            file content to update
 	 * @return the updated ontology
 	 */
 	@Override
-	public OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto) {
+	public OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto, MultipartFile file) {
 
 		// Get DB entity
 		Ontology ontologyDB = this.getEntity(id);
+
+		if (file != null && !file.isEmpty()) {
+			try {
+				// Convert the file content to a byte array
+				byte[] fileContent = file.getBytes();
+
+				// Set the byte array as the content of the ontology
+				ontologyDB.setContent(fileContent);
+			} catch (IOException e) {
+				throw new UncheckedIOException("Failed to store file content", e);
+			}
+		}
 
 		// New ontology to save
 		Ontology ontologySource = this.ontologyMapper.dtoToEntity(ontologyDto);

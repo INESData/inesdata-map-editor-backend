@@ -23,6 +23,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
@@ -71,15 +72,17 @@ class OntologyControllerTest {
 
 		// mock
 		Long id = 1L;
-		OntologyDTO searchOntologyDTO = new OntologyDTO();
+		OntologyDTO ontologyDto = new OntologyDTO();
 		OntologyDTO updatedOntology = new OntologyDTO();
+		MultipartFile file = new MockMultipartFile("file", "filename.txt", "text/plain", "file content".getBytes());
 
-		Mockito.when(this.ontologyService.updateOntology(id, searchOntologyDTO)).thenReturn(updatedOntology);
+		// Configura el mock para el servicio
+		Mockito.when(this.ontologyService.updateOntology(id, ontologyDto, file)).thenReturn(updatedOntology);
 
-		// test
-		ResponseEntity<OntologyDTO> result = this.controller.updateOntology(id, searchOntologyDTO);
+		// Llama al método del controlador
+		ResponseEntity<OntologyDTO> result = this.controller.updateOntology(id, ontologyDto, file);
 
-		// verifies & asserts
+		// Verifica y asertaciones
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals(updatedOntology, result.getBody());
 	}
