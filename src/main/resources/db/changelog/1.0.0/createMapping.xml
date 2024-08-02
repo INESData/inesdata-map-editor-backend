@@ -7,7 +7,7 @@
 
 	<changeSet author="gmv" id="1.0.0-mapping">
 		<createTable tableName="MAPPING">
-			<column name="id" type="BIGINT">
+			<column name="id" type="BIGINT" autoIncrement="true">
 				<constraints nullable="false" unique="true" primaryKey="true"/>
 			</column>
 			<column name="name" type="VARCHAR(255)">

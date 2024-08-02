@@ -21,4 +21,5 @@ public interface OntologyMapper extends BaseEntityMapper<OntologyDTO, Ontology> 
 	 * @return the corresponding SearchOntologyDTO DTO
 	 */
 	SearchOntologyDTO entitytoSearchOntologyDTO(Ontology ontology);
+
 }

@@ -1,22 +1,28 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.servlet.MockMvc;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
@@ -28,8 +34,8 @@ import com.inesdatamap.mapperbackend.utils.Constants;
  *
  * @author gmv
  */
-@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = OntologyController.class)
+@WebMvcTest(OntologyController.class)
 class OntologyControllerTest {
 
 	@MockBean
@@ -37,6 +43,9 @@ class OntologyControllerTest {
 
 	@Autowired
 	private OntologyController controller;
+
+	@Autowired
+	private MockMvc mockMvc;
 
 	@Test
 	void testListOntologies() {
@@ -90,4 +99,42 @@ class OntologyControllerTest {
 		// Verify that the service method was called once
 		Mockito.verify(this.ontologyService, Mockito.times(1)).deleteOntology(id);
 	}
+
+	@Test
+	void createOntology_withFile() throws Exception {
+		// Arrange
+		OntologyDTO ontologyDto = new OntologyDTO();
+		ontologyDto.setName("Test Ontology");
+
+		MockMultipartFile file = new MockMultipartFile("file", "test.txt", MediaType.TEXT_PLAIN_VALUE,
+				"This is the file content".getBytes());
+
+		MockMultipartFile jsonBody = new MockMultipartFile("body", "body", MediaType.APPLICATION_JSON_VALUE,
+				"{\"name\":\"Test Ontology\"}".getBytes());
+
+		when(this.ontologyService.createOntology(Mockito.any(OntologyDTO.class), Mockito.any())).thenReturn(ontologyDto);
+
+		// Act & Assert
+		this.mockMvc.perform(multipart("/ontologies").file(file).file(jsonBody).contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+				.andExpect(status().isCreated()) // Changed from isOk() to isCreated()
+				.andExpect(jsonPath("$.name").value("Test Ontology"));
+	}
+
+	@Test
+	void createOntology_withoutFile() throws Exception {
+		// Arrange
+		OntologyDTO ontologyDto = new OntologyDTO();
+		ontologyDto.setName("Test Ontology");
+
+		MockMultipartFile jsonBody = new MockMultipartFile("body", "body", MediaType.APPLICATION_JSON_VALUE,
+				"{\"name\":\"Test Ontology\"}".getBytes());
+
+		when(this.ontologyService.createOntology(Mockito.any(OntologyDTO.class), Mockito.isNull())).thenReturn(ontologyDto);
+
+		// Act & Assert
+		this.mockMvc.perform(multipart("/ontologies").file(jsonBody).contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
+				.andExpect(status().isCreated()) // Changed from isOk() to isCreated()
+				.andExpect(jsonPath("$.name").value("Test Ontology"));
+	}
+
 }

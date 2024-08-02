@@ -2,7 +2,12 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -18,6 +23,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
@@ -122,6 +129,49 @@ class OntologyServiceImplTest {
 
 		// Verify
 		assertEquals(ontology, result);
+	}
+
+	@Test
+	void testCreateOntology_withFile() throws IOException {
+		// Arrange
+		OntologyDTO dto = new OntologyDTO();
+		dto.setName("Test Ontology");
+
+		MockMultipartFile file = new MockMultipartFile("file", "testfile.txt", "text/plain", "File content".getBytes());
+
+		Ontology ontology = new Ontology();
+		Ontology savedOntology = new Ontology();
+		savedOntology.setId(1L);
+
+		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(ontology);
+		when(this.ontologyRepo.save(ontology)).thenReturn(savedOntology);
+		when(this.ontologyMapper.entityToDto(savedOntology)).thenReturn(dto);
+
+		// Act
+		OntologyDTO result = this.ontologyService.createOntology(dto, file);
+
+		// Assert
+		assertEquals(dto, result);
+		verify(this.ontologyRepo).save(ontology);
+		assertEquals("File content".getBytes().length, ontology.getContent().length);
+	}
+
+	@Test
+	void testCreateOntology_fileReadException() throws IOException {
+		// Arrange
+		OntologyDTO dto = new OntologyDTO();
+		dto.setName("Test Ontology");
+
+		MultipartFile file = mock(MultipartFile.class);
+		when(file.getBytes()).thenThrow(new IOException("Failed to read file"));
+
+		Ontology ontology = new Ontology();
+		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(ontology);
+
+		// Act & Assert
+		assertThrows(UncheckedIOException.class, () -> {
+			this.ontologyService.createOntology(dto, file);
+		});
 	}
 
 	@Test

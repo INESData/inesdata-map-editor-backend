@@ -1,10 +1,13 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.NoSuchElementException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
@@ -89,6 +92,38 @@ public class OntologyServiceImpl implements OntologyService {
 		this.getEntity(id);
 
 		this.ontologyRepo.deleteById(id);
+
+	}
+
+	/**
+	 * Saves an ontology
+	 *
+	 * @param ontologyDto
+	 *            the OntologyDTO
+	 * @return the saved ontology
+	 */
+	@Override
+	public OntologyDTO createOntology(OntologyDTO ontologyDto, MultipartFile file) {
+
+		// DTO to entity
+		Ontology ontology = this.ontologyMapper.dtoToEntity(ontologyDto);
+
+		if (file != null && !file.isEmpty()) {
+			try {
+				// Convert the file content to a byte array
+				byte[] fileContent = file.getBytes();
+
+				// Set the byte array as the content of the ontology
+				ontology.setContent(fileContent);
+			} catch (IOException e) {
+				throw new UncheckedIOException("Failed to store file content", e);
+			}
+		}
+
+		// Save new entity
+		Ontology savedOntology = this.ontologyRepo.save(ontology);
+
+		return this.ontologyMapper.entityToDto(savedOntology);
 
 	}
 
