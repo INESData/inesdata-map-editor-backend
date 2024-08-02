@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -26,7 +25,6 @@ import com.inesdatamap.mapperbackend.services.OntologyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 
 /**
  * REST Controller for Ontology
@@ -74,14 +72,17 @@ public class OntologyController {
 	 *            ontology identifier
 	 * @param ontologyDto
 	 *            to update
+	 * @param file
+	 *            file content to update
 	 * @return updated ontology
 	 */
-	@PutMapping(value = "/{id}")
+	@PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(summary = "Update given ontology")
 	public ResponseEntity<OntologyDTO> updateOntology(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier to update", required = true) Long id,
-			@Valid @RequestBody @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontologyDto) {
-		return ResponseEntity.ok(this.ontologyService.updateOntology(id, ontologyDto));
+			@RequestPart("body") @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontologyDto,
+			@RequestPart(value = "file", required = false) MultipartFile file) {
+		return ResponseEntity.ok(this.ontologyService.updateOntology(id, ontologyDto, file));
 	}
 
 	/**
