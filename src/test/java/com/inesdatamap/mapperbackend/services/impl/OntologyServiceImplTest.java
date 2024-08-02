@@ -1,5 +1,6 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -77,33 +78,54 @@ class OntologyServiceImplTest {
 	}
 
 	@Test
-	void testUpdateOntology() {
-		// Mock data
+	void testUpdateOntology_withFile() throws IOException {
+		// Arrange
 		Long id = 1L;
-		Ontology ontologyDB = new Ontology();
-		OntologyDTO ontologyDTO = new OntologyDTO();
-		Ontology ontologySource = new Ontology();
-		Ontology ontologyUpdated = new Ontology();
-		MultipartFile file = new MockMultipartFile("file", "filename.txt", "text/plain", "file content".getBytes());
+		OntologyDTO dto = new OntologyDTO();
+		dto.setName("Updated Ontology");
 
-		// Mock behavior
-		Mockito.when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontologyDB));
-		Mockito.when(this.ontologyMapper.dtoToEntity(ontologyDTO)).thenReturn(ontologySource);
-		Mockito.when(this.ontologyMapper.merge(ontologySource, ontologyDB)).thenReturn(ontologyUpdated);
-		Mockito.when(this.ontologyRepo.saveAndFlush(ontologyUpdated)).thenReturn(ontologyUpdated);
-		Mockito.when(this.ontologyMapper.entityToDto(ontologyUpdated)).thenReturn(ontologyDTO);
+		byte[] fileContent = "Updated file content".getBytes();
+		MultipartFile file = new MockMultipartFile("file", "testfile.txt", "text/plain", fileContent);
 
-		try {
-			// Test
-			OntologyDTO result = this.ontologyService.updateOntology(id, ontologyDTO, file);
+		Ontology existingOntology = new Ontology();
+		existingOntology.setContent("Old content".getBytes()); // Existing content
 
-			// Verify
-			assertEquals(ontologyDTO, result);
-			assertEquals(file.getBytes(), ontologyDB.getContent()); // Verify that the file content was set correctly
-		} catch (IOException e) {
-			// Handle the exception (e.g., fail the test)
-			throw new RuntimeException("IOException occurred during test execution", e);
-		}
+		Ontology updatedOntology = new Ontology();
+		updatedOntology.setId(id); // Set id to match the existing ontology
+		updatedOntology.setContent(fileContent); // Updated content
+
+		when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(existingOntology));
+		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(updatedOntology);
+		when(this.ontologyMapper.merge(updatedOntology, existingOntology)).thenReturn(updatedOntology);
+		when(this.ontologyRepo.saveAndFlush(updatedOntology)).thenReturn(updatedOntology);
+		when(this.ontologyMapper.entityToDto(updatedOntology)).thenReturn(dto);
+
+		// Act
+		OntologyDTO result = this.ontologyService.updateOntology(id, dto, file);
+
+		// Assert
+		assertEquals(dto, result);
+		verify(this.ontologyRepo).saveAndFlush(updatedOntology);
+		assertArrayEquals(fileContent, existingOntology.getContent()); // Verify that the file content was updated
+	}
+
+	void testUpdateOntology_fileReadException() throws IOException {
+		// Arrange
+		Long id = 1L;
+		OntologyDTO dto = new OntologyDTO();
+		dto.setName("Updated Ontology");
+
+		MultipartFile file = mock(MultipartFile.class);
+		when(file.getBytes()).thenThrow(new IOException("Failed to read file"));
+
+		Ontology existingOntology = new Ontology();
+		when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(existingOntology));
+		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(new Ontology());
+
+		// Act & Assert
+		assertThrows(UncheckedIOException.class, () -> {
+			this.ontologyService.updateOntology(id, dto, file);
+		});
 	}
 
 	@Test
