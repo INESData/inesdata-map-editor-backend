@@ -2,7 +2,6 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.NoSuchElementException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +14,8 @@ import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.services.OntologyService;
+
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Implementation of the OntologyService interface.
@@ -150,7 +151,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 */
 	@Override
 	public Ontology getEntity(Long id) {
-		return this.ontologyRepo.findById(id).orElseThrow(() -> new NoSuchElementException("Entity not found with id: " + id));
+		return this.ontologyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity not found with id" + id.toString()));
 	}
 
 }
