@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -32,6 +31,8 @@ import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
+
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Unit tests for the {@link OntologyServiceImpl}
@@ -210,6 +211,6 @@ class OntologyServiceImplTest {
 		Mockito.when(this.ontologyRepo.findById(id)).thenReturn(Optional.empty());
 
 		// Test & Verify
-		assertThrows(NoSuchElementException.class, () -> this.ontologyService.getEntity(id));
+		assertThrows(EntityNotFoundException.class, () -> this.ontologyService.getEntity(id));
 	}
 }
