@@ -1,8 +1,13 @@
 package com.inesdatamap.mapperbackend.services;
 
-import java.util.Optional;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import javax.sql.DataSource;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -11,9 +16,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
+import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.DataBaseSource;
+import com.inesdatamap.mapperbackend.model.jpa.DataSource;
+import com.inesdatamap.mapperbackend.model.mappers.DataSourceMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
 import com.inesdatamap.mapperbackend.services.impl.DataSourceServiceImpl;
 
@@ -24,6 +35,12 @@ class DataSourceServiceTest {
 
 	@Mock
 	private DataSourceRepository<DataBaseSource> dataBaseSourceRepository;
+
+	@Mock
+	private DataSourceRepository<DataSource> dataSourceRepository;
+
+	@Mock
+	private DataSourceMapper dataSourceMapper;
 
 	@InjectMocks
 	private DataSourceServiceImpl dataSourceService;
@@ -53,7 +70,7 @@ class DataSourceServiceTest {
 		Mockito.when(this.dataBaseSourceRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
 		// asserts
-		Assertions.assertThrows(EntityNotFoundException.class, () -> dataSourceService.findById(1L));
+		Assertions.assertThrows(EntityNotFoundException.class, () -> this.dataSourceService.findById(1L));
 	}
 
 	@Test
@@ -70,11 +87,58 @@ class DataSourceServiceTest {
 		Mockito.when(this.dataBaseSourceRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dbs));
 
 		// test
-		DataSource ds = dataSourceService.getClientDataSource(1L);
+		javax.sql.DataSource ds = this.dataSourceService.getClientDataSource(1L);
 
 		// asserts
 		Assertions.assertNotNull(ds);
 
+	}
+
+	@Test
+	void testListDataSources() {
+
+		// Mock data
+		DataSource dataSource = new DataSource();
+		DataSourceDTO dataSourceDTO = new DataSourceDTO();
+		Page<DataSource> page = new PageImpl<>(List.of(dataSource));
+		when(this.dataSourceRepository.findAll(any(Pageable.class))).thenReturn(page);
+		when(this.dataSourceMapper.dataSourceToDTO(any(DataSource.class))).thenReturn(dataSourceDTO);
+
+		// Execute the method
+		Page<DataSourceDTO> result = this.dataSourceService.listDataSources(Pageable.unpaged());
+
+		// Verify
+		assertThat(result).isNotNull();
+		assertThat(result.getContent()).containsExactly(dataSourceDTO);
+	}
+
+	@Test
+	void testDeleteDataSource() {
+
+		// Mock data
+		Long id = 1L;
+		DataSource dataSource = new DataSource();
+		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(dataSource));
+
+		// Execute the method
+		this.dataSourceService.deleteDataSource(id);
+
+		// Verify
+		verify(this.dataSourceRepository, times(1)).deleteById(id);
+	}
+
+	@Test
+	void testGetEntity() {
+		// Prepare mock data
+		Long id = 1L;
+		DataSource dataSource = new DataSource();
+		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(dataSource));
+
+		// Execute the method
+		DataSource result = this.dataSourceService.getEntity(id);
+
+		// Verify results
+		assertThat(result).isEqualTo(dataSource);
 	}
 
 }

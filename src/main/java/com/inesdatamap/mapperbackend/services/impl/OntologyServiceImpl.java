@@ -3,6 +3,7 @@ package com.inesdatamap.mapperbackend.services.impl;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,22 +25,11 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class OntologyServiceImpl implements OntologyService {
 
+	@Autowired
 	private OntologyRepository ontologyRepo;
 
+	@Autowired
 	private OntologyMapper ontologyMapper;
-
-	/**
-	 * Constructor with dependencies injected.
-	 *
-	 * @param ontologyRepo
-	 *            the ontology repository
-	 * @param ontologyMapper
-	 *            the ontology mapper
-	 */
-	public OntologyServiceImpl(OntologyRepository ontologyRepo, OntologyMapper ontologyMapper) {
-		this.ontologyRepo = ontologyRepo;
-		this.ontologyMapper = ontologyMapper;
-	}
 
 	/**
 	 * Retrieves a list of all ontologies and maps them to their corresponding DTOs.
