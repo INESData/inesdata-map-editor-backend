@@ -1,5 +1,6 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,28 +25,14 @@ import jakarta.persistence.EntityNotFoundException;
 @Transactional
 public class DataSourceServiceImpl implements DataSourceService {
 
+	@Autowired
 	private DataSourceRepository<DataBaseSource> dataBaseSourceRepository;
 
+	@Autowired
 	private DataSourceRepository<DataSource> dataSourceRepository;
 
+	@Autowired
 	private DataSourceMapper dataSourceMapper;
-
-	/**
-	 * Constructor
-	 *
-	 * @param dataBaseSourceRepository
-	 *            the database source repository
-	 * @param dataSourceRepository
-	 *            the data source repository
-	 * @param dataSourceMapper
-	 *            the data source mapper
-	 */
-	public DataSourceServiceImpl(DataSourceRepository<DataBaseSource> dataBaseSourceRepository,
-			DataSourceRepository<DataSource> dataSourceRepository, DataSourceMapper dataSourceMapper) {
-		this.dataBaseSourceRepository = dataBaseSourceRepository;
-		this.dataSourceRepository = dataSourceRepository;
-		this.dataSourceMapper = dataSourceMapper;
-	}
 
 	@Override
 	public DataBaseSource findById(Long dataSourceId) {

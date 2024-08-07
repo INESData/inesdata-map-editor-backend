@@ -8,11 +8,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.DataBaseSource;
@@ -21,20 +19,17 @@ import com.inesdatamap.mapperbackend.services.impl.DataSourceServiceImpl;
 
 import jakarta.persistence.EntityNotFoundException;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = DataSourceServiceImpl.class)
+@ExtendWith(MockitoExtension.class)
 class DataSourceServiceTest {
 
-	@MockBean
+	@Mock
 	private DataSourceRepository<DataBaseSource> dataBaseSourceRepository;
 
-	@Autowired
 	@InjectMocks
 	private DataSourceServiceImpl dataSourceService;
 
 	@Test
 	void testFindById() {
-
 		// mock
 		DataBaseSource dbs = new DataBaseSource();
 		dbs.setId(1L);
@@ -42,7 +37,7 @@ class DataSourceServiceTest {
 		Mockito.when(this.dataBaseSourceRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dbs));
 
 		// test
-		DataBaseSource result = dataSourceService.findById(1L);
+		DataBaseSource result = this.dataSourceService.findById(1L);
 
 		// asserts
 		Assertions.assertEquals(dbs.getId(), result.getId());
