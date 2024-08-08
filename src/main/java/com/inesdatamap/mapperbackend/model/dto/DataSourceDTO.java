@@ -27,6 +27,4 @@ public class DataSourceDTO extends BaseEntityDTO {
 
 	private String fileName;
 
-	private String fields;
-
 }
