@@ -40,9 +40,8 @@ public class DataSource extends BaseEntity implements Serializable {
 	private String name;
 
 	/**
-	 * The type of the source.
+	 * The type of the data source.
 	 */
-
 	@Column(name = "type", insertable = false, updatable = false)
 	@Enumerated(EnumType.STRING)
 	protected DataSourceTypeEnum type;

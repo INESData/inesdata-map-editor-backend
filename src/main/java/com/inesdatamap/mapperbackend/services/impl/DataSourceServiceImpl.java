@@ -48,6 +48,11 @@ public class DataSourceServiceImpl implements DataSourceService {
 		return router.getDatasource(dataSourceId, ds.getConnectionString(), ds.getDatabaseType(), ds.getUser(), ds.getPassword());
 	}
 
+	/**
+	 * Retrieves a list of all data sources and maps them to their corresponding DTOs.
+	 *
+	 * @return List of data sources
+	 */
 	@Override
 	public Page<DataSourceDTO> listDataSources(Pageable pageable) {
 		Page<DataSource> dataSourcesPage = this.dataSourceRepository.findAll(pageable);
@@ -56,6 +61,12 @@ public class DataSourceServiceImpl implements DataSourceService {
 
 	}
 
+	/**
+	 * Deletes a data source by its id.
+	 *
+	 * @param id
+	 *            the ID of the data source to delete
+	 */
 	@Override
 	public void deleteDataSource(Long id) {
 
@@ -76,7 +87,7 @@ public class DataSourceServiceImpl implements DataSourceService {
 	@Override
 	public DataSource getEntity(Long id) {
 		return this.dataSourceRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Entity not found with id" + id.toString()));
+				.orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id.toString()));
 	}
 
 }

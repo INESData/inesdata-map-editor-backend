@@ -17,7 +17,9 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 	/**
 	 * Converts a DataSource entity to its corresponding DataSourceDTO.
 	 *
-	 * This method checks the type of the given entity and uses the appropriate conversion method for DataBaseSource or FileSource.
+	 * This method checks the type of the given entity and uses the appropriate
+	 * 
+	 * conversion method for DataBaseSource or FileSource.
 	 *
 	 * @param entity
 	 *            the DataSource entity to be converted.

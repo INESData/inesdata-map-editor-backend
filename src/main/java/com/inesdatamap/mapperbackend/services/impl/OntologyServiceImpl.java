@@ -141,7 +141,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 */
 	@Override
 	public Ontology getEntity(Long id) {
-		return this.ontologyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity not found with id" + id.toString()));
+		return this.ontologyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id.toString()));
 	}
 
 }
