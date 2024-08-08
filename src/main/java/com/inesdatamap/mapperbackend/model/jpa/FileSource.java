@@ -7,7 +7,6 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * File Source db entity representation
@@ -16,7 +15,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @Entity
 @DiscriminatorValue("FILE")
 public class FileSource extends DataSource implements Serializable {
@@ -37,35 +35,5 @@ public class FileSource extends DataSource implements Serializable {
 	 */
 	@Column(name = "fields")
 	private String fields;
-
-	/**
-	 * @return the fileName
-	 */
-	public String getFileName() {
-		return this.fileName;
-	}
-
-	/**
-	 * @param fileName
-	 * 	the fileName to set
-	 */
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-
-	/**
-	 * @return the fields
-	 */
-	public String getFields() {
-		return this.fields;
-	}
-
-	/**
-	 * @param fields
-	 * 	the fields to set
-	 */
-	public void setFields(String fields) {
-		this.fields = fields;
-	}
 
 }

@@ -2,8 +2,8 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.NoSuchElementException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +16,8 @@ import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 
+import jakarta.persistence.EntityNotFoundException;
+
 /**
  * Implementation of the OntologyService interface.
  *
@@ -23,22 +25,11 @@ import com.inesdatamap.mapperbackend.services.OntologyService;
 @Service
 public class OntologyServiceImpl implements OntologyService {
 
+	@Autowired
 	private OntologyRepository ontologyRepo;
 
+	@Autowired
 	private OntologyMapper ontologyMapper;
-
-	/**
-	 * Constructor with dependencies injected.
-	 *
-	 * @param ontologyRepo
-	 *            the ontology repository
-	 * @param ontologyMapper
-	 *            the ontology mapper
-	 */
-	public OntologyServiceImpl(OntologyRepository ontologyRepo, OntologyMapper ontologyMapper) {
-		this.ontologyRepo = ontologyRepo;
-		this.ontologyMapper = ontologyMapper;
-	}
 
 	/**
 	 * Retrieves a list of all ontologies and maps them to their corresponding DTOs.
@@ -150,7 +141,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 */
 	@Override
 	public Ontology getEntity(Long id) {
-		return this.ontologyRepo.findById(id).orElseThrow(() -> new NoSuchElementException("Entity not found with id: " + id));
+		return this.ontologyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id.toString()));
 	}
 
 }
