@@ -79,7 +79,7 @@ class DataSourceServiceTest {
 		// mock
 		DataBaseSource dbs = new DataBaseSource();
 		dbs.setId(1L);
-		dbs.setUser("");
+		dbs.setUserName("");
 		dbs.setPassword("");
 		dbs.setConnectionString("jdbc:mysql://localhost:3306/test");
 		dbs.setDatabaseType(DataBaseTypeEnum.MYSQL);

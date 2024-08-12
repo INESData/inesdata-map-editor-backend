@@ -54,4 +54,22 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 	 */
 	DataSourceDTO dataFileToDTO(FileSource fileSource);
 
+	/**
+	 * Converts a DataSourceDTO object to its corresponding DataBaseSource entity.
+	 *
+	 * @param dataBaseSource
+	 *            the DataSourceDTO object to be converted.
+	 * @return the corresponding DataBaseSource entity.
+	 */
+	DataBaseSource dataSourceDtoToDataBase(DataSourceDTO dataBaseSource);
+
+	/**
+	 * Converts a DataSourceDTO object to its corresponding FileSource entity.
+	 *
+	 * @param dataBaseSource
+	 *            the DataSourceDTO object to be converted.
+	 * @return the corresponding FileSource entity.
+	 */
+	FileSource dataSourceDtoToFileSource(DataSourceDTO dataBaseSource);
+
 }

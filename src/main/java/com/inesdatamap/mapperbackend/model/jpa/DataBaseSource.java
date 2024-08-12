@@ -37,8 +37,8 @@ public class DataBaseSource extends DataSource implements Serializable {
 	/**
 	 * The user name for accessing the database.
 	 */
-	@Column(name = "user")
-	private String user;
+	@Column(name = "user_name")
+	private String userName;
 
 	/**
 	 * The password for accessing the database.
