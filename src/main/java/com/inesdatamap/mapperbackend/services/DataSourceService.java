@@ -71,4 +71,17 @@ public interface DataSourceService {
 	 */
 	DataSourceDTO createDataSource(DataSourceDTO dataSourceDTO, MultipartFile file);
 
+	/**
+	 * Updates a data source identified by its ID.
+	 *
+	 * @param id
+	 *            the ID of the data source to update
+	 * @param dataSourceDTO
+	 *            the DataSourceDTO
+	 * @param file
+	 *            file content to update
+	 * @return the updated data source
+	 */
+	DataSourceDTO updateDataSource(Long id, DataSourceDTO dataSourceDTO, MultipartFile file);
+
 }

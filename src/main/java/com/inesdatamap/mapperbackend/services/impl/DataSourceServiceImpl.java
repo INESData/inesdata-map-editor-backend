@@ -146,4 +146,42 @@ public class DataSourceServiceImpl implements DataSourceService {
 		return this.dataSourceMapper.dataSourceToDTO(savedDataSource);
 	}
 
+	/**
+	 * Updates a data source identified by its ID.
+	 *
+	 * @param id
+	 *            the ID of the data source to update
+	 * @param dataSourceDTO
+	 *            the DataSourceDTO
+	 * @param file
+	 *            file content to update
+	 * @return the updated data source
+	 */
+	@Override
+	public DataSourceDTO updateDataSource(Long id, DataSourceDTO dataSourceDTO, MultipartFile file) {
+
+		// Get DB entity
+		DataSource dataSource = this.getEntity(id);
+		DataSource dataSourceUpdated = new DataSource();
+
+		if (dataSourceDTO.getType() == DataSourceTypeEnum.FILE) {
+
+			// New data source to save
+			FileSource newFileSource = this.dataSourceMapper.dataSourceDtoToFileSource(dataSourceDTO);
+
+			// Updated data source
+			dataSourceUpdated = this.dataSourceRepository.saveAndFlush(this.dataSourceMapper.merge(dataSource, newFileSource));
+
+		} else if (dataSourceDTO.getType() == DataSourceTypeEnum.DATABASE) {
+
+			// New data source to save
+			DataBaseSource newDataBaseSource = this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDTO);
+
+			// Updated data source
+			dataSourceUpdated = this.dataSourceRepository.saveAndFlush(this.dataSourceMapper.merge(dataSource, newDataBaseSource));
+
+		}
+		return this.dataSourceMapper.entityToDto(dataSourceUpdated);
+	}
+
 }
