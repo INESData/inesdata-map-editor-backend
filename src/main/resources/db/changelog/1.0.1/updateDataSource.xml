@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet author="gmv" id="1.0.1-update-data-source">
+        <renameColumn
+            tableName="DATA_SOURCE"
+            oldColumnName="user"
+            newColumnName="user_name"
+            columnDataType="VARCHAR(255)"/>
+    </changeSet>
+
+</databaseChangeLog>
