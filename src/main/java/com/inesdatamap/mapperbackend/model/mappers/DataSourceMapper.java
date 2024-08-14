@@ -76,7 +76,7 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 
 	/**
 	 * Merges the properties of a source DataBaseSource instance into a target DataBaseSource instance.
-	 * 
+	 *
 	 * @param source
 	 *            the DataBaseSource instance containing the new values to be merged into the target entity.
 	 * @param target
@@ -89,7 +89,7 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 
 	/**
 	 * Merges the properties of a source FileSource instance into a target {@link FileSource} instance.
-	 * 
+	 *
 	 * @param source
 	 *            the FileSource instance containing the new values to be merged into the target entity.
 	 * @param target

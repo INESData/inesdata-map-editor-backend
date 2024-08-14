@@ -12,7 +12,7 @@
             newColumnName="user_name"
             columnDataType="VARCHAR(255)"/>
 	</changeSet>
-	
+
 	<changeSet author="gmv" id="1.0.1-add-file-type-column">
 		<addColumn tableName="DATA_SOURCE">
 			<column name="file_type" type="VARCHAR(255)"/>
