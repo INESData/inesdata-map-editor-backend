@@ -1,6 +1,8 @@
 package com.inesdatamap.mapperbackend.model.mappers;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.jpa.DataBaseSource;
@@ -71,5 +73,31 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 	 * @return the corresponding FileSource entity.
 	 */
 	FileSource dataSourceDtoToFileSource(DataSourceDTO dataBaseSource);
+
+	/**
+	 * Merges the properties of a source DataBaseSource instance into a target DataBaseSource instance.
+	 * 
+	 * @param source
+	 *            the DataBaseSource instance containing the new values to be merged into the target entity.
+	 * @param target
+	 *            the DataBaseSource instance to be updated with the values from the source.
+	 * @return the updated DataBaseSource instance with the merged properties.
+	 */
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	DataBaseSource mergeDataBaseSource(DataBaseSource source, @MappingTarget DataBaseSource target);
+
+	/**
+	 * Merges the properties of a source FileSource instance into a target {@link FileSource} instance.
+	 * 
+	 * @param source
+	 *            the FileSource instance containing the new values to be merged into the target entity.
+	 * @param target
+	 *            the FileSource instance to be updated with the values from the source.
+	 * @return the updated FileSource instance with the merged properties.
+	 */
+	@Mapping(target = "id", ignore = true)
+	@Mapping(target = "version", ignore = true)
+	FileSource mergeFileSource(FileSource source, @MappingTarget FileSource target);
 
 }

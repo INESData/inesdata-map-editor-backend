@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -178,8 +179,7 @@ class DataSourceServiceTest {
 	}
 
 	@Test
-	void testUpdateDataSourceWithFile() {
-
+	void testUpdateDataSourceWithFile() throws IOException {
 		// Mock data
 		Long id = 1L;
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
@@ -192,8 +192,8 @@ class DataSourceServiceTest {
 		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(existingFileSource));
 		when(this.dataSourceMapper.dataSourceDtoToFileSource(dataSourceDto)).thenReturn(updatedFileSource);
 		when(this.dataSourceRepository.saveAndFlush(any(FileSource.class))).thenReturn(updatedFileSource);
-		when(this.dataSourceMapper.merge(any(FileSource.class), any(DataSource.class))).thenReturn(updatedFileSource);
-		when(this.dataSourceMapper.entityToDto(any(DataSource.class))).thenReturn(dataSourceDto);
+		when(this.dataSourceMapper.mergeFileSource(any(FileSource.class), any(FileSource.class))).thenReturn(updatedFileSource);
+		when(this.dataSourceMapper.entityToDto(any(FileSource.class))).thenReturn(dataSourceDto);
 
 		// Execute the method
 		DataSourceDTO result = this.dataSourceService.updateDataSource(id, dataSourceDto, file);
@@ -201,25 +201,26 @@ class DataSourceServiceTest {
 		// Verify
 		assertThat(result).isNotNull();
 		verify(this.dataSourceRepository, times(1)).saveAndFlush(any(FileSource.class));
-		verify(this.dataSourceMapper, times(1)).entityToDto(any(DataSource.class));
+		verify(this.dataSourceMapper, times(1)).mergeFileSource(any(FileSource.class), any(FileSource.class));
+		verify(this.dataSourceMapper, times(1)).entityToDto(any(FileSource.class));
 	}
 
 	@Test
 	void testUpdateDataSourceWithDatabase() {
-
 		// Mock data
 		Long id = 1L;
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
-		DataBaseSource existingDataSource = new DataBaseSource();
-		DataBaseSource updatedDataSource = new DataBaseSource();
+		DataBaseSource existingDataBaseSource = new DataBaseSource();
+		DataBaseSource updatedDataBaseSource = new DataBaseSource();
 
 		// Mock behavior
-		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(existingDataSource));
-		when(this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDto)).thenReturn(updatedDataSource);
-		when(this.dataSourceRepository.saveAndFlush(any(DataBaseSource.class))).thenReturn(updatedDataSource);
-		when(this.dataSourceMapper.merge(any(DataSource.class), any(DataSource.class))).thenReturn(updatedDataSource);
-		when(this.dataSourceMapper.entityToDto(any(DataSource.class))).thenReturn(dataSourceDto);
+		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(existingDataBaseSource));
+		when(this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDto)).thenReturn(updatedDataBaseSource);
+		when(this.dataSourceRepository.saveAndFlush(any(DataBaseSource.class))).thenReturn(updatedDataBaseSource);
+		when(this.dataSourceMapper.mergeDataBaseSource(any(DataBaseSource.class), any(DataBaseSource.class)))
+				.thenReturn(updatedDataBaseSource);
+		when(this.dataSourceMapper.entityToDto(any(DataBaseSource.class))).thenReturn(dataSourceDto);
 
 		// Execute the method
 		DataSourceDTO result = this.dataSourceService.updateDataSource(id, dataSourceDto, null);
@@ -227,7 +228,8 @@ class DataSourceServiceTest {
 		// Verify
 		assertThat(result).isNotNull();
 		verify(this.dataSourceRepository, times(1)).saveAndFlush(any(DataBaseSource.class));
-		verify(this.dataSourceMapper, times(1)).entityToDto(any(DataSource.class));
+		verify(this.dataSourceMapper, times(1)).mergeDataBaseSource(any(DataBaseSource.class), any(DataBaseSource.class));
+		verify(this.dataSourceMapper, times(1)).entityToDto(any(DataBaseSource.class));
 	}
 
 	@Test

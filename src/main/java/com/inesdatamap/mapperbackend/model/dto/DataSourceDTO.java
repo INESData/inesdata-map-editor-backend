@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.model.dto;
 
 import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
+import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
 
 import lombok.Getter;
@@ -28,5 +29,7 @@ public class DataSourceDTO extends BaseEntityDTO {
 	private String fileName;
 
 	private String fields;
+
+	private DataFileTypeEnum fileType;
 
 }
