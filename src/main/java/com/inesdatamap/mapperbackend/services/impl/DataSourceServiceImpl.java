@@ -161,26 +161,40 @@ public class DataSourceServiceImpl implements DataSourceService {
 	public DataSourceDTO updateDataSource(Long id, DataSourceDTO dataSourceDTO, MultipartFile file) {
 
 		// Get DB entity
-		DataSource dataSource = this.getEntity(id);
+		DataSource dataSourceDB = this.getEntity(id);
 		DataSource dataSourceUpdated = new DataSource();
 
 		if (dataSourceDTO.getType() == DataSourceTypeEnum.FILE) {
 
-			// New data source to save
+			// New file source to save
 			FileSource newFileSource = this.dataSourceMapper.dataSourceDtoToFileSource(dataSourceDTO);
 
-			// Updated data source
-			dataSourceUpdated = this.dataSourceRepository.saveAndFlush(this.dataSourceMapper.merge(dataSource, newFileSource));
+			if (file != null && !file.isEmpty()) {
+				try {
+					// Read file content
+					BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()));
+
+					// Read file first line with headers
+					String headers = reader.readLine();
+
+					// Set headers
+					newFileSource.setFields(headers);
+					newFileSource.setFileName(file.getOriginalFilename());
+
+				} catch (IOException e) {
+					throw new UncheckedIOException("Failed to update file headers", e);
+				}
+			}
+			dataSourceUpdated = this.dataSourceMapper.mergeFileSource(newFileSource, (FileSource) dataSourceDB);
 
 		} else if (dataSourceDTO.getType() == DataSourceTypeEnum.DATABASE) {
 
-			// New data source to save
+			// New data base source to save
 			DataBaseSource newDataBaseSource = this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDTO);
-
-			// Updated data source
-			dataSourceUpdated = this.dataSourceRepository.saveAndFlush(this.dataSourceMapper.merge(dataSource, newDataBaseSource));
+			dataSourceUpdated = this.dataSourceMapper.mergeDataBaseSource(newDataBaseSource, (DataBaseSource) dataSourceDB);
 
 		}
+		dataSourceUpdated = this.dataSourceRepository.saveAndFlush(dataSourceUpdated);
 		return this.dataSourceMapper.entityToDto(dataSourceUpdated);
 	}
 
