@@ -13,10 +13,16 @@ public final class Constants {
 	 * Constant representing the number 0
 	 */
 	public static final int NUMBER_0 = 0;
+
 	/**
 	 * Constant representing the number 10
 	 */
 	public static final int NUMBER_10 = 10;
+
+	/**
+	 * Constant representing the number 16
+	 */
+	public static final int NUMBER_16 = 16;
 
 	private Constants() {
 		// Empty constructor to avoid initialization

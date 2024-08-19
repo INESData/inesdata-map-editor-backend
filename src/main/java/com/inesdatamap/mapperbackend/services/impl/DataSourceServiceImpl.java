@@ -8,6 +8,7 @@ import java.io.UncheckedIOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +42,9 @@ public class DataSourceServiceImpl implements DataSourceService {
 
 	@Autowired
 	private DataSourceMapper dataSourceMapper;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Override
 	public DataBaseSource findById(Long dataSourceId) {
@@ -137,6 +141,13 @@ public class DataSourceServiceImpl implements DataSourceService {
 			// Map DTO to a DataBaseSource entity
 			DataBaseSource dataBaseSource = this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDTO);
 
+			// Encrypt the password before saving
+			if (dataSourceDTO.getPassword() != null) {
+
+				String encryptedPassword = this.passwordEncoder.encode(dataSourceDTO.getPassword());
+				dataBaseSource.setPassword(encryptedPassword);
+			}
+
 			dataSource = dataBaseSource;
 		}
 
@@ -191,6 +202,16 @@ public class DataSourceServiceImpl implements DataSourceService {
 
 			// New data base source to save
 			DataBaseSource newDataBaseSource = this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDTO);
+
+			// Check and update the password if it has changed
+			if (dataSourceDTO.getPassword() != null
+					&& !this.passwordEncoder.matches(dataSourceDTO.getPassword(), ((DataBaseSource) dataSourceDB).getPassword())) {
+
+				// Encode the new password
+				String encodedPassword = this.passwordEncoder.encode(dataSourceDTO.getPassword());
+				newDataBaseSource.setPassword(encodedPassword);
+			}
+
 			dataSourceUpdated = this.dataSourceMapper.mergeDataBaseSource(newDataBaseSource, (DataBaseSource) dataSourceDB);
 
 		}
