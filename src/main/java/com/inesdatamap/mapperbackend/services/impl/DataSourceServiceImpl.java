@@ -200,17 +200,20 @@ public class DataSourceServiceImpl implements DataSourceService {
 
 		} else if (dataSourceDTO.getType() == DataSourceTypeEnum.DATABASE) {
 
-			// New data base source to save
-			DataBaseSource newDataBaseSource = this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDTO);
+			String passwordToSave;
 
-			// Check and update the password if it has changed
 			if (dataSourceDTO.getPassword() != null
 					&& !this.passwordEncoder.matches(dataSourceDTO.getPassword(), ((DataBaseSource) dataSourceDB).getPassword())) {
 
-				// Encode the new password
-				String encodedPassword = this.passwordEncoder.encode(dataSourceDTO.getPassword());
-				newDataBaseSource.setPassword(encodedPassword);
+				// Encode new password if it has changed
+				passwordToSave = this.passwordEncoder.encode(dataSourceDTO.getPassword());
+			} else {
+				// Keep password if it has not changed
+				passwordToSave = ((DataBaseSource) dataSourceDB).getPassword();
 			}
+
+			DataBaseSource newDataBaseSource = this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDTO);
+			newDataBaseSource.setPassword(passwordToSave);
 
 			dataSourceUpdated = this.dataSourceMapper.mergeDataBaseSource(newDataBaseSource, (DataBaseSource) dataSourceDB);
 
