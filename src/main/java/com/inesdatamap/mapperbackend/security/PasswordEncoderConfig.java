@@ -18,7 +18,7 @@ public class PasswordEncoderConfig {
 
 	/**
 	 * Creates a {@link PasswordEncoder} bean using {@link BCryptPasswordEncoder}.
-	 * 
+	 *
 	 * The {@code BCryptPasswordEncoder} is configured with a strength of 16, which affects the computational cost of the hashing algorithm.
 	 * The strength should be tuned to balance security and performance. The default strength is 10.
 	 *
