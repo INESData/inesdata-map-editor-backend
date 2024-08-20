@@ -53,6 +53,8 @@ class DataSourceServiceTest {
 	@InjectMocks
 	private DataSourceServiceImpl dataSourceService;
 
+	private static final String TEST_PASSWORD = "password";
+
 	@Test
 	void testFindById() {
 		// mock
@@ -167,7 +169,7 @@ class DataSourceServiceTest {
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
 		// Setting a password to test encoding
-		dataSourceDto.setPassword("password123");
+		dataSourceDto.setPassword(TEST_PASSWORD);
 		DataBaseSource dataBaseSource = new DataBaseSource();
 		// Mocked encoded password
 		String encodedPassword = "encodedPassword";
@@ -222,11 +224,11 @@ class DataSourceServiceTest {
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
 		// Set new password
-		dataSourceDto.setPassword("newPassword");
+		dataSourceDto.setPassword(TEST_PASSWORD);
 
 		DataBaseSource existingDataBaseSource = new DataBaseSource();
 		// Password stored in DB
-		existingDataBaseSource.setPassword("encodedPassword");
+		existingDataBaseSource.setPassword(TEST_PASSWORD);
 
 		DataBaseSource updatedDataBaseSource = new DataBaseSource();
 
