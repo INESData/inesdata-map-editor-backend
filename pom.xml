@@ -23,6 +23,8 @@
 		<lombok-mapstruct-binding.version>0.2.0</lombok-mapstruct-binding.version>
 		<liquibase.version>4.28.0</liquibase.version>
 		<springdoc-openapi-starter-webmvc.version>2.2.0</springdoc-openapi-starter-webmvc.version>
+		<spring-framework.version>6.1.12</spring-framework.version>
+		<!-- spring-framework:6.1.11 vulnerability CVE-2024-38809 -->
 		<!-- plugins -->
 		<jacoco-maven-plugin.version>0.8.8</jacoco-maven-plugin.version>
 		<editorconfig-maven-plugin.version>0.1.3</editorconfig-maven-plugin.version>
