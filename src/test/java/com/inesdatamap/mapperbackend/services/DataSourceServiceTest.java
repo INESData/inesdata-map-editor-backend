@@ -168,15 +168,13 @@ class DataSourceServiceTest {
 		// Mock data
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
-		// Setting a password to test encoding
 		dataSourceDto.setPassword(TEST_PASSWORD);
 		DataBaseSource dataBaseSource = new DataBaseSource();
-		// Mocked encoded password
 		String encodedPassword = "encodedPassword";
 
 		// Mock behavior
 		when(this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDto)).thenReturn(dataBaseSource);
-		when(this.passwordEncoder.encode("password123")).thenReturn(encodedPassword);
+		when(this.passwordEncoder.encode(TEST_PASSWORD)).thenReturn(encodedPassword);
 		when(this.dataSourceRepository.save(any(DataBaseSource.class))).thenReturn(dataBaseSource);
 		when(this.dataSourceMapper.dataSourceToDTO(any(DataBaseSource.class))).thenReturn(dataSourceDto);
 
@@ -187,7 +185,7 @@ class DataSourceServiceTest {
 		assertThat(result).isNotNull();
 		verify(this.dataSourceRepository, times(1)).save(any(DataBaseSource.class));
 		verify(this.dataSourceMapper, times(1)).dataSourceToDTO(any(DataBaseSource.class));
-		verify(this.passwordEncoder, times(1)).encode("password123");
+		verify(this.passwordEncoder, times(1)).encode(TEST_PASSWORD);
 	}
 
 	@Test
@@ -219,16 +217,15 @@ class DataSourceServiceTest {
 
 	@Test
 	void testUpdateDataSourceWithDatabase() {
+
 		// Mock data
 		Long id = 1L;
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
-		// Set new password
 		dataSourceDto.setPassword(TEST_PASSWORD);
 
 		DataBaseSource existingDataBaseSource = new DataBaseSource();
-		// Password stored in DB
-		existingDataBaseSource.setPassword(TEST_PASSWORD);
+		existingDataBaseSource.setPassword("encodedPassword");
 
 		DataBaseSource updatedDataBaseSource = new DataBaseSource();
 
@@ -236,8 +233,8 @@ class DataSourceServiceTest {
 		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(existingDataBaseSource));
 		when(this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDto)).thenReturn(updatedDataBaseSource);
 		when(this.dataSourceRepository.saveAndFlush(any(DataBaseSource.class))).thenReturn(updatedDataBaseSource);
-		when(this.passwordEncoder.matches("newPassword", "encodedPassword")).thenReturn(false);
-		when(this.passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
+		when(this.passwordEncoder.matches(TEST_PASSWORD, "encodedPassword")).thenReturn(false);
+		when(this.passwordEncoder.encode(TEST_PASSWORD)).thenReturn("newEncodedPassword");
 		when(this.dataSourceMapper.mergeDataBaseSource(any(DataBaseSource.class), any(DataBaseSource.class)))
 				.thenReturn(updatedDataBaseSource);
 		when(this.dataSourceMapper.entityToDto(any(DataBaseSource.class))).thenReturn(dataSourceDto);
