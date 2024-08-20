@@ -25,7 +25,14 @@ public final class Constants {
 	public static final int NUMBER_16 = 16;
 
 	// Passwords (for testing)
+	/**
+	 * Constant representing a test password
+	 */
 	public static final String TEST_PASSWORD = "password123";
+
+	/**
+	 * Constant representing an encoded test password
+	 */
 	public static final String ENCODED_PASSWORD = "encodedPassword";
 
 	private Constants() {
