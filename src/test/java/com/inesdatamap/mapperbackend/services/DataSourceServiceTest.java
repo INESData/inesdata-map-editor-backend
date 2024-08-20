@@ -221,10 +221,12 @@ class DataSourceServiceTest {
 		Long id = 1L;
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
-		dataSourceDto.setPassword("newPassword"); // Set new password
+		// Set new password
+		dataSourceDto.setPassword("newPassword");
 
 		DataBaseSource existingDataBaseSource = new DataBaseSource();
-		existingDataBaseSource.setPassword("encodedPassword"); // Password stored in DB
+		// Password stored in DB
+		existingDataBaseSource.setPassword("encodedPassword");
 
 		DataBaseSource updatedDataBaseSource = new DataBaseSource();
 
