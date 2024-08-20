@@ -3,6 +3,8 @@ package com.inesdatamap.mapperbackend.model.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.jpa.DataBaseSource;
@@ -14,7 +16,13 @@ import com.inesdatamap.mapperbackend.model.jpa.FileSource;
  *
  */
 @Mapper(componentModel = "spring", uses = BaseEntityMapper.class)
-public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSource> {
+public abstract class DataSourceMapper implements BaseEntityMapper<DataSourceDTO, DataSource> {
+
+	/**
+	 * Password encoder used to encrypt passwords before storing them.
+	 */
+	@Autowired
+	protected PasswordEncoder passwordEncoder;
 
 	/**
 	 * Converts a DataSource entity to its corresponding DataSourceDTO.
@@ -27,7 +35,7 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 	 *            the DataSource entity to be converted.
 	 * @return the corresponding DataSourceDTO for the given entity.
 	 */
-	default DataSourceDTO dataSourceToDTO(DataSource entity) {
+	public DataSourceDTO dataSourceToDTO(DataSource entity) {
 		if (entity instanceof DataBaseSource database) {
 			return this.dataBaseToDTO(database);
 		} else if (entity instanceof FileSource fileSource) {
@@ -45,7 +53,8 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 	 * @return the corresponding DataSourceDTO.
 	 */
 
-	DataSourceDTO dataBaseToDTO(DataBaseSource dataBaseSource);
+	@Mapping(target = "password", ignore = true)
+	public abstract DataSourceDTO dataBaseToDTO(DataBaseSource dataBaseSource);
 
 	/**
 	 * Converts a FileSource entity to its corresponding DataSourceDTO.
@@ -54,7 +63,7 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 	 *            the FileSource entity to be converted.
 	 * @return the corresponding DataSourceDTO.
 	 */
-	DataSourceDTO dataFileToDTO(FileSource fileSource);
+	public abstract DataSourceDTO dataFileToDTO(FileSource fileSource);
 
 	/**
 	 * Converts a DataSourceDTO object to its corresponding DataBaseSource entity.
@@ -63,7 +72,8 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 	 *            the DataSourceDTO object to be converted.
 	 * @return the corresponding DataBaseSource entity.
 	 */
-	DataBaseSource dataSourceDtoToDataBase(DataSourceDTO dataBaseSource);
+	@Mapping(target = "password", expression = "java(dataBaseSource.getPassword()!= null ? passwordEncoder.encode(dataBaseSource.getPassword()) : null)")
+	public abstract DataBaseSource dataSourceDtoToDataBase(DataSourceDTO dataBaseSource);
 
 	/**
 	 * Converts a DataSourceDTO object to its corresponding FileSource entity.
@@ -72,7 +82,7 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 	 *            the DataSourceDTO object to be converted.
 	 * @return the corresponding FileSource entity.
 	 */
-	FileSource dataSourceDtoToFileSource(DataSourceDTO dataBaseSource);
+	public abstract FileSource dataSourceDtoToFileSource(DataSourceDTO dataBaseSource);
 
 	/**
 	 * Merges the properties of a source DataBaseSource instance into a target DataBaseSource instance.
@@ -85,7 +95,7 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 	 */
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "version", ignore = true)
-	DataBaseSource mergeDataBaseSource(DataBaseSource source, @MappingTarget DataBaseSource target);
+	public abstract DataBaseSource mergeDataBaseSource(DataBaseSource source, @MappingTarget DataBaseSource target);
 
 	/**
 	 * Merges the properties of a source FileSource instance into a target FileSource instance.
@@ -98,6 +108,6 @@ public interface DataSourceMapper extends BaseEntityMapper<DataSourceDTO, DataSo
 	 */
 	@Mapping(target = "id", ignore = true)
 	@Mapping(target = "version", ignore = true)
-	FileSource mergeFileSource(FileSource source, @MappingTarget FileSource target);
+	public abstract FileSource mergeFileSource(FileSource source, @MappingTarget FileSource target);
 
 }

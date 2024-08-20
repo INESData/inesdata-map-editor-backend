@@ -138,17 +138,9 @@ public class DataSourceServiceImpl implements DataSourceService {
 			}
 			dataSource = fileSource;
 		} else if (dataSourceDTO.getType() == DataSourceTypeEnum.DATABASE) {
+
 			// Map DTO to a DataBaseSource entity
-			DataBaseSource dataBaseSource = this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDTO);
-
-			// Encrypt the password before saving
-			if (dataSourceDTO.getPassword() != null) {
-
-				String encryptedPassword = this.passwordEncoder.encode(dataSourceDTO.getPassword());
-				dataBaseSource.setPassword(encryptedPassword);
-			}
-
-			dataSource = dataBaseSource;
+			dataSource = this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDTO);
 		}
 
 		// Save new entity
@@ -200,20 +192,13 @@ public class DataSourceServiceImpl implements DataSourceService {
 
 		} else if (dataSourceDTO.getType() == DataSourceTypeEnum.DATABASE) {
 
-			String passwordToSave;
-
-			if (dataSourceDTO.getPassword() != null
-					&& !this.passwordEncoder.matches(dataSourceDTO.getPassword(), ((DataBaseSource) dataSourceDB).getPassword())) {
-
-				// Encode new password if it has changed
-				passwordToSave = this.passwordEncoder.encode(dataSourceDTO.getPassword());
-			} else {
-				// Keep password if it has not changed
-				passwordToSave = ((DataBaseSource) dataSourceDB).getPassword();
-			}
-
+			// Map DTO to a DataBaseSource entity
 			DataBaseSource newDataBaseSource = this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDTO);
-			newDataBaseSource.setPassword(passwordToSave);
+
+			if (dataSourceDTO.getPassword() == null) {
+				// Keep password if it has not changed
+				newDataBaseSource.setPassword(((DataBaseSource) dataSourceDB).getPassword());
+			}
 
 			dataSourceUpdated = this.dataSourceMapper.mergeDataBaseSource(newDataBaseSource, (DataBaseSource) dataSourceDB);
 
