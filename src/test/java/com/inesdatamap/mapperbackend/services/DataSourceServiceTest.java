@@ -32,7 +32,6 @@ import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.mappers.DataSourceMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
 import com.inesdatamap.mapperbackend.services.impl.DataSourceServiceImpl;
-import com.inesdatamap.mapperbackend.utils.Constants;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -167,13 +166,19 @@ class DataSourceServiceTest {
 		// Mock data
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
-		dataSourceDto.setPassword(Constants.TEST_PASSWORD);
+
+		// Generate a test password
+		String testPassword = this.generateRandomPassword();
+		dataSourceDto.setPassword(testPassword);
+
 		DataBaseSource dataBaseSource = new DataBaseSource();
-		String encodedPassword = Constants.ENCODED_PASSWORD;
+
+		// Generate encoded password
+		String encodedPassword = this.generateRandomEncodedPassword();
 
 		// Mock behavior
 		when(this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDto)).thenReturn(dataBaseSource);
-		when(this.passwordEncoder.encode(Constants.TEST_PASSWORD)).thenReturn(encodedPassword);
+		when(this.passwordEncoder.encode(testPassword)).thenReturn(encodedPassword);
 		when(this.dataSourceRepository.save(any(DataBaseSource.class))).thenReturn(dataBaseSource);
 		when(this.dataSourceMapper.dataSourceToDTO(any(DataBaseSource.class))).thenReturn(dataSourceDto);
 
@@ -184,7 +189,7 @@ class DataSourceServiceTest {
 		assertThat(result).isNotNull();
 		verify(this.dataSourceRepository, times(1)).save(any(DataBaseSource.class));
 		verify(this.dataSourceMapper, times(1)).dataSourceToDTO(any(DataBaseSource.class));
-		verify(this.passwordEncoder, times(1)).encode(Constants.TEST_PASSWORD);
+		verify(this.passwordEncoder, times(1)).encode(testPassword); // Use testPassword
 	}
 
 	@Test
@@ -221,19 +226,27 @@ class DataSourceServiceTest {
 		Long id = 1L;
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
-		dataSourceDto.setPassword(Constants.TEST_PASSWORD);
+
+		// Generate new password
+		String newPassword = this.generateRandomPassword();
+		dataSourceDto.setPassword(newPassword);
 
 		DataBaseSource existingDataBaseSource = new DataBaseSource();
-		existingDataBaseSource.setPassword(Constants.ENCODED_PASSWORD);
+		// Set existing encoded password
+		String existingEncodedPassword = this.generateRandomEncodedPassword();
+		existingDataBaseSource.setPassword(existingEncodedPassword);
 
 		DataBaseSource updatedDataBaseSource = new DataBaseSource();
+
+		// Generate new encoded password
+		String newEncodedPassword = this.generateRandomEncodedPassword();
 
 		// Mock behavior
 		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(existingDataBaseSource));
 		when(this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDto)).thenReturn(updatedDataBaseSource);
+		when(this.passwordEncoder.matches(newPassword, existingEncodedPassword)).thenReturn(false);
+		when(this.passwordEncoder.encode(newPassword)).thenReturn(newEncodedPassword);
 		when(this.dataSourceRepository.saveAndFlush(any(DataBaseSource.class))).thenReturn(updatedDataBaseSource);
-		when(this.passwordEncoder.matches(Constants.TEST_PASSWORD, Constants.ENCODED_PASSWORD)).thenReturn(false);
-		when(this.passwordEncoder.encode(Constants.TEST_PASSWORD)).thenReturn("newEncodedPassword");
 		when(this.dataSourceMapper.mergeDataBaseSource(any(DataBaseSource.class), any(DataBaseSource.class)))
 				.thenReturn(updatedDataBaseSource);
 		when(this.dataSourceMapper.entityToDto(any(DataBaseSource.class))).thenReturn(dataSourceDto);
@@ -246,6 +259,8 @@ class DataSourceServiceTest {
 		verify(this.dataSourceRepository, times(1)).saveAndFlush(any(DataBaseSource.class));
 		verify(this.dataSourceMapper, times(1)).mergeDataBaseSource(any(DataBaseSource.class), any(DataBaseSource.class));
 		verify(this.dataSourceMapper, times(1)).entityToDto(any(DataBaseSource.class));
+		verify(this.passwordEncoder, times(1)).matches(newPassword, existingEncodedPassword);
+		verify(this.passwordEncoder, times(1)).encode(newPassword);
 	}
 
 	@Test
@@ -260,6 +275,16 @@ class DataSourceServiceTest {
 
 		// Verify results
 		assertThat(result).isEqualTo(dataSource);
+	}
+
+	// Helper method to generate a random password
+	private String generateRandomPassword() {
+		return "password" + System.currentTimeMillis();
+	}
+
+	// Helper method to generate a random encoded password
+	private String generateRandomEncodedPassword() {
+		return "encoded" + System.currentTimeMillis();
 	}
 
 }
