@@ -24,6 +24,10 @@ public final class Constants {
 	 */
 	public static final int NUMBER_16 = 16;
 
+	// Passwords (for testing)
+	public static final String TEST_PASSWORD = "password123";
+	public static final String ENCODED_PASSWORD = "encodedPassword";
+
 	private Constants() {
 		// Empty constructor to avoid initialization
 	}

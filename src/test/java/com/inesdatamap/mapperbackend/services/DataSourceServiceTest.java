@@ -32,6 +32,7 @@ import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.mappers.DataSourceMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
 import com.inesdatamap.mapperbackend.services.impl.DataSourceServiceImpl;
+import com.inesdatamap.mapperbackend.utils.Constants;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -168,13 +169,13 @@ class DataSourceServiceTest {
 		// Mock data
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
-		dataSourceDto.setPassword(TEST_PASSWORD);
+		dataSourceDto.setPassword(Constants.TEST_PASSWORD);
 		DataBaseSource dataBaseSource = new DataBaseSource();
-		String encodedPassword = "encodedPassword";
+		String encodedPassword = Constants.ENCODED_PASSWORD;
 
 		// Mock behavior
 		when(this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDto)).thenReturn(dataBaseSource);
-		when(this.passwordEncoder.encode(TEST_PASSWORD)).thenReturn(encodedPassword);
+		when(this.passwordEncoder.encode(Constants.TEST_PASSWORD)).thenReturn(encodedPassword);
 		when(this.dataSourceRepository.save(any(DataBaseSource.class))).thenReturn(dataBaseSource);
 		when(this.dataSourceMapper.dataSourceToDTO(any(DataBaseSource.class))).thenReturn(dataSourceDto);
 
@@ -185,7 +186,7 @@ class DataSourceServiceTest {
 		assertThat(result).isNotNull();
 		verify(this.dataSourceRepository, times(1)).save(any(DataBaseSource.class));
 		verify(this.dataSourceMapper, times(1)).dataSourceToDTO(any(DataBaseSource.class));
-		verify(this.passwordEncoder, times(1)).encode(TEST_PASSWORD);
+		verify(this.passwordEncoder, times(1)).encode(Constants.TEST_PASSWORD);
 	}
 
 	@Test
@@ -222,10 +223,10 @@ class DataSourceServiceTest {
 		Long id = 1L;
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
-		dataSourceDto.setPassword(TEST_PASSWORD);
+		dataSourceDto.setPassword(Constants.TEST_PASSWORD);
 
 		DataBaseSource existingDataBaseSource = new DataBaseSource();
-		existingDataBaseSource.setPassword("encodedPassword");
+		existingDataBaseSource.setPassword(Constants.ENCODED_PASSWORD);
 
 		DataBaseSource updatedDataBaseSource = new DataBaseSource();
 
@@ -233,8 +234,8 @@ class DataSourceServiceTest {
 		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(existingDataBaseSource));
 		when(this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDto)).thenReturn(updatedDataBaseSource);
 		when(this.dataSourceRepository.saveAndFlush(any(DataBaseSource.class))).thenReturn(updatedDataBaseSource);
-		when(this.passwordEncoder.matches(TEST_PASSWORD, "encodedPassword")).thenReturn(false);
-		when(this.passwordEncoder.encode(TEST_PASSWORD)).thenReturn("newEncodedPassword");
+		when(this.passwordEncoder.matches(Constants.TEST_PASSWORD, Constants.ENCODED_PASSWORD)).thenReturn(false);
+		when(this.passwordEncoder.encode(Constants.TEST_PASSWORD)).thenReturn("newEncodedPassword");
 		when(this.dataSourceMapper.mergeDataBaseSource(any(DataBaseSource.class), any(DataBaseSource.class)))
 				.thenReturn(updatedDataBaseSource);
 		when(this.dataSourceMapper.entityToDto(any(DataBaseSource.class))).thenReturn(dataSourceDto);
