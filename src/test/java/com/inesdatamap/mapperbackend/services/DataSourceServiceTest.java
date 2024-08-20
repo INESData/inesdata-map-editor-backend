@@ -54,8 +54,6 @@ class DataSourceServiceTest {
 	@InjectMocks
 	private DataSourceServiceImpl dataSourceService;
 
-	private static final String TEST_PASSWORD = "password";
-
 	@Test
 	void testFindById() {
 		// mock
