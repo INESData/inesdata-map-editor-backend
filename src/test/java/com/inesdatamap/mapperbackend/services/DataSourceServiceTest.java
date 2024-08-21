@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
@@ -45,6 +46,9 @@ class DataSourceServiceTest {
 
 	@Mock
 	private DataSourceMapper dataSourceMapper;
+
+	@Mock
+	private PasswordEncoder passwordEncoder;
 
 	@InjectMocks
 	private DataSourceServiceImpl dataSourceService;
@@ -162,6 +166,7 @@ class DataSourceServiceTest {
 		// Mock data
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
+
 		DataBaseSource dataBaseSource = new DataBaseSource();
 
 		// Mock behavior
@@ -207,10 +212,12 @@ class DataSourceServiceTest {
 
 	@Test
 	void testUpdateDataSourceWithDatabase() {
+
 		// Mock data
 		Long id = 1L;
 		DataSourceDTO dataSourceDto = new DataSourceDTO();
 		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
+
 		DataBaseSource existingDataBaseSource = new DataBaseSource();
 		DataBaseSource updatedDataBaseSource = new DataBaseSource();
 
@@ -244,6 +251,16 @@ class DataSourceServiceTest {
 
 		// Verify results
 		assertThat(result).isEqualTo(dataSource);
+	}
+
+	// Helper method to generate a random password
+	private String generateRandomPassword() {
+		return "password" + System.currentTimeMillis();
+	}
+
+	// Helper method to generate a random encoded password
+	private String generateRandomEncodedPassword() {
+		return "encoded" + System.currentTimeMillis();
 	}
 
 }

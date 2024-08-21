@@ -18,6 +18,11 @@ public final class Constants {
 	 */
 	public static final int NUMBER_10 = 10;
 
+	/**
+	 * Constant representing the number 16
+	 */
+	public static final int NUMBER_16 = 16;
+
 	private Constants() {
 		// Empty constructor to avoid initialization
 	}
