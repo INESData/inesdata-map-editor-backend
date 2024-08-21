@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
+import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
@@ -59,16 +60,25 @@ public class OntologyServiceImpl implements OntologyService {
 	@Override
 	public OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto, MultipartFile file) {
 
+		if (ontologyDto == null) {
+			throw new IllegalArgumentException("The ontology has no data to update");
+		}
+
 		// Get DB entity
 		Ontology ontologyDB = this.getEntity(id);
 
 		if (file != null && !file.isEmpty()) {
+
+			// Validate the file extension
+			validateFileExtension(file.getContentType());
+
 			try {
 				// Convert the file content to a byte array
 				byte[] fileContent = file.getBytes();
 
 				// Set the byte array as the content of the ontology
 				ontologyDB.setContent(fileContent);
+
 			} catch (IOException e) {
 				throw new UncheckedIOException("Failed to store file content", e);
 			}
@@ -110,19 +120,31 @@ public class OntologyServiceImpl implements OntologyService {
 	@Override
 	public OntologyDTO createOntology(OntologyDTO ontologyDto, MultipartFile file) {
 
+		if (ontologyDto == null) {
+			throw new IllegalArgumentException("The ontology has no data");
+		}
+
 		// DTO to entity
 		Ontology ontology = this.ontologyMapper.dtoToEntity(ontologyDto);
 
 		if (file != null && !file.isEmpty()) {
+
+			// Validate the file extension
+			validateFileExtension(file.getContentType());
+
 			try {
 				// Convert the file content to a byte array
 				byte[] fileContent = file.getBytes();
 
 				// Set the byte array as the content of the ontology
 				ontology.setContent(fileContent);
+
 			} catch (IOException e) {
 				throw new UncheckedIOException("Failed to store file content", e);
 			}
+
+		} else {
+			throw new IllegalArgumentException("File is required and cannot be empty");
 		}
 
 		// Save new entity
@@ -142,6 +164,20 @@ public class OntologyServiceImpl implements OntologyService {
 	@Override
 	public Ontology getEntity(Long id) {
 		return this.ontologyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id.toString()));
+	}
+
+	/**
+	 * Validates the file extension against the supported extensions defined in the DataFileTypeEnum.
+	 *
+	 * @param fileExtension
+	 *            the MIME type to validate
+	 * @throws IllegalArgumentException
+	 *             if the provided file extension is not supported
+	 */
+	private static void validateFileExtension(String fileExtension) {
+		if (!DataFileTypeEnum.isValidExtension(fileExtension)) {
+			throw new IllegalArgumentException("Unsupported file extension: " + fileExtension);
+		}
 	}
 
 }
