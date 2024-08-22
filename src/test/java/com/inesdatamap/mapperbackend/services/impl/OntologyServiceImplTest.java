@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -116,7 +117,7 @@ class OntologyServiceImplTest {
 		Ontology ontology = new Ontology();
 		Mockito.when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontology));
 
-		// Caso 1: ontologyDto es válido, file es null (no se lanza excepción)
+		// Case 1: ontologyDto is valid, file is null (no exception is thrown)
 		OntologyDTO dto = new OntologyDTO();
 		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(new Ontology());
 
@@ -124,7 +125,7 @@ class OntologyServiceImplTest {
 			this.ontologyService.updateOntology(id, dto, null);
 		});
 
-		// Caso 2: ontologyDto es válido, file es vacío (no se lanza excepción)
+		// Case 2: ontologyDto is valid, file is empty (no exception is thrown)
 		MultipartFile emptyFile = mock(MultipartFile.class);
 		when(emptyFile.isEmpty()).thenReturn(true);
 
@@ -132,26 +133,23 @@ class OntologyServiceImplTest {
 			this.ontologyService.updateOntology(id, dto, emptyFile);
 		});
 
-		// Caso 3: ontologyDto es válido, file tiene contenido y se procesa correctamente
+		// Case 3: ontologyDto is valid, file has content and is processed correctly
 		MultipartFile validFile = mock(MultipartFile.class);
 		when(validFile.isEmpty()).thenReturn(false);
-		when(validFile.getBytes()).thenReturn("valid content".getBytes()); // Aquí se lanza IOException
+		when(validFile.getBytes()).thenReturn("valid content".getBytes());
 		when(validFile.getContentType()).thenReturn("application/json");
 
 		assertDoesNotThrow(() -> {
 			this.ontologyService.updateOntology(id, dto, validFile);
 		});
 
-		// Caso 4: ontologyDto es válido, file tiene error de lectura (debería lanzar UncheckedIOException)
+		// Case 4: ontologyDto is valid, file has a read error (should throw UncheckedIOException)
 		MultipartFile fileWithError = mock(MultipartFile.class);
 		when(fileWithError.isEmpty()).thenReturn(false);
 		when(fileWithError.getContentType()).thenReturn("application/json");
 
-		try {
-			when(fileWithError.getBytes()).thenThrow(new IOException("Failed to read file"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		// Mock the file read error
+		when(fileWithError.getBytes()).thenThrow(new IOException("Failed to read file"));
 
 		UncheckedIOException exception = assertThrows(UncheckedIOException.class, () -> {
 			this.ontologyService.updateOntology(id, dto, fileWithError);
@@ -217,27 +215,40 @@ class OntologyServiceImplTest {
 	}
 
 	@Test
-	void testCreateOntology_exceptions() {
-		// Arrange
-		OntologyDTO dto = new OntologyDTO();
-		dto.setName("Test Ontology");
-
-		// Test with null DTO
+	void testCreateOntology_exceptions() throws IOException {
+		// OntologyDto is null, should throw IllegalArgumentException
 		assertThrows(IllegalArgumentException.class, () -> {
 			this.ontologyService.createOntology(null, mock(MultipartFile.class));
 		}, "The ontology has no data");
 
-		// Test with null file
-		assertThrows(IllegalArgumentException.class, () -> {
-			this.ontologyService.createOntology(dto, null);
-		}, "File is required and cannot be empty");
+		// OntologyDto is valid, file is null (no exception is thrown)
+		OntologyDTO dto = new OntologyDTO();
+		dto.setName("Test Ontology");
+		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(new Ontology());
+		when(this.ontologyRepo.save(any(Ontology.class))).thenReturn(new Ontology());
 
-		// Test with empty file
+		assertDoesNotThrow(() -> {
+			this.ontologyService.createOntology(dto, null);
+		});
+
+		// OntologyDto is valid, file is empty (no exception is thrown)
 		MultipartFile emptyFile = mock(MultipartFile.class);
 		when(emptyFile.isEmpty()).thenReturn(true);
-		assertThrows(IllegalArgumentException.class, () -> {
+
+		assertDoesNotThrow(() -> {
 			this.ontologyService.createOntology(dto, emptyFile);
-		}, "File is required and cannot be empty");
+		});
+
+		// OntologyDto is valid, file has content (no exception is thrown)
+		MultipartFile validFile = mock(MultipartFile.class);
+		when(validFile.isEmpty()).thenReturn(false);
+		when(validFile.getBytes()).thenReturn("valid content".getBytes());
+		when(validFile.getContentType()).thenReturn("text/csv");
+
+		assertDoesNotThrow(() -> {
+			this.ontologyService.createOntology(dto, validFile);
+		});
+
 	}
 
 	@Test
