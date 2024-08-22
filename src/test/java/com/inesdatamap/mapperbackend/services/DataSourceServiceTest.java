@@ -252,15 +252,4 @@ class DataSourceServiceTest {
 		// Verify results
 		assertThat(result).isEqualTo(dataSource);
 	}
-
-	// Helper method to generate a random password
-	private String generateRandomPassword() {
-		return "password" + System.currentTimeMillis();
-	}
-
-	// Helper method to generate a random encoded password
-	private String generateRandomEncodedPassword() {
-		return "encoded" + System.currentTimeMillis();
-	}
-
 }

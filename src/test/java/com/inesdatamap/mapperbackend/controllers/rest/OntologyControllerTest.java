@@ -74,7 +74,7 @@ class OntologyControllerTest {
 		Long id = 1L;
 		OntologyDTO ontologyDto = new OntologyDTO();
 		OntologyDTO updatedOntology = new OntologyDTO();
-		MultipartFile file = new MockMultipartFile("file", "filename.txt", "text/plain", "file content".getBytes());
+		MultipartFile file = new MockMultipartFile("file", "filename.csv", "text/csv", "file content".getBytes());
 
 		// Configure mock for service
 		Mockito.when(this.ontologyService.updateOntology(id, ontologyDto, file)).thenReturn(updatedOntology);
