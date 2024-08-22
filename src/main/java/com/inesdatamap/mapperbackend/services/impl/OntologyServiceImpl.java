@@ -169,7 +169,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 *            the MultipartFile containing the content to be processed
 	 * @param ontology
 	 *            the Ontology entity where the file content will be stored
-	 * 
+	 *
 	 * @throws UncheckedIOException
 	 *             if an error occurs while reading the file content.
 	 */
