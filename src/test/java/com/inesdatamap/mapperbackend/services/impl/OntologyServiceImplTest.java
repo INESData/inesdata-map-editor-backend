@@ -117,7 +117,7 @@ class OntologyServiceImplTest {
 		Ontology ontology = new Ontology();
 		Mockito.when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontology));
 
-		// Case 1: ontologyDto is valid, file is null (no exception is thrown)
+		// OntologyDto is valid, file is null (no exception is thrown)
 		OntologyDTO dto = new OntologyDTO();
 		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(new Ontology());
 
@@ -125,7 +125,7 @@ class OntologyServiceImplTest {
 			this.ontologyService.updateOntology(id, dto, null);
 		});
 
-		// Case 2: ontologyDto is valid, file is empty (no exception is thrown)
+		// OntologyDto is valid, file is empty (no exception is thrown)
 		MultipartFile emptyFile = mock(MultipartFile.class);
 		when(emptyFile.isEmpty()).thenReturn(true);
 
@@ -133,7 +133,7 @@ class OntologyServiceImplTest {
 			this.ontologyService.updateOntology(id, dto, emptyFile);
 		});
 
-		// Case 3: ontologyDto is valid, file has content and is processed correctly
+		// OntologyDto is valid, file has content and is processed correctly
 		MultipartFile validFile = mock(MultipartFile.class);
 		when(validFile.isEmpty()).thenReturn(false);
 		when(validFile.getBytes()).thenReturn("valid content".getBytes());
@@ -143,7 +143,7 @@ class OntologyServiceImplTest {
 			this.ontologyService.updateOntology(id, dto, validFile);
 		});
 
-		// Case 4: ontologyDto is valid, file has a read error (should throw UncheckedIOException)
+		// OntologyDto is valid, file has a read error (should throw UncheckedIOException)
 		MultipartFile fileWithError = mock(MultipartFile.class);
 		when(fileWithError.isEmpty()).thenReturn(false);
 		when(fileWithError.getContentType()).thenReturn("application/json");
