@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,7 +34,9 @@ public class Ontology extends BaseEntity implements Serializable {
 	/**
 	 * The name of the ontology.
 	 */
-	@Column(name = "name", nullable = false)
+	@NotNull
+	@Size(max = 255)
+	@Column(name = "name", nullable = false, unique = true)
 	private String name;
 
 	/**
@@ -46,6 +50,7 @@ public class Ontology extends BaseEntity implements Serializable {
 	/**
 	 * The title of the ontology.
 	 */
+	@Size(max = 255)
 	@Column(name = "title")
 	private String title;
 
@@ -58,13 +63,16 @@ public class Ontology extends BaseEntity implements Serializable {
 	/**
 	 * The URL associated with the ontology.
 	 */
+	@Size(max = 255)
 	@Column(name = "url")
 	private String url;
 
 	/**
 	 * The version number of the ontology.
 	 */
-	@Column(name = "version_name")
+	@NotNull
+	@Size(max = 255)
+	@Column(name = "version_name", nullable = false)
 	private String versionName;
 
 }
