@@ -21,13 +21,13 @@ public class OntologyDTO extends BaseEntityDTO {
 
 	private byte[] content;
 
-	@Size(min = 1, max = 255)
+	@Size(max = 255)
 	private String title;
 
 	@PastOrPresent
 	private LocalDateTime uploadDate;
 
-	@Size(min = 1, max = 255)
+	@Size(max = 255)
 	private String url;
 
 	@NotNull
