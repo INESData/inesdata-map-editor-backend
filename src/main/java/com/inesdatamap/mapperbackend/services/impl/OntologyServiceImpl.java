@@ -72,16 +72,8 @@ public class OntologyServiceImpl implements OntologyService {
 			// Validate the file extension
 			validateFileExtension(file.getContentType());
 
-			try {
-				// Convert the file content to a byte array
-				byte[] fileContent = file.getBytes();
-
-				// Set the byte array as the content of the ontology
-				ontologyDB.setContent(fileContent);
-
-			} catch (IOException e) {
-				throw new UncheckedIOException("Failed to store file content", e);
-			}
+			// Read file content
+			processFileContent(file, ontologyDB);
 		}
 
 		// New ontology to save
@@ -132,19 +124,9 @@ public class OntologyServiceImpl implements OntologyService {
 			// Validate the file extension
 			validateFileExtension(file.getContentType());
 
-			try {
-				// Convert the file content to a byte array
-				byte[] fileContent = file.getBytes();
+			// Read file content
+			processFileContent(file, ontology);
 
-				// Set the byte array as the content of the ontology
-				ontology.setContent(fileContent);
-
-			} catch (IOException e) {
-				throw new UncheckedIOException("Failed to store file content", e);
-			}
-
-		} else {
-			throw new IllegalArgumentException("File is required and cannot be empty");
 		}
 
 		// Save new entity
@@ -177,6 +159,31 @@ public class OntologyServiceImpl implements OntologyService {
 	private static void validateFileExtension(String fileExtension) {
 		if (!DataFileTypeEnum.isValidExtension(fileExtension)) {
 			throw new IllegalArgumentException("Unsupported file extension: " + fileExtension);
+		}
+	}
+
+	/**
+	 * Processes the content of the MultipartFile and sets it as the content of the specified Ontology.
+	 *
+	 * @param file
+	 *            the MultipartFile containing the content to be processed
+	 * @param ontology
+	 *            the Ontology entity where the file content will be stored
+	 * 
+	 * @throws UncheckedIOException
+	 *             if an error occurs while reading the file content.
+	 */
+	private static void processFileContent(MultipartFile file, Ontology ontology) {
+
+		try {
+			// Convert the file content to a byte array
+			byte[] fileContent = file.getBytes();
+
+			// Set the byte array as the content of the ontology
+			ontology.setContent(fileContent);
+
+		} catch (IOException e) {
+			throw new UncheckedIOException("Failed to store file content", e);
 		}
 	}
 
