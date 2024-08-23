@@ -52,8 +52,7 @@ class DataSourceControllerTest {
 				.thenReturn(page);
 
 		// test
-		ResponseEntity<Page<DataSourceDTO>> result = this.controller.listDataSources(Constants.NUMBER_0, Constants.NUMBER_10,
-				Constants.SORT_BY_NAME);
+		ResponseEntity<Page<DataSourceDTO>> result = this.controller.listDataSources(Constants.NUMBER_0, Constants.NUMBER_10);
 
 		// verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());

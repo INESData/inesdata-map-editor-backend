@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.services.OntologyService;
+import com.inesdatamap.mapperbackend.utils.Constants;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -57,16 +58,13 @@ public class OntologyController {
 	 * @param size
 	 *            page size
 	 *
-	 * @param sortBy
-	 *            sorting field
-	 *
 	 * @return List of all ontologies
 	 */
 	@GetMapping(path = "")
 	@Operation(summary = "List all ontologies")
-	public ResponseEntity<Page<SearchOntologyDTO>> listOntologies(@RequestParam int page, @RequestParam int size,
-			@RequestParam String sortBy) {
-		Page<SearchOntologyDTO> ontologies = this.ontologyService.listOntologies(PageRequest.of(page, size, Sort.by(sortBy).ascending()));
+	public ResponseEntity<Page<SearchOntologyDTO>> listOntologies(@RequestParam int page, @RequestParam int size) {
+		Page<SearchOntologyDTO> ontologies = this.ontologyService
+				.listOntologies(PageRequest.of(page, size, Sort.by(Constants.SORT_BY_NAME).ascending()));
 		return ResponseEntity.ok(ontologies);
 	}
 
