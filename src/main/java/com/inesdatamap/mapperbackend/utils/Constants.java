@@ -23,6 +23,12 @@ public final class Constants {
 	 */
 	public static final int NUMBER_16 = 16;
 
+	// Filters
+	/**
+	 * Constant representing the sort by name
+	 */
+	public static final String SORT_BY_NAME = "name";
+
 	private Constants() {
 		// Empty constructor to avoid initialization
 	}

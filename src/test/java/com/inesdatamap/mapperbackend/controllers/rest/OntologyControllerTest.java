@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -57,10 +58,13 @@ class OntologyControllerTest {
 		List<SearchOntologyDTO> ontologies = Arrays.asList(ontology1, ontology2);
 		Page<SearchOntologyDTO> page = new PageImpl<>(ontologies);
 
-		Mockito.when(this.ontologyService.listOntologies(PageRequest.of(Constants.NUMBER_0, Constants.NUMBER_10))).thenReturn(page);
+		Mockito.when(this.ontologyService
+				.listOntologies(PageRequest.of(Constants.NUMBER_0, Constants.NUMBER_10, Sort.by(Constants.SORT_BY_NAME).ascending())))
+				.thenReturn(page);
 
 		// test
-		ResponseEntity<Page<SearchOntologyDTO>> result = this.controller.listOntologies(Constants.NUMBER_0, Constants.NUMBER_10);
+		ResponseEntity<Page<SearchOntologyDTO>> result = this.controller.listOntologies(Constants.NUMBER_0, Constants.NUMBER_10,
+				Constants.SORT_BY_NAME);
 
 		// verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());

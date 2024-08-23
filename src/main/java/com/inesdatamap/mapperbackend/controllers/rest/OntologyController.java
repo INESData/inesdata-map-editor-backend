@@ -57,14 +57,16 @@ public class OntologyController {
 	 * @param size
 	 *            page size
 	 *
+	 * @param sortBy
+	 *            sorting field
+	 *
 	 * @return List of all ontologies
 	 */
 	@GetMapping(path = "")
 	@Operation(summary = "List all ontologies")
 	public ResponseEntity<Page<SearchOntologyDTO>> listOntologies(@RequestParam int page, @RequestParam int size,
-			@RequestParam String sortBy, String sortDir) {
-		Page<SearchOntologyDTO> ontologies = this.ontologyService
-				.listOntologies(PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDir), sortBy)));
+			@RequestParam String sortBy) {
+		Page<SearchOntologyDTO> ontologies = this.ontologyService.listOntologies(PageRequest.of(page, size, Sort.by(sortBy).ascending()));
 		return ResponseEntity.ok(ontologies);
 	}
 

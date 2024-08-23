@@ -3,6 +3,7 @@ package com.inesdatamap.mapperbackend.controllers.rest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,12 +48,17 @@ public class DataSourceController {
 	 * @param size
 	 *            page size
 	 *
+	 * @param sortBy
+	 *            sorting field
+	 *
+	 *
 	 * @return List of all data sources
 	 */
 	@GetMapping(path = "")
 	@Operation(summary = "List all data sources")
-	public ResponseEntity<Page<DataSourceDTO>> listDataSources(@RequestParam int page, @RequestParam int size) {
-		Page<DataSourceDTO> dataSources = this.dataSourceService.listDataSources(PageRequest.of(page, size));
+	public ResponseEntity<Page<DataSourceDTO>> listDataSources(@RequestParam int page, @RequestParam int size,
+			@RequestParam String sortBy) {
+		Page<DataSourceDTO> dataSources = this.dataSourceService.listDataSources(PageRequest.of(page, size, Sort.by(sortBy).ascending()));
 		return ResponseEntity.ok(dataSources);
 	}
 
