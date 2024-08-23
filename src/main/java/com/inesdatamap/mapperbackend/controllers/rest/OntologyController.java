@@ -2,6 +2,7 @@ package com.inesdatamap.mapperbackend.controllers.rest;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -60,8 +61,10 @@ public class OntologyController {
 	 */
 	@GetMapping(path = "")
 	@Operation(summary = "List all ontologies")
-	public ResponseEntity<Page<SearchOntologyDTO>> listOntologies(@RequestParam int page, @RequestParam int size) {
-		Page<SearchOntologyDTO> ontologies = this.ontologyService.listOntologies(PageRequest.of(page, size));
+	public ResponseEntity<Page<SearchOntologyDTO>> listOntologies(@RequestParam int page, @RequestParam int size,
+			@RequestParam String sortBy, String sortDir) {
+		Page<SearchOntologyDTO> ontologies = this.ontologyService
+				.listOntologies(PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDir), sortBy)));
 		return ResponseEntity.ok(ontologies);
 	}
 
