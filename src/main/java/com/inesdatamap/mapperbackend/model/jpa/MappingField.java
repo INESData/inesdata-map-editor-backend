@@ -13,7 +13,6 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * MappingField db entity representation
@@ -23,7 +22,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "MAPPING_FIELD")
 public class MappingField extends BaseEntity implements Serializable {
@@ -74,103 +72,4 @@ public class MappingField extends BaseEntity implements Serializable {
 	@OneToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ontology_id")
 	private Ontology ontology;
-
-	/**
-	 * @return the logicalTable
-	 */
-
-	public LogicalTable getLogicalTable() {
-		return this.logicalTable;
-	}
-
-	/**
-	 * @param logicalTable
-	 *            the logicalTable to set
-	 */
-
-	public void setLogicalTable(LogicalTable logicalTable) {
-		this.logicalTable = logicalTable;
-	}
-
-	/**
-	 * @return the logicalSource
-	 */
-
-	public LogicalSource getLogicalSource() {
-		return this.logicalSource;
-	}
-
-	/**
-	 * @param logicalSource
-	 *            the logicalSource to set
-	 */
-
-	public void setLogicalSource(LogicalSource logicalSource) {
-		this.logicalSource = logicalSource;
-	}
-
-	/**
-	 * @return the subject
-	 */
-
-	public SubjectMap getSubject() {
-		return this.subject;
-	}
-
-	/**
-	 * @param subject
-	 *            the subject to set
-	 */
-
-	public void setSubject(SubjectMap subject) {
-		this.subject = subject;
-	}
-
-	/**
-	 * @return the predicates
-	 */
-	public List<PredicateObjectMap> getPredicates() {
-		return new ArrayList<>(this.predicates);
-	}
-
-	/**
-	 * @param predicates
-	 *            the predicates to set The ontology associated with the mapping field.
-	 */
-	public void setPredicates(List<PredicateObjectMap> predicates) {
-		this.predicates = new ArrayList<>(predicates);
-	}
-
-	/**
-	 * @return the source
-	 */
-
-	public DataSource getSource() {
-		return this.source;
-	}
-
-	/**
-	 * @param source
-	 *            the source to set
-	 */
-	public void setSource(DataSource source) {
-		this.source = source;
-	}
-
-	/**
-	 * @return the ontology
-	 */
-
-	public Ontology getOntology() {
-		return this.ontology;
-	}
-
-	/**
-	 * @param ontology
-	 *            the ontology to set
-	 */
-	public void setOntology(Ontology ontology) {
-		this.ontology = ontology;
-	}
-
 }

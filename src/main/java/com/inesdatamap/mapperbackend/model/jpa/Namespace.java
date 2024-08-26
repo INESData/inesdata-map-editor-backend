@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * Namespace db entity representation
@@ -17,7 +16,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "NAMESPACE")
 public class Namespace extends BaseEntity implements Serializable {
@@ -38,35 +36,5 @@ public class Namespace extends BaseEntity implements Serializable {
 	 */
 	@Column(name = "iri")
 	private String iri;
-
-	/**
-	 * @return the prefix
-	 */
-	public String getPrefix() {
-		return this.prefix;
-	}
-
-	/**
-	 * @param prefix
-	 *            the prefix to set
-	 */
-	public void setPrefix(String prefix) {
-		this.prefix = prefix;
-	}
-
-	/**
-	 * @return the iri
-	 */
-	public String getIri() {
-		return this.iri;
-	}
-
-	/**
-	 * @param iri
-	 *            the iri to set
-	 */
-	public void setIri(String iri) {
-		this.iri = iri;
-	}
 
 }
