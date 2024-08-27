@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -46,7 +47,9 @@ class DataSourceControllerTest {
 		List<DataSourceDTO> dataSources = Arrays.asList(dataSourceDTO1, dataSourceDTO2);
 		Page<DataSourceDTO> page = new PageImpl<>(dataSources);
 
-		Mockito.when(this.dataSourceService.listDataSources(PageRequest.of(Constants.NUMBER_0, Constants.NUMBER_10))).thenReturn(page);
+		Mockito.when(this.dataSourceService
+				.listDataSources(PageRequest.of(Constants.NUMBER_0, Constants.NUMBER_10, Sort.by(Constants.SORT_BY_NAME).ascending())))
+				.thenReturn(page);
 
 		// test
 		ResponseEntity<Page<DataSourceDTO>> result = this.controller.listDataSources(Constants.NUMBER_0, Constants.NUMBER_10);
