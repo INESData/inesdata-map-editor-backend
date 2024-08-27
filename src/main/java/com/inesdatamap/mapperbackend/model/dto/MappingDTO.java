@@ -1,8 +1,5 @@
 package com.inesdatamap.mapperbackend.model.dto;
 
-import com.inesdatamap.mapperbackend.model.jpa.DataSource;
-import com.inesdatamap.mapperbackend.model.jpa.Ontology;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,10 +10,12 @@ import lombok.Setter;
 @Setter
 public class MappingDTO extends BaseEntityDTO {
 
+	private Long id;
+
 	private String name;
 
-	private Ontology ontology;
+	private OntologyDTO ontology;
 
-	private DataSource dataSource;
+	private DataSourceDTO dataSource;
 
 }
