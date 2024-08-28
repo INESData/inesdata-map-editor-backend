@@ -50,7 +50,7 @@ public class FileSourceController {
 	 *            to save
 	 * @param file
 	 *            file content to save
-	 * @return saved data source
+	 * @return saved file source
 	 */
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@Operation(summary = "Create given file source")
@@ -70,7 +70,7 @@ public class FileSourceController {
 	 *
 	 * @param fileSourceDTO
 	 *            to save
-	 * @return saved data source
+	 * @return saved file source
 	 */
 	@PutMapping(value = "/{id}")
 	@Operation(summary = "Updates given file source")

@@ -12,7 +12,7 @@ import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 
 /**
- * Utility for file validation and processinf
+ * Utility for file validation and file
  *
  * @author gmv
  */

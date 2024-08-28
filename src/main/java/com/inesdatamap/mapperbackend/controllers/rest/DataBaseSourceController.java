@@ -101,7 +101,7 @@ public class DataBaseSourceController {
 	 *
 	 * @param dataBaseSourceDTO
 	 *            to save
-	 * @return saved data source
+	 * @return saved data base source
 	 */
 	@PostMapping
 	@Operation(summary = "Create given data base source")
@@ -119,7 +119,7 @@ public class DataBaseSourceController {
 	 *            data base source identifier
 	 * @param dataBaseSourceDTO
 	 *            to update
-	 * @return updated data source
+	 * @return updated data base source
 	 */
 	@PutMapping(value = "/{id}")
 	@Operation(summary = "Update given data base source")

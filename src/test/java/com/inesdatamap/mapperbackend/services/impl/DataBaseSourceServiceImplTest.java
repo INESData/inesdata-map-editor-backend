@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.inesdatamap.mapperbackend.model.dto.DataBaseSourceDTO;
@@ -74,27 +75,33 @@ class DataBaseSourceServiceImplTest {
 
 	@Test
 	void updateDataBaseSource() {
+		// Inicializar los mocks
+		MockitoAnnotations.openMocks(this);
+
 		// Arrange
 		Long id = 1L;
 		DataBaseSourceDTO inputDto = new DataBaseSourceDTO();
 		DataBaseSource existingEntity = new DataBaseSource();
 		DataBaseSource updatedEntity = new DataBaseSource();
-		DataSourceDTO outputDto = new DataSourceDTO();
+		DataBaseSourceDTO outputDto = new DataBaseSourceDTO();
 
-		when(this.dataBaseSourceService.getEntity(id)).thenReturn(existingEntity);
+		// Config mocks
+		when(this.dataBaseSourceRepository.findById(id)).thenReturn(Optional.of(existingEntity));
 		doNothing().when(this.dataBaseSourceMapper).merge(inputDto, existingEntity);
-		when(this.dataSourceRepository.save(existingEntity)).thenReturn(updatedEntity);
+		when(this.dataBaseSourceRepository.save(existingEntity)).thenReturn(updatedEntity);
 		when(this.dataSourceMapper.entityToDto(updatedEntity)).thenReturn(outputDto);
 
 		// Act
 		DataSourceDTO result = this.dataBaseSourceService.updateDataBaseSource(id, inputDto);
 
 		// Assert
-		assertNotNull(result);
-		assertEquals(outputDto, result);
-		verify(this.dataBaseSourceService).getEntity(id);
+		assertNotNull(result, "The result should not be null");
+		assertEquals(outputDto, result, "The result should match the expected output DTO");
+
+		// Verify
+		verify(this.dataBaseSourceRepository).findById(id);
 		verify(this.dataBaseSourceMapper).merge(inputDto, existingEntity);
-		verify(this.dataSourceRepository).save(existingEntity);
+		verify(this.dataBaseSourceRepository).save(existingEntity);
 		verify(this.dataSourceMapper).entityToDto(updatedEntity);
 	}
 
