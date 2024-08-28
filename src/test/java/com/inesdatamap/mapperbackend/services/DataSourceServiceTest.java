@@ -6,7 +6,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,15 +19,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
-import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.DataBaseSource;
 import com.inesdatamap.mapperbackend.model.jpa.DataSource;
-import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.mappers.DataSourceMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
 import com.inesdatamap.mapperbackend.services.impl.DataSourceServiceImpl;
@@ -133,110 +129,6 @@ class DataSourceServiceTest {
 
 		// Verify
 		verify(this.dataSourceRepository, times(1)).deleteById(id);
-	}
-
-	@Test
-	void testCreateDataSourceWithFile() throws Exception {
-
-		// Mock data
-		DataSourceDTO dataSourceDto = new DataSourceDTO();
-		dataSourceDto.setType(DataSourceTypeEnum.FILE);
-		MockMultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", "header1,header2".getBytes());
-		FileSource fileSource = new FileSource();
-		fileSource.setFields("header1,header2");
-		fileSource.setFileName("test.csv");
-
-		// Mock behavior
-		when(this.dataSourceMapper.dataSourceDtoToFileSource(dataSourceDto)).thenReturn(fileSource);
-		when(this.dataSourceRepository.save(any(FileSource.class))).thenReturn(fileSource);
-		when(this.dataSourceMapper.dataSourceToDTO(any(FileSource.class))).thenReturn(dataSourceDto);
-
-		// Execute the method
-		DataSourceDTO result = this.dataSourceService.createDataSource(dataSourceDto, file);
-
-		// Verify
-		assertThat(result).isNotNull();
-		verify(this.dataSourceRepository, times(1)).save(any(FileSource.class));
-		verify(this.dataSourceMapper, times(1)).dataSourceToDTO(any(FileSource.class));
-	}
-
-	@Test
-	void testCreateDataSourceWithDatabase() {
-
-		// Mock data
-		DataSourceDTO dataSourceDto = new DataSourceDTO();
-		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
-
-		DataBaseSource dataBaseSource = new DataBaseSource();
-
-		// Mock behavior
-		when(this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDto)).thenReturn(dataBaseSource);
-		when(this.dataSourceRepository.save(any(DataBaseSource.class))).thenReturn(dataBaseSource);
-		when(this.dataSourceMapper.dataSourceToDTO(any(DataBaseSource.class))).thenReturn(dataSourceDto);
-
-		// Execute the method
-		DataSourceDTO result = this.dataSourceService.createDataSource(dataSourceDto, null);
-
-		// Verify
-		assertThat(result).isNotNull();
-		verify(this.dataSourceRepository, times(1)).save(any(DataBaseSource.class));
-		verify(this.dataSourceMapper, times(1)).dataSourceToDTO(any(DataBaseSource.class));
-	}
-
-	@Test
-	void testUpdateDataSourceWithFile() throws IOException {
-		// Mock data
-		Long id = 1L;
-		DataSourceDTO dataSourceDto = new DataSourceDTO();
-		dataSourceDto.setType(DataSourceTypeEnum.FILE);
-		FileSource existingFileSource = new FileSource();
-		FileSource updatedFileSource = new FileSource();
-		MockMultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv", "header1,header2".getBytes());
-
-		// Mock behavior
-		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(existingFileSource));
-		when(this.dataSourceMapper.dataSourceDtoToFileSource(dataSourceDto)).thenReturn(updatedFileSource);
-		when(this.dataSourceRepository.saveAndFlush(any(FileSource.class))).thenReturn(updatedFileSource);
-		when(this.dataSourceMapper.mergeFileSource(any(FileSource.class), any(FileSource.class))).thenReturn(updatedFileSource);
-		when(this.dataSourceMapper.entityToDto(any(FileSource.class))).thenReturn(dataSourceDto);
-
-		// Execute the method
-		DataSourceDTO result = this.dataSourceService.updateDataSource(id, dataSourceDto, file);
-
-		// Verify
-		assertThat(result).isNotNull();
-		verify(this.dataSourceRepository, times(1)).saveAndFlush(any(FileSource.class));
-		verify(this.dataSourceMapper, times(1)).mergeFileSource(any(FileSource.class), any(FileSource.class));
-		verify(this.dataSourceMapper, times(1)).entityToDto(any(FileSource.class));
-	}
-
-	@Test
-	void testUpdateDataSourceWithDatabase() {
-
-		// Mock data
-		Long id = 1L;
-		DataSourceDTO dataSourceDto = new DataSourceDTO();
-		dataSourceDto.setType(DataSourceTypeEnum.DATABASE);
-
-		DataBaseSource existingDataBaseSource = new DataBaseSource();
-		DataBaseSource updatedDataBaseSource = new DataBaseSource();
-
-		// Mock behavior
-		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(existingDataBaseSource));
-		when(this.dataSourceMapper.dataSourceDtoToDataBase(dataSourceDto)).thenReturn(updatedDataBaseSource);
-		when(this.dataSourceRepository.saveAndFlush(any(DataBaseSource.class))).thenReturn(updatedDataBaseSource);
-		when(this.dataSourceMapper.mergeDataBaseSource(any(DataBaseSource.class), any(DataBaseSource.class)))
-				.thenReturn(updatedDataBaseSource);
-		when(this.dataSourceMapper.entityToDto(any(DataBaseSource.class))).thenReturn(dataSourceDto);
-
-		// Execute the method
-		DataSourceDTO result = this.dataSourceService.updateDataSource(id, dataSourceDto, null);
-
-		// Verify
-		assertThat(result).isNotNull();
-		verify(this.dataSourceRepository, times(1)).saveAndFlush(any(DataBaseSource.class));
-		verify(this.dataSourceMapper, times(1)).mergeDataBaseSource(any(DataBaseSource.class), any(DataBaseSource.class));
-		verify(this.dataSourceMapper, times(1)).entityToDto(any(DataBaseSource.class));
 	}
 
 	@Test

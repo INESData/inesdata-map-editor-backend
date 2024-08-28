@@ -1,5 +1,8 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,10 +17,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.inesdatamap.mapperbackend.model.dto.DataBaseSourceDTO;
+import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.services.ClientDataSourceService;
+import com.inesdatamap.mapperbackend.services.DataBaseSourceService;
 import com.inesdatamap.mapperbackend.services.DataSourceService;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Unit tests for the {@link DataBaseSourceController}
@@ -34,6 +38,9 @@ class DataBaseSourceControllerTest {
 	@MockBean
 	private DataSourceService dataSourceService;
 
+	@MockBean
+	private DataBaseSourceService dataBaseSourceService;
+
 	@Autowired
 	private DataBaseSourceController controller;
 
@@ -42,10 +49,10 @@ class DataBaseSourceControllerTest {
 
 		// mock
 		List<String> tables = Arrays.asList("table1", "table2");
-		Mockito.when(clientDataSourceService.getTableNames(Mockito.anyLong(), Mockito.any())).thenReturn(tables);
+		Mockito.when(this.clientDataSourceService.getTableNames(Mockito.anyLong(), Mockito.any())).thenReturn(tables);
 
 		// test
-		ResponseEntity<List<String>> result = controller.getTableNames(1L);
+		ResponseEntity<List<String>> result = this.controller.getTableNames(1L);
 
 		// verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -57,10 +64,11 @@ class DataBaseSourceControllerTest {
 
 		// mock
 		List<String> columns = Arrays.asList("column1", "column2");
-		Mockito.when(clientDataSourceService.getColumnNames(Mockito.anyLong(), Mockito.anyString(), Mockito.any())).thenReturn(columns);
+		Mockito.when(this.clientDataSourceService.getColumnNames(Mockito.anyLong(), Mockito.anyString(), Mockito.any()))
+				.thenReturn(columns);
 
 		// test
-		ResponseEntity<List<String>> result = controller.getColumnNames(1L, "test");
+		ResponseEntity<List<String>> result = this.controller.getColumnNames(1L, "test");
 
 		// verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -73,12 +81,49 @@ class DataBaseSourceControllerTest {
 
 		// mock
 		List<String> columns = Arrays.asList("column1", "column2");
-		Mockito.when(clientDataSourceService.getColumnNames(Mockito.anyLong(), Mockito.anyString(), Mockito.any())).thenReturn(columns);
+		Mockito.when(this.clientDataSourceService.getColumnNames(Mockito.anyLong(), Mockito.anyString(), Mockito.any()))
+				.thenReturn(columns);
 
 		// test and assert
 		Assertions.assertThrows(IllegalArgumentException.class, () -> {
-			controller.getColumnNames(1L, "");
+			this.controller.getColumnNames(1L, "");
 		});
 
+	}
+
+	@Test
+	void testCreateDataBaseSource() {
+
+		DataSourceDTO dataSourceDTO = new DataSourceDTO();
+		DataBaseSourceDTO dataBaseSourceDTO = new DataBaseSourceDTO();
+
+		// Mock the service call
+		when(this.dataBaseSourceService.createDataBaseSource(Mockito.any(DataBaseSourceDTO.class))).thenReturn(dataSourceDTO);
+
+		// Test the controller method
+		ResponseEntity<DataSourceDTO> result = this.controller.createDataBaseSource(dataBaseSourceDTO);
+
+		// Verify and assert
+		assertEquals(HttpStatus.CREATED, result.getStatusCode());
+		assertEquals(dataSourceDTO, result.getBody());
+	}
+
+	@Test
+	void testUpdateDataBaseSource() {
+
+		DataSourceDTO dataSourceDTO = new DataSourceDTO();
+		DataBaseSourceDTO dataBaseSourceDTO = new DataBaseSourceDTO();
+
+		Long id = 1L;
+		// Mock the service call
+		when(this.dataBaseSourceService.updateDataBaseSource(Mockito.eq(id), Mockito.any(DataBaseSourceDTO.class)))
+				.thenReturn(dataSourceDTO);
+
+		// Test the controller method
+		ResponseEntity<DataSourceDTO> result = this.controller.updateDataBaseSource(id, dataBaseSourceDTO);
+
+		// Verify and assert
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals(dataSourceDTO, result.getBody());
 	}
 }
