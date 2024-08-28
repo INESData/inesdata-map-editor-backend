@@ -2,6 +2,8 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,11 +12,13 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,6 +29,8 @@ import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.mappers.FileSourceMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.FileSourceRepository;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
+
+import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Unit tests for the {@link FileSourceServiceImpl}
@@ -79,6 +85,45 @@ class FileSourceServiceImplTest {
 		verify(this.fileSourceRepository).save(fileSourceEntity);
 		verify(this.fileSourceMapper).toDTO(savedFileSourceEntity);
 		verify(file, times(1)).getInputStream();
+	}
+
+	@Test
+	void testUpdateFileSource() {
+		// Inicializar los mocks
+		MockitoAnnotations.openMocks(this);
+
+		// Arrange
+		Long id = 1L;
+		FileSourceDTO inputDto = new FileSourceDTO();
+		FileSource fileSourceEntity = new FileSource();
+		FileSourceDTO outputDto = new FileSourceDTO();
+
+		// Configuración de mocks
+		when(this.fileSourceRepository.findById(id)).thenReturn(Optional.of(fileSourceEntity));
+		doNothing().when(this.fileSourceMapper).merge(inputDto, fileSourceEntity);
+		when(this.fileSourceMapper.toDTO(fileSourceEntity)).thenReturn(outputDto);
+
+		// Act
+		DataSourceDTO result = this.fileSourceService.updateFileSource(id, inputDto);
+
+		// Assert
+		assertNotNull(result); // Asegura que el resultado no es null
+		assertEquals(outputDto, result); // Asegura que el resultado es igual al esperado
+		verify(this.fileSourceRepository).findById(id);
+		verify(this.fileSourceMapper).merge(inputDto, fileSourceEntity);
+		verify(this.fileSourceMapper).toDTO(fileSourceEntity);
+	}
+
+	@Test
+	void testGetEntity() {
+		// Mock data
+		Long id = 1L;
+
+		// Mock behavior
+		Mockito.when(this.fileSourceRepository.findById(id)).thenReturn(Optional.empty());
+
+		// Test & Verify
+		assertThrows(EntityNotFoundException.class, () -> this.fileSourceService.getEntity(id));
 	}
 
 }
