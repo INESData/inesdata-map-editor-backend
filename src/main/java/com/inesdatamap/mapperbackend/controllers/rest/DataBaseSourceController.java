@@ -129,4 +129,19 @@ public class DataBaseSourceController {
 		return ResponseEntity.ok(this.dataBaseSourceService.updateDataBaseSource(id, dataBaseSourceDTO));
 	}
 
+	/**
+	 * Get the given data base source.
+	 *
+	 * @param id
+	 *            identifier
+	 *
+	 * @return The data base source
+	 */
+	@GetMapping("/{id}")
+	@Operation(summary = "Gets given data base source")
+	public ResponseEntity<DataBaseSourceDTO> listDataSources(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Data source identifier", required = true) Long id) {
+		return ResponseEntity.ok(this.dataBaseSourceService.getDataBaseSourceById(id));
+	}
+
 }

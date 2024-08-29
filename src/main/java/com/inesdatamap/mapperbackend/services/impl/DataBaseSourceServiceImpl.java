@@ -101,4 +101,16 @@ public class DataBaseSourceServiceImpl implements DataBaseSourceService {
 				.orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id.toString()));
 	}
 
+	/**
+	 * Retrieves a DataBaseSourceDTO by its identifier.
+	 *
+	 * @param id
+	 *            the unique identifier of the data base source entity
+	 * @return the data base source dto corresponding to the given ID
+	 */
+	@Override
+	public DataBaseSourceDTO getDataBaseSourceById(Long id) {
+		return this.dataBaseSourceMapper.toDTO(this.getEntity(id));
+	}
+
 }

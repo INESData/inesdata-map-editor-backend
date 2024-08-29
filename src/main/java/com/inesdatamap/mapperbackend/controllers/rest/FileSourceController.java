@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -78,6 +79,21 @@ public class FileSourceController {
 			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier to update", required = true) Long id,
 			@RequestBody @Parameter(name = "fileSource", description = "The file source to update", required = true) FileSourceDTO fileSourceDTO) {
 		return ResponseEntity.ok(this.fileSourceService.updateFileSource(id, fileSourceDTO));
+	}
+
+	/**
+	 * Get the given data file source.
+	 *
+	 * @param id
+	 *            identifier
+	 *
+	 * @return The data file source
+	 */
+	@GetMapping("/{id}")
+	@Operation(summary = "Gets given data file source")
+	public ResponseEntity<FileSourceDTO> listDataSources(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
+		return ResponseEntity.ok(this.fileSourceService.getFileSourceById(id));
 	}
 
 }

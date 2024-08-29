@@ -38,4 +38,13 @@ public interface DataBaseSourceService {
 	 */
 	DataSource getEntity(Long id);
 
+	/**
+	 * Get data base source by id
+	 *
+	 * @param id
+	 *            Id
+	 * @return The data base source
+	 */
+	DataBaseSourceDTO getDataBaseSourceById(Long id);
+
 }

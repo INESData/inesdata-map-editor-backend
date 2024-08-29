@@ -43,4 +43,13 @@ public interface FileSourceService {
 	 */
 	FileSource getEntity(Long id);
 
+	/**
+	 * Get file source by id
+	 *
+	 * @param id
+	 *            Id
+	 * @return The data file source
+	 */
+	FileSourceDTO getFileSourceById(Long id);
+
 }

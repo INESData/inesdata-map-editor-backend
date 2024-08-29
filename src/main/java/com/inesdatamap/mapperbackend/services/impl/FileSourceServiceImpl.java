@@ -64,6 +64,15 @@ public class FileSourceServiceImpl implements FileSourceService {
 		return this.fileSourceMapper.toDTO(savedFileSource);
 	}
 
+	/**
+	 * Updates an existing file source
+	 *
+	 * @param id
+	 *            The identifier of the file source to be updated
+	 * @param fileSourceDTO
+	 *            The FileSourceDTO
+	 * @return the updated file source.
+	 */
 	@Override
 	public DataSourceDTO updateFileSource(Long id, FileSourceDTO fileSourceDTO) {
 
@@ -91,6 +100,19 @@ public class FileSourceServiceImpl implements FileSourceService {
 	public FileSource getEntity(Long id) {
 		return this.fileSourceRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id.toString()));
+	}
+
+	/**
+	 * Retrieves a FileSourceDTO by its identifier.
+	 *
+	 * @param id
+	 *            the unique identifier of the file source entity
+	 * @return the file source dto corresponding to the given ID
+	 */
+	@Override
+	public FileSourceDTO getFileSourceById(Long id) {
+		return this.fileSourceMapper.entityToDto(this.getEntity(id));
+
 	}
 
 }
