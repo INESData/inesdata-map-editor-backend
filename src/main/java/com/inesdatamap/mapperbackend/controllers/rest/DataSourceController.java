@@ -5,20 +5,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.services.DataSourceService;
@@ -74,45 +69,6 @@ public class DataSourceController {
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Data source identifier to delete", required = true) Long id) {
 		this.dataSourceService.deleteDataSource(id);
 		return ResponseEntity.noContent().build();
-	}
-
-	/**
-	 * Saves the given data source
-	 *
-	 * @param dataSourceDTO
-	 *            to save
-	 * @param file
-	 *            file content to save
-	 * @return saved data source
-	 */
-	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	@Operation(summary = "Create given data source")
-	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<DataSourceDTO> createDataSource(
-			@RequestPart("body") @Parameter(name = "dataSource", description = "The data source to save", required = true) DataSourceDTO dataSourceDTO,
-			@RequestPart(value = "file", required = false) MultipartFile file) {
-		DataSourceDTO createdDataSource = this.dataSourceService.createDataSource(dataSourceDTO, file);
-		return ResponseEntity.status(HttpStatus.CREATED).body(createdDataSource);
-	}
-
-	/**
-	 * Updates the given data source
-	 *
-	 * @param id
-	 *            data source identifier
-	 * @param dataSourceDto
-	 *            to update
-	 * @param file
-	 *            file content to update
-	 * @return updated data source
-	 */
-	@PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	@Operation(summary = "Update given data source")
-	public ResponseEntity<DataSourceDTO> updateDataSource(
-			@PathVariable(name = "id") @Parameter(name = "id", description = "Data source identifier to update", required = true) Long id,
-			@RequestPart("body") @Parameter(name = "dataSource", description = "The data source to update", required = true) DataSourceDTO dataSourceDto,
-			@RequestPart(value = "file", required = false) MultipartFile file) {
-		return ResponseEntity.ok(this.dataSourceService.updateDataSource(id, dataSourceDto, file));
 	}
 
 }
