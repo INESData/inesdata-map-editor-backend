@@ -76,8 +76,6 @@ public class OntologyController {
 	 *            ontology identifier
 	 * @param ontologyDto
 	 *            to update
-	 * @param file
-	 *            file content to update
 	 * @return updated ontology
 	 */
 	@PutMapping("/{id}")

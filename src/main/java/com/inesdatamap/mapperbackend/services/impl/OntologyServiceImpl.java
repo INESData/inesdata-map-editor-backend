@@ -50,8 +50,6 @@ public class OntologyServiceImpl implements OntologyService {
 	 *            the ID of the ontology to update
 	 * @param ontologyDto
 	 *            the OntologyDTO
-	 * @param file
-	 *            file content to update
 	 * @return the updated ontology
 	 */
 	@Override
