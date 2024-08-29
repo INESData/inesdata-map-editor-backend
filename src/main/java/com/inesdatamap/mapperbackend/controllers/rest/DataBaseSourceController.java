@@ -139,7 +139,7 @@ public class DataBaseSourceController {
 	 */
 	@GetMapping("/{id}")
 	@Operation(summary = "Gets given data base source")
-	public ResponseEntity<DataBaseSourceDTO> listDataSources(
+	public ResponseEntity<DataBaseSourceDTO> getDataBaseSource(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Data source identifier", required = true) Long id) {
 		return ResponseEntity.ok(this.dataBaseSourceService.getDataBaseSourceById(id));
 	}

@@ -91,7 +91,7 @@ public class FileSourceController {
 	 */
 	@GetMapping("/{id}")
 	@Operation(summary = "Gets given data file source")
-	public ResponseEntity<FileSourceDTO> listDataSources(
+	public ResponseEntity<FileSourceDTO> getFileSource(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
 		return ResponseEntity.ok(this.fileSourceService.getFileSourceById(id));
 	}

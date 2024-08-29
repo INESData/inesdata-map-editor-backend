@@ -55,7 +55,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @return the updated ontology
 	 */
 	@Override
-	public OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto, MultipartFile file) {
+	public OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto) {
 
 		if (ontologyDto == null) {
 			throw new IllegalArgumentException("The ontology has no data to update");
@@ -63,12 +63,6 @@ public class OntologyServiceImpl implements OntologyService {
 
 		// Get DB entity
 		Ontology ontologyDB = this.getEntity(id);
-
-		if (file != null && !file.isEmpty()) {
-
-			// Read file content
-			FileUtils.processFileContent(file, ontologyDB);
-		}
 
 		// New ontology to save
 		Ontology ontologySource = this.ontologyMapper.dtoToEntity(ontologyDto);

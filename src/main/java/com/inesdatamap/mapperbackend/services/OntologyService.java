@@ -40,11 +40,10 @@ public interface OntologyService {
 	 *            the ID of the ontology to update
 	 * @param ontologyDto
 	 *            the OntologyDTO
-	 * @param file
-	 *            file content to update
+	 * 
 	 * @return the updated ontology
 	 */
-	OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto, MultipartFile file);
+	OntologyDTO updateOntology(Long id, OntologyDTO ontologyDto);
 
 	/**
 	 * Deletes an ontology by its id.

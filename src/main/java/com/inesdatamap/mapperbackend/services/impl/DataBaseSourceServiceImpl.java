@@ -89,11 +89,11 @@ public class DataBaseSourceServiceImpl implements DataBaseSourceService {
 	}
 
 	/**
-	 * Retrieves an ontology entity by its ID.
+	 * Retrieves a data base source entity by its ID.
 	 *
 	 * @param id
-	 *            the ID of the ontology to retrieve
-	 * @return the ontology entity corresponding to the given ID
+	 *            the ID of the data base source to retrieve
+	 * @return the data base source entity corresponding to the given ID
 	 */
 	@Override
 	public DataBaseSource getEntity(Long id) {

@@ -79,13 +79,12 @@ public class OntologyController {
 	 *            file content to update
 	 * @return updated ontology
 	 */
-	@PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PutMapping("/{id}")
 	@Operation(summary = "Update given ontology")
 	public ResponseEntity<OntologyDTO> updateOntology(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier to update", required = true) Long id,
-			@RequestPart("body") @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontologyDto,
-			@RequestPart(value = "file", required = false) MultipartFile file) {
-		return ResponseEntity.ok(this.ontologyService.updateOntology(id, ontologyDto, file));
+			@RequestPart("body") @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontologyDto) {
+		return ResponseEntity.ok(this.ontologyService.updateOntology(id, ontologyDto));
 	}
 
 	/**
