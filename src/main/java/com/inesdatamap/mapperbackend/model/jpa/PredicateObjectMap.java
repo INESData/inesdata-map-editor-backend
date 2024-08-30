@@ -13,7 +13,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * ObjectMap db entity representation
@@ -23,7 +22,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "PREDICATE_OBJECT_MAP")
 public class PredicateObjectMap extends BaseEntity implements Serializable {
@@ -45,35 +43,5 @@ public class PredicateObjectMap extends BaseEntity implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "object_map_id")
 	private List<ObjectMap> objectMap = new ArrayList<>();
-
-	/**
-	 * @return the predicate
-	 */
-	public String getPredicate() {
-		return this.predicate;
-	}
-
-	/**
-	 * @param predicate
-	 *            the predicate to set
-	 */
-	public void setPredicate(String predicate) {
-		this.predicate = predicate;
-	}
-
-	/**
-	 * @return the objectMap
-	 */
-	public List<ObjectMap> getObjectMap() {
-		return new ArrayList<>(this.objectMap);
-	}
-
-	/**
-	 * @param objectMap
-	 *            the objectMap to set
-	 */
-	public void setObjectMap(List<ObjectMap> objectMap) {
-		this.objectMap = new ArrayList<>(objectMap);
-	}
 
 }
