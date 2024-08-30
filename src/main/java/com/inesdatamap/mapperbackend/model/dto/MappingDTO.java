@@ -10,8 +10,6 @@ import lombok.Setter;
 @Setter
 public class MappingDTO extends BaseEntityDTO {
 
-	private Long id;
-
 	private String name;
 
 	private OntologyDTO ontology;
