@@ -1,6 +1,5 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -78,83 +76,6 @@ class OntologyServiceImplTest {
 		// Verify
 		assertEquals(searchOntologyDTOPage.getTotalElements(), result.getTotalElements());
 		assertEquals(searchOntologyDTOPage.getContent().size(), result.getContent().size());
-	}
-
-	@Test
-	void testUpdateOntology_withFile() throws IOException {
-		// Arrange
-		Long id = 1L;
-		OntologyDTO dto = new OntologyDTO();
-		dto.setName("Updated Ontology");
-
-		// Simulate file upload
-		MockMultipartFile file = new MockMultipartFile("file", "testfile.csv", "text/csv", "File content".getBytes());
-
-		Ontology ontologyDB = new Ontology();
-		Ontology ontologySource = new Ontology();
-		Ontology ontologyUpdated = new Ontology();
-
-		when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontologyDB));
-		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(ontologySource);
-		when(this.ontologyMapper.merge(ontologySource, ontologyDB)).thenReturn(ontologyUpdated);
-		when(this.ontologyRepo.saveAndFlush(ontologyUpdated)).thenReturn(ontologyUpdated);
-		when(this.ontologyMapper.entityToDto(ontologyUpdated)).thenReturn(dto);
-
-		// Act
-		OntologyDTO result = this.ontologyService.updateOntology(id, dto, file);
-
-		// Assert
-		assertEquals(dto, result);
-		verify(this.ontologyRepo).saveAndFlush(ontologyUpdated);
-		assertArrayEquals("File content".getBytes(), ontologyDB.getContent());
-	}
-
-	@Test
-	void testUpdateOntology_exceptions() throws IOException {
-		Long id = 1L;
-
-		// Mock the getEntity method to return a valid ontology
-		Ontology ontology = new Ontology();
-		Mockito.when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontology));
-
-		// OntologyDto is valid, file is null (no exception is thrown)
-		OntologyDTO dto = new OntologyDTO();
-		when(this.ontologyMapper.dtoToEntity(dto)).thenReturn(new Ontology());
-
-		assertDoesNotThrow(() -> {
-			this.ontologyService.updateOntology(id, dto, null);
-		});
-
-		// OntologyDto is valid, file is empty (no exception is thrown)
-		MultipartFile emptyFile = mock(MultipartFile.class);
-		when(emptyFile.isEmpty()).thenReturn(true);
-
-		assertDoesNotThrow(() -> {
-			this.ontologyService.updateOntology(id, dto, emptyFile);
-		});
-
-		// OntologyDto is valid, file has content and is processed correctly
-		MultipartFile validFile = mock(MultipartFile.class);
-		when(validFile.isEmpty()).thenReturn(false);
-		when(validFile.getBytes()).thenReturn("valid content".getBytes());
-		when(validFile.getContentType()).thenReturn("application/json");
-
-		assertDoesNotThrow(() -> {
-			this.ontologyService.updateOntology(id, dto, validFile);
-		});
-
-		// OntologyDto is valid, file has a read error (should throw UncheckedIOException)
-		MultipartFile fileWithError = mock(MultipartFile.class);
-		when(fileWithError.isEmpty()).thenReturn(false);
-		when(fileWithError.getContentType()).thenReturn("application/json");
-
-		// Mock the file read error
-		when(fileWithError.getBytes()).thenThrow(new IOException("Failed to read file"));
-
-		UncheckedIOException exception = assertThrows(UncheckedIOException.class, () -> {
-			this.ontologyService.updateOntology(id, dto, fileWithError);
-		});
-		assertEquals("Failed to store file content", exception.getMessage());
 	}
 
 	@Test
@@ -243,7 +164,6 @@ class OntologyServiceImplTest {
 		MultipartFile validFile = mock(MultipartFile.class);
 		when(validFile.isEmpty()).thenReturn(false);
 		when(validFile.getBytes()).thenReturn("valid content".getBytes());
-		when(validFile.getContentType()).thenReturn("text/csv");
 
 		assertDoesNotThrow(() -> {
 			this.ontologyService.createOntology(dto, validFile);

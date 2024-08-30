@@ -1,9 +1,9 @@
 package com.inesdatamap.mapperbackend.model.dto;
 
-import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
-import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,22 +14,10 @@ import lombok.Setter;
 @Setter
 public class DataSourceDTO extends BaseEntityDTO {
 
+	@NotNull
+	@Size(min = 1, max = 255)
 	private String name;
 
 	private DataSourceTypeEnum type;
-
-	private String connectionString;
-
-	private String userName;
-
-	private String password;
-
-	private DataBaseTypeEnum databaseType;
-
-	private String fileName;
-
-	private String fields;
-
-	private DataFileTypeEnum fileType;
 
 }

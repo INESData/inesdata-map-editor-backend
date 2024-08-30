@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +58,9 @@ class OntologyControllerTest {
 		List<SearchOntologyDTO> ontologies = Arrays.asList(ontology1, ontology2);
 		Page<SearchOntologyDTO> page = new PageImpl<>(ontologies);
 
-		Mockito.when(this.ontologyService.listOntologies(PageRequest.of(Constants.NUMBER_0, Constants.NUMBER_10))).thenReturn(page);
+		Mockito.when(this.ontologyService
+				.listOntologies(PageRequest.of(Constants.NUMBER_0, Constants.NUMBER_10, Sort.by(Constants.SORT_BY_NAME).ascending())))
+				.thenReturn(page);
 
 		// test
 		ResponseEntity<Page<SearchOntologyDTO>> result = this.controller.listOntologies(Constants.NUMBER_0, Constants.NUMBER_10);
@@ -77,9 +80,9 @@ class OntologyControllerTest {
 		MultipartFile file = new MockMultipartFile("file", "filename.csv", "text/csv", "file content".getBytes());
 
 		// Configure mock for service
-		Mockito.when(this.ontologyService.updateOntology(id, ontologyDto, file)).thenReturn(updatedOntology);
+		Mockito.when(this.ontologyService.updateOntology(id, ontologyDto)).thenReturn(updatedOntology);
 
-		ResponseEntity<OntologyDTO> result = this.controller.updateOntology(id, ontologyDto, file);
+		ResponseEntity<OntologyDTO> result = this.controller.updateOntology(id, ontologyDto);
 
 		// verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());

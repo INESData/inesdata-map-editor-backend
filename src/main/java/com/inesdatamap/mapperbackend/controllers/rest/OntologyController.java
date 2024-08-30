@@ -2,6 +2,7 @@ package com.inesdatamap.mapperbackend.controllers.rest;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.services.OntologyService;
+import com.inesdatamap.mapperbackend.utils.Constants;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -61,7 +64,8 @@ public class OntologyController {
 	@GetMapping(path = "")
 	@Operation(summary = "List all ontologies")
 	public ResponseEntity<Page<SearchOntologyDTO>> listOntologies(@RequestParam int page, @RequestParam int size) {
-		Page<SearchOntologyDTO> ontologies = this.ontologyService.listOntologies(PageRequest.of(page, size));
+		Page<SearchOntologyDTO> ontologies = this.ontologyService
+				.listOntologies(PageRequest.of(page, size, Sort.by(Constants.SORT_BY_NAME).ascending()));
 		return ResponseEntity.ok(ontologies);
 	}
 
@@ -72,17 +76,14 @@ public class OntologyController {
 	 *            ontology identifier
 	 * @param ontologyDto
 	 *            to update
-	 * @param file
-	 *            file content to update
 	 * @return updated ontology
 	 */
-	@PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	@PutMapping("/{id}")
 	@Operation(summary = "Update given ontology")
 	public ResponseEntity<OntologyDTO> updateOntology(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier to update", required = true) Long id,
-			@RequestPart("body") @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontologyDto,
-			@RequestPart(value = "file", required = false) MultipartFile file) {
-		return ResponseEntity.ok(this.ontologyService.updateOntology(id, ontologyDto, file));
+			@RequestBody @Parameter(name = "ontology", description = "The ontology to update", required = true) OntologyDTO ontologyDto) {
+		return ResponseEntity.ok(this.ontologyService.updateOntology(id, ontologyDto));
 	}
 
 	/**
