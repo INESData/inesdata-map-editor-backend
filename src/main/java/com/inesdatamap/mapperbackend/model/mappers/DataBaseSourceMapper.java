@@ -51,6 +51,7 @@ public abstract class DataBaseSourceMapper implements BaseEntityMapper<DataBaseS
 	 * @param dataBaseSource
 	 *            The DataBaseSource entity to be updated
 	 */
+	@Mapping(target = "password", expression = "java(dataBaseSourceDTO.getPassword()!= null ? passwordEncoder.encode(dataBaseSourceDTO.getPassword()) : dataBaseSource.getPassword())")
 	public abstract void merge(DataBaseSourceDTO dataBaseSourceDTO, @MappingTarget DataBaseSource dataBaseSource);
 
 }
