@@ -63,7 +63,7 @@ public class MappingField extends BaseEntity implements Serializable {
 	 * The source associated with the mapping field.
 	 */
 	@OneToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "data_source_id")
+	@JoinColumn(name = "source_id")
 	private DataSource source;
 
 	/**

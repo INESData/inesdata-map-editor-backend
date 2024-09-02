@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,7 +36,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	/**
 	 * The name of the mapping.
 	 */
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	private String name;
 
 	/**
@@ -50,7 +51,8 @@ public class Mapping extends BaseEntity implements Serializable {
 	 */
 	@Lob
 	@Column(name = "rml")
-	private String rml;
+	@Basic(fetch = FetchType.LAZY)
+	private byte[] rml;
 
 	/**
 	 * Namespaces associated with the mapping.
