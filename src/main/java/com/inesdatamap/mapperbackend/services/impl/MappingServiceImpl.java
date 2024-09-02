@@ -88,7 +88,7 @@ public class MappingServiceImpl implements MappingService {
 	public void deleteMapping(Long id) {
 
 		// Get entity if exists
-		Mapping mapping = this.getEntity(id);
+		this.getEntity(id);
 
 		this.mappingRepo.deleteById(id);
 
