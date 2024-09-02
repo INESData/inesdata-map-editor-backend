@@ -52,9 +52,6 @@ public class MappingServiceImpl implements MappingService {
 			if (mapping.getName() != null && !mapping.getName().isEmpty()) {
 				searchMapping.setName(mapping.getName());
 			}
-			byte[] rmlValue = new byte[100];
-
-			mapping.setRml(rmlValue);
 
 			List<String> ontologies = new ArrayList<>();
 			List<String> dataSources = new ArrayList<>();
