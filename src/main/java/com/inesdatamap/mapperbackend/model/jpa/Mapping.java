@@ -9,7 +9,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -42,8 +41,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	/**
 	 * Fields associated with the mapping.
 	 */
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "mapping_id")
+	@OneToMany(mappedBy = "mapping", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<MappingField> fields = new ArrayList<>();
 
 	/**
@@ -57,8 +55,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	/**
 	 * Namespaces associated with the mapping.
 	 */
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "mapping_id")
+	@OneToMany(mappedBy = "mapping", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Namespace> namespaces = new ArrayList<>();
 
 }

@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,5 +39,12 @@ public class Namespace extends BaseEntity implements Serializable {
 	 */
 	@Column(name = "iri")
 	private String iri;
+
+	/**
+	 * The mapping associated with the namespace.
+	 */
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@JoinColumn(name = "mapping_id")
+	private Mapping mapping;
 
 }

@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -20,6 +21,7 @@ import lombok.Setter;
  * @author gmv
  *
  */
+
 @Getter
 @Setter
 @Entity
@@ -40,8 +42,14 @@ public class PredicateObjectMap extends BaseEntity implements Serializable {
 	/**
 	 * The object map associated with the predicate.
 	 */
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "object_map_id")
+	@OneToMany(mappedBy = "predicateObjectMap", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ObjectMap> objectMap = new ArrayList<>();
+
+	/**
+	 * The mapping field associated with the predicate object map.
+	 */
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@JoinColumn(name = "mapping_field_id")
+	private MappingField mappingField;
 
 }
