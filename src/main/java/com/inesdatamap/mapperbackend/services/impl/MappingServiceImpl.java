@@ -79,7 +79,7 @@ public class MappingServiceImpl implements MappingService {
 	}
 
 	/**
-	 * Deletes an mapping by its id.
+	 * Deletes a mapping by its id.
 	 *
 	 * @param id
 	 *            the ID of the mapping to delete
