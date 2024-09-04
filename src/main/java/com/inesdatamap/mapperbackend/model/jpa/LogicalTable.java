@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * Logical table entity representation
@@ -17,7 +16,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "LOGICAL_TABLE")
 public class LogicalTable extends BaseEntity implements Serializable {
@@ -38,35 +36,4 @@ public class LogicalTable extends BaseEntity implements Serializable {
 	 */
 	@Column(name = "query")
 	private String query;
-
-	/**
-	 * @return the tableName
-	 */
-	public String getTableName() {
-		return this.tableName;
-	}
-
-	/**
-	 * @param tableName
-	 *            the tableName to set
-	 */
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
-
-	/**
-	 * @return the query
-	 */
-	public String getQuery() {
-		return this.query;
-	}
-
-	/**
-	 * @param query
-	 *            the query to set
-	 */
-	public void setQuery(String query) {
-		this.query = query;
-	}
-
 }

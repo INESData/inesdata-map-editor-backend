@@ -7,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * Logical source entity representation
@@ -17,7 +16,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "LOGICAL_SOURCE")
 public class LogicalSource extends BaseEntity implements Serializable {
@@ -50,65 +48,4 @@ public class LogicalSource extends BaseEntity implements Serializable {
 	 */
 	@Column(name = "query")
 	private String query;
-
-	/**
-	 * @return the source
-	 */
-	public String getSource() {
-		return this.source;
-	}
-
-	/**
-	 * @param source
-	 *            the source to set
-	 */
-	public void setSource(String source) {
-		this.source = source;
-	}
-
-	/**
-	 * @return the referenceFormulation
-	 */
-	public String getReferenceFormulation() {
-		return this.referenceFormulation;
-	}
-
-	/**
-	 * @param referenceFormulation
-	 *            the referenceFormulation to set
-	 */
-	public void setReferenceFormulation(String referenceFormulation) {
-		this.referenceFormulation = referenceFormulation;
-	}
-
-	/**
-	 * @return the iterator
-	 */
-	public String getIterator() {
-		return this.iterator;
-	}
-
-	/**
-	 * @param iterator
-	 *            the iterator to set
-	 */
-	public void setIterator(String iterator) {
-		this.iterator = iterator;
-	}
-
-	/**
-	 * @return the query
-	 */
-	public String getQuery() {
-		return this.query;
-	}
-
-	/**
-	 * @param query
-	 *            the query to set
-	 */
-	public void setQuery(String query) {
-		this.query = query;
-	}
-
 }

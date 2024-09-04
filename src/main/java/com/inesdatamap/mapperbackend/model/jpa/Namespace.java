@@ -4,10 +4,12 @@ import java.io.Serializable;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * Namespace db entity representation
@@ -17,7 +19,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "NAMESPACE")
 public class Namespace extends BaseEntity implements Serializable {
@@ -40,33 +41,10 @@ public class Namespace extends BaseEntity implements Serializable {
 	private String iri;
 
 	/**
-	 * @return the prefix
+	 * The mapping associated with the namespace.
 	 */
-	public String getPrefix() {
-		return this.prefix;
-	}
-
-	/**
-	 * @param prefix
-	 *            the prefix to set
-	 */
-	public void setPrefix(String prefix) {
-		this.prefix = prefix;
-	}
-
-	/**
-	 * @return the iri
-	 */
-	public String getIri() {
-		return this.iri;
-	}
-
-	/**
-	 * @param iri
-	 *            the iri to set
-	 */
-	public void setIri(String iri) {
-		this.iri = iri;
-	}
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@JoinColumn(name = "mapping_id")
+	private Mapping mapping;
 
 }
