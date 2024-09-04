@@ -24,10 +24,10 @@ ENV JAVA_HOME=/opt/java/openjdk
 COPY --from=eclipse-temurin:17-jre $JAVA_HOME $JAVA_HOME
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-# Where to download dependencies
-ARG INDEX_URL
+COPY ./lib ./lib
 
-RUN pip install inesdata-mov-datasets --index-url "$INDEX_URL"  --upgrade --pre
+# Install dependencies
+RUN pip install ./lib/kg_generation-0.1.0-py3-none-any.whl
 
 # System env vars
 ENV USER_NAME=mapper

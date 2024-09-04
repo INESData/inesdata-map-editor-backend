@@ -57,7 +57,12 @@ public enum BaseErrorCode implements ErrorCode {
 	/**
 	 * Business Key
 	 */
-	BUSINESS_KEY("BUSINESS_KEY", 500);
+	BUSINESS_KEY("BUSINESS_KEY", 500),
+
+	/**
+	 * Graph engine error
+	 */
+	GRAPH_ENGINE_ERROR("GRAPH_ENGINE_ERROR", 500);
 
 	/**
 	 * Code error
@@ -73,9 +78,9 @@ public enum BaseErrorCode implements ErrorCode {
 	 * Private constructor
 	 *
 	 * @param code
-	 * 		error code
+	 * 	error code
 	 * @param status
-	 * 		error estatus
+	 * 	error estatus
 	 */
 	BaseErrorCode(String code, Integer status) {
 		this.code = code;
@@ -106,7 +111,7 @@ public enum BaseErrorCode implements ErrorCode {
 	 * Find an enum value by status. If a status is assigned to multiple enum values, get the first occurrence
 	 *
 	 * @param status
-	 * 		the status
+	 * 	the status
 	 *
 	 * @return {@link ErrorCode} enum value
 	 */

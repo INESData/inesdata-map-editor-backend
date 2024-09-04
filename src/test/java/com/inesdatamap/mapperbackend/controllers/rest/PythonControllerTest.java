@@ -15,17 +15,17 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Unit tests for the {@link PythonController}
+ * Unit tests for the {@link GraphEngineController}
  *
  * @author gmv
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = PythonController.class)
+@ContextConfiguration(classes = GraphEngineController.class)
 class PythonControllerTest {
 
 	@Autowired
 	@InjectMocks
-	private PythonController controller;
+	private GraphEngineController controller;
 
 	@Test
 	void getTest() throws IOException {
