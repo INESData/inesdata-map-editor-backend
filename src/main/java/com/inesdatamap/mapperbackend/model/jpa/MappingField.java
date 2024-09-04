@@ -8,12 +8,12 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * MappingField db entity representation
@@ -23,7 +23,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "MAPPING_FIELD")
 public class MappingField extends BaseEntity implements Serializable {
@@ -57,15 +56,14 @@ public class MappingField extends BaseEntity implements Serializable {
 	/**
 	 * The predicates associated with the mapping field.
 	 */
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "mapping_field_id")
+	@OneToMany(mappedBy = "mappingField", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<PredicateObjectMap> predicates = new ArrayList<>();
 
 	/**
 	 * The source associated with the mapping field.
 	 */
 	@OneToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "data_source_id")
+	@JoinColumn(name = "source_id")
 	private DataSource source;
 
 	/**
@@ -76,101 +74,9 @@ public class MappingField extends BaseEntity implements Serializable {
 	private Ontology ontology;
 
 	/**
-	 * @return the logicalTable
+	 * The mapping associated with the mapping field.
 	 */
-
-	public LogicalTable getLogicalTable() {
-		return this.logicalTable;
-	}
-
-	/**
-	 * @param logicalTable
-	 *            the logicalTable to set
-	 */
-
-	public void setLogicalTable(LogicalTable logicalTable) {
-		this.logicalTable = logicalTable;
-	}
-
-	/**
-	 * @return the logicalSource
-	 */
-
-	public LogicalSource getLogicalSource() {
-		return this.logicalSource;
-	}
-
-	/**
-	 * @param logicalSource
-	 *            the logicalSource to set
-	 */
-
-	public void setLogicalSource(LogicalSource logicalSource) {
-		this.logicalSource = logicalSource;
-	}
-
-	/**
-	 * @return the subject
-	 */
-
-	public SubjectMap getSubject() {
-		return this.subject;
-	}
-
-	/**
-	 * @param subject
-	 *            the subject to set
-	 */
-
-	public void setSubject(SubjectMap subject) {
-		this.subject = subject;
-	}
-
-	/**
-	 * @return the predicates
-	 */
-	public List<PredicateObjectMap> getPredicates() {
-		return new ArrayList<>(this.predicates);
-	}
-
-	/**
-	 * @param predicates
-	 *            the predicates to set The ontology associated with the mapping field.
-	 */
-	public void setPredicates(List<PredicateObjectMap> predicates) {
-		this.predicates = new ArrayList<>(predicates);
-	}
-
-	/**
-	 * @return the source
-	 */
-
-	public DataSource getSource() {
-		return this.source;
-	}
-
-	/**
-	 * @param source
-	 *            the source to set
-	 */
-	public void setSource(DataSource source) {
-		this.source = source;
-	}
-
-	/**
-	 * @return the ontology
-	 */
-
-	public Ontology getOntology() {
-		return this.ontology;
-	}
-
-	/**
-	 * @param ontology
-	 *            the ontology to set
-	 */
-	public void setOntology(Ontology ontology) {
-		this.ontology = ontology;
-	}
-
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@JoinColumn(name = "mapping_id")
+	private Mapping mapping;
 }

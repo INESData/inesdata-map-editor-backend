@@ -9,11 +9,11 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 /**
  * ObjectMap db entity representation
@@ -23,7 +23,6 @@ import lombok.ToString;
  */
 @Getter
 @Setter
-@ToString
 @Entity
 @Table(name = "OBJECT_MAP")
 public class ObjectMap extends BaseEntity implements Serializable {
@@ -53,50 +52,9 @@ public class ObjectMap extends BaseEntity implements Serializable {
 	private List<ObjectMap> objectValue = new ArrayList<>();
 
 	/**
-	 * @return the key
+	 * The predicate object map associated with the mapping field.
 	 */
-
-	public String getKey() {
-		return this.key;
-	}
-
-	/**
-	 * @param key
-	 *            the key to set
-	 */
-	public void setKey(String key) {
-		this.key = key;
-	}
-
-	/**
-	 * @return the literalValue
-	 */
-	public String getLiteralValue() {
-		return this.literalValue;
-	}
-
-	/**
-	 * @param literalValue
-	 *            the literalValue to set
-	 */
-	public void setLiteralValue(String literalValue) {
-		this.literalValue = literalValue;
-	}
-
-	/**
-	 * @return the objectValue
-	 */
-
-	public List<ObjectMap> getObjectValue() {
-		return new ArrayList<>(this.objectValue);
-	}
-
-	/**
-	 * @param objectValue
-	 *            the objectValue to set
-	 */
-	public void setObjectValue(List<ObjectMap> objectValue) {
-		this.objectValue = new ArrayList<>(objectValue);
-	}
-
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
+	@JoinColumn(name = "predicate_object_map_id")
+	private PredicateObjectMap predicateObjectMap;
 }
