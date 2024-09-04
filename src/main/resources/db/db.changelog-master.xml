@@ -7,6 +7,6 @@
 
 	<include file="classpath:db/changelog/db.changelog-1.0.0.xml"/>
 	<include file="classpath:db/changelog/db.changelog-1.0.1.xml"/>
-	<include file="classpath:db/changelog/db.changelog-1.0.2.xml"/>
+	<include file="classpath:db/changelog/db.changelog-1.1.0.xml"/>
 
 </databaseChangeLog>

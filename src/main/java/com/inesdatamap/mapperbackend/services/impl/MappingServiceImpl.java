@@ -46,12 +46,8 @@ public class MappingServiceImpl implements MappingService {
 		// Iterate mappings page
 		for (Mapping mapping : mappingsPage) {
 			SearchMappingDTO searchMapping = new SearchMappingDTO();
-			if (mapping.getId() != null) {
-				searchMapping.setId(mapping.getId());
-			}
-			if (mapping.getName() != null && !mapping.getName().isEmpty()) {
-				searchMapping.setName(mapping.getName());
-			}
+			searchMapping.setId(mapping.getId());
+			searchMapping.setName(mapping.getName());
 
 			List<String> ontologies = new ArrayList<>();
 			List<String> dataSources = new ArrayList<>();
