@@ -75,6 +75,7 @@ class FileSourceServiceImplTest {
 		when(file.getInputStream()).thenReturn(inputStream);
 		when(file.isEmpty()).thenReturn(false);
 		when(file.getContentType()).thenReturn("text/csv");
+		when(file.getOriginalFilename()).thenReturn("file.csv");
 
 		// Configuración de mocks adicionales
 		when(this.fileSourceRepository.save(any())).thenReturn(savedFileSourceEntity);
@@ -122,6 +123,7 @@ class FileSourceServiceImplTest {
 		when(file.getInputStream()).thenReturn(inputStream);
 		when(file.isEmpty()).thenReturn(false);
 		when(file.getContentType()).thenReturn("text/csv");
+		when(file.getOriginalFilename()).thenReturn("file.csv");
 
 		// Configuración de mocks adicionales
 		when(this.fileSourceRepository.save(any())).thenReturn(savedFileSourceEntity);
