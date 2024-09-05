@@ -8,6 +8,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.exceptions.FileCreationException;
@@ -103,7 +104,7 @@ public final class FileUtils {
 		try {
 
 			Files.createDirectories(Paths.get(path));
-			file.transferTo(new File(String.join(File.separator, path, file.getOriginalFilename())));
+			file.transferTo(new File(String.join(File.separator, path, FilenameUtils.getName(file.getOriginalFilename()))));
 
 		} catch (IOException e) {
 			throw new FileCreationException("Failed to save file: " + path, e);

@@ -2,6 +2,7 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import java.io.File;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,7 +74,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 			// Set values in FileSource
 			savedFileSource.setFields(headers);
-			savedFileSource.setFileName(file.getOriginalFilename());
+			savedFileSource.setFileName(FilenameUtils.getName(file.getOriginalFilename()));
 			savedFileSource.setFilePath(filePath);
 
 			// Save file

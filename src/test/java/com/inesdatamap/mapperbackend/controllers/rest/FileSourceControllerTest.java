@@ -1,8 +1,5 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -16,9 +13,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.dto.FileSourceDTO;
-import com.inesdatamap.mapperbackend.model.mappers.FileSourceMapper;
-import com.inesdatamap.mapperbackend.repositories.jpa.FileSourceRepository;
 import com.inesdatamap.mapperbackend.services.FileSourceService;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link FileSourceController}
@@ -34,12 +32,6 @@ class FileSourceControllerTest {
 
 	@Autowired
 	private FileSourceController fileSourceController;
-
-	@MockBean
-	private FileSourceMapper fileSourceMapper;
-
-	@MockBean
-	private FileSourceRepository fileSourceRepository;
 
 	@Test
 	void testUpdateFileSource() {
