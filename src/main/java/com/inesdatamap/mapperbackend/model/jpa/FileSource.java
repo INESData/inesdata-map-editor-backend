@@ -35,6 +35,12 @@ public class FileSource extends DataSource implements Serializable {
 	private String fileName;
 
 	/**
+	 * The path of the file.
+	 */
+	@Column(name = "file_path")
+	private String filePath;
+
+	/**
 	 * The fields of the file or data.
 	 */
 	@Column(name = "fields")

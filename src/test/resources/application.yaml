@@ -20,3 +20,9 @@ spring:
   # Liquibase (desactivado para los tests)
   liquibase:
     enabled: false
+
+# Datasource paths
+datasource-paths:
+  rml: /test/tmp
+  data-input: /test/input
+  data-output: /test/output
