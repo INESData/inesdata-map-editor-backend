@@ -21,10 +21,6 @@ spring:
   liquibase:
     enabled: false
 
-logging:
-  level:
-    org.springframework.boot.context.config: "trace"
-
 # Datasource paths
 datasource-paths:
   rml: /test/tmp

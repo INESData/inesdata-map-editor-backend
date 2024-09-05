@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @ExtendWith(SpringExtension.class)
 @EnableConfigurationProperties(value = DatasourcePathsProperties.class)
-@TestPropertySource(properties = { "spring.config.location=classpath:application-test.yaml" })
+@TestPropertySource(properties = { "spring.config.location=classpath:application.yaml" })
 @ContextConfiguration(initializers = ConfigDataApplicationContextInitializer.class)
 class DatasourcePathsPropertiesTest {
 
