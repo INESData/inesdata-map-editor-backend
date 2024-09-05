@@ -13,7 +13,10 @@ Run:
 ```
 docker build -f docker/Dockerfile --build-arg INDEX_URL= --tag com.inesdata-map/mapper-backend .
 ```
-For starting a container, run:
+
+A volume is needed to store the datasource's files. It is important that it is mounted into the same directory as defined on the properties `DATASOURCEPATHS_DATAINPUT` and `DATASOURCEPATHS_DATAOUTPUT`.
+ 
+For starting a container, run the following command:
 ```
-docker run --name mapper-backend -p 8080:8080 -d --env-file ./docker/env.list com.inesdata-map/mapper-backend:latest
+docker run --name mapper-backend -p 8080:8080 -d --env-file ./docker/env.list -v $(pwd)/inesdata-map-data:/data -d com.inesdata-map/mapper-backend:latest
 ```
