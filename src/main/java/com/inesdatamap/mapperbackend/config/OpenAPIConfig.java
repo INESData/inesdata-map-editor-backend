@@ -1,7 +1,12 @@
 package com.inesdatamap.mapperbackend.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 import com.inesdatamap.mapperbackend.properties.RestApiInfoProperties;
 
@@ -13,6 +18,18 @@ import io.swagger.v3.oas.models.info.Info;
  */
 @Configuration
 public class OpenAPIConfig {
+
+	/**
+	 * Constructor
+	 *
+	 * @param converter
+	 * 	the Jackson converter
+	 */
+	public OpenAPIConfig(MappingJackson2HttpMessageConverter converter) {
+		List<MediaType> supportedMediaTypes = new ArrayList<>(converter.getSupportedMediaTypes());
+		supportedMediaTypes.add(MediaType.APPLICATION_OCTET_STREAM);
+		converter.setSupportedMediaTypes(supportedMediaTypes);
+	}
 
 	/**
 	 * Gets the OpenAPI info from properties

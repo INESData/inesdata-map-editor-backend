@@ -20,3 +20,13 @@ spring:
   # Liquibase (desactivado para los tests)
   liquibase:
     enabled: false
+
+logging:
+  level:
+    org.springframework.boot.context.config: "trace"
+
+# Datasource paths
+datasource-paths:
+  rml: /test/tmp
+  data-input: /test/input
+  data-output: /test/output
