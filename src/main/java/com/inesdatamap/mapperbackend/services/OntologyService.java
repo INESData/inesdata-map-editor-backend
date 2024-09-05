@@ -1,7 +1,10 @@
 package com.inesdatamap.mapperbackend.services;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
@@ -24,12 +27,12 @@ public interface OntologyService {
 	Ontology getEntity(Long id);
 
 	/**
-	 * Retrieves all ontologies.
+	 * Retrieves all ontologies paginated.
 	 *
 	 * @param pageable
 	 *            pageable
 	 *
-	 * @return List of ontologies
+	 * @return List of ontologies paginated
 	 */
 	Page<SearchOntologyDTO> listOntologies(Pageable pageable);
 
@@ -63,5 +66,25 @@ public interface OntologyService {
 	 * @return the saved ontology
 	 */
 	OntologyDTO createOntology(OntologyDTO ontologyDto, MultipartFile file);
+
+	/**
+	 * Retrieves all ontologies.
+	 *
+	 * @param ascending
+	 *            ascending
+	 *
+	 * @return List of ontologies
+	 */
+	List<SearchOntologyDTO> getOntologies(Sort ascending);
+
+	/**
+	 * Gets all ontology classes.
+	 *
+	 * @param id
+	 *            ontology identifier
+	 *
+	 * @return Ontology classes
+	 */
+	List<String> getOntologyClasses(Long id);
 
 }

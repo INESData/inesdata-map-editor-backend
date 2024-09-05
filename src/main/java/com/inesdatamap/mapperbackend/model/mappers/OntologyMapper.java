@@ -1,5 +1,7 @@
 package com.inesdatamap.mapperbackend.model.mappers;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
@@ -21,5 +23,14 @@ public interface OntologyMapper extends BaseEntityMapper<OntologyDTO, Ontology> 
 	 * @return the corresponding SearchOntologyDTO DTO
 	 */
 	SearchOntologyDTO entitytoSearchOntologyDTO(Ontology ontology);
+
+	/**
+	 * Converts a list of Ontology entities to a list of SearchOntologyDTO DTOs.
+	 *
+	 * @param ontologiesList
+	 *            the list of Ontology entities to be converted
+	 * @return a list of SearchOntologyDTO objects corresponding to the input entities
+	 */
+	List<SearchOntologyDTO> entitytoSearchOntologyDTO(List<Ontology> ontologiesList);
 
 }

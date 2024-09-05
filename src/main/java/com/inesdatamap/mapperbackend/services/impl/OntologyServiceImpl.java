@@ -1,8 +1,11 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -129,6 +132,35 @@ public class OntologyServiceImpl implements OntologyService {
 	@Override
 	public Ontology getEntity(Long id) {
 		return this.ontologyRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id.toString()));
+	}
+
+	@Override
+	public List<SearchOntologyDTO> getOntologies(Sort nameSort) {
+
+		List<Ontology> ontologiesList = this.ontologyRepo.findAll(nameSort);
+
+		return this.ontologyMapper.entitytoSearchOntologyDTO(ontologiesList);
+
+	}
+
+	/**
+	 * Retrieves all class names from an ontology specified by its ID.
+	 *
+	 * @param id
+	 *            the ID of the ontology entity to be retrieved from the database
+	 * @return a list of class names extracted from the ontology
+	 */
+	@Override
+	public List<String> getOntologyClasses(Long id) {
+
+		// Get entity from DB
+		Ontology ontology = this.getEntity(id);
+
+		// Read ontology file content
+		String ontologyContent = FileUtils.getOntologyContent(ontology);
+
+		// Get all classes in ontology and return list
+		return FileUtils.getClasses(ontologyContent);
 	}
 
 }
