@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * OpenAPI configuration test
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = OpenAPIConfig.class)
+@ContextConfiguration(classes = { OpenAPIConfig.class, MappingJackson2HttpMessageConverter.class })
 @EnableConfigurationProperties(value = RestApiInfoProperties.class)
 @TestPropertySource(properties = { "info.rest-api.name=test-micro", "info.rest-api.description=test-description",
 	"info.rest-api.version=test-version" })
