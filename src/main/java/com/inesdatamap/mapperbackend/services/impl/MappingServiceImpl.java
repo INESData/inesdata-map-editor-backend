@@ -1,5 +1,8 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,17 +12,18 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.inesdatamap.mapperbackend.exceptions.GraphEngineException;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
 import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
+import com.inesdatamap.mapperbackend.services.GraphEngineService;
 import com.inesdatamap.mapperbackend.services.MappingService;
 
 import jakarta.persistence.EntityNotFoundException;
 
 /**
  * Implementation of the MappingService interface.
- *
  */
 @Service
 public class MappingServiceImpl implements MappingService {
@@ -27,11 +31,14 @@ public class MappingServiceImpl implements MappingService {
 	@Autowired
 	private MappingRepository mappingRepo;
 
+	@Autowired
+	private GraphEngineService graphEngineService;
+
 	/**
 	 * Retrieves a list of all mappings and maps them to their corresponding DTOs.
 	 *
 	 * @param pageable
-	 *            pageable
+	 * 	pageable
 	 *
 	 * @return List of MappingsDTOs
 	 */
@@ -78,7 +85,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Deletes a mapping by its id.
 	 *
 	 * @param id
-	 *            the ID of the mapping to delete
+	 * 	the ID of the mapping to delete
 	 */
 	@Override
 	public void deleteMapping(Long id) {
@@ -94,12 +101,43 @@ public class MappingServiceImpl implements MappingService {
 	 * Retrieves a MappingField entity by its ID.
 	 *
 	 * @param id
-	 *            the ID of the MappingField to retrieve
+	 * 	the ID of the MappingField to retrieve
+	 *
 	 * @return the MappingField entity corresponding to the given ID
 	 */
 	@Override
 	public Mapping getEntity(Long id) {
-		return this.mappingRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id.toString()));
+		return this.mappingRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id));
+	}
+
+	/**
+	 * Materializes a mapping by its id.
+	 *
+	 * @param id
+	 * 	the ID of the mapping to materialize
+	 */
+	@Override
+	public void materialize(Long id) throws IOException {
+
+		Mapping mapping = this.getEntity(id);
+
+		// Create temporary file
+		File rmlTmpFile = File.createTempFile(String.join("_", "mapping", mapping.getId().toString(), mapping.getName()), null);
+
+		// Write RML to temporary file
+		Files.write(rmlTmpFile.toPath(), mapping.getRml());
+
+		try {
+			this.graphEngineService.run(rmlTmpFile.getAbsolutePath());
+		} catch (GraphEngineException e) {
+			// Delete temporary file
+			Files.delete(rmlTmpFile.toPath());
+			throw e;
+		} finally {
+			// Delete temporary file
+			Files.delete(rmlTmpFile.toPath());
+		}
+
 	}
 
 }

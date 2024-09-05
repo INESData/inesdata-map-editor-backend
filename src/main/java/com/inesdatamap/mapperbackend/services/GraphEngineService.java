@@ -10,11 +10,11 @@ public interface GraphEngineService {
 	/**
 	 * Run the graph engine
 	 *
-	 * @return the result
+	 * @param rml
+	 * 	the RML content
 	 *
-	 * @throws InterruptedException
-	 * 	the exception
+	 * @return the result
 	 */
-	List<String> run() throws InterruptedException;
+	List<String> run(String rml);
 
 }

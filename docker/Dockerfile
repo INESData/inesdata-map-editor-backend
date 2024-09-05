@@ -10,11 +10,9 @@ RUN mvn dependency:go-offline -B
 # Copy everything to current working directory
 COPY ./src ./src
 
-# Build
-RUN mvn package -Dmaven.test.skip=true
-
-# Remove unnecessary jar files
-RUN rm target/*.jar.original &&\
+# Build and remove unnecessary jar files
+RUN mvn package -Dmaven.test.skip=true && \
+	rm target/*.jar.original && \
     rm target/*-javadoc.jar
 
 # Python base image

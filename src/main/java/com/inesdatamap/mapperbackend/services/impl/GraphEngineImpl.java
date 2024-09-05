@@ -22,10 +22,10 @@ public class GraphEngineImpl implements GraphEngineService {
 	/**
 	 * Logger
 	 */
-	protected final Log logger = LogFactory.getLog(this.getClass());
+	protected final Log LOGGER = LogFactory.getLog(this.getClass());
 
 	@Override
-	public List<String> run() throws InterruptedException {
+	public List<String> run(String rml) {
 
 		ProcessBuilder processBuilder = new ProcessBuilder("python", "-m", "kg_generation", "--help");
 		processBuilder.redirectErrorStream(true);
@@ -38,12 +38,18 @@ public class GraphEngineImpl implements GraphEngineService {
 			results = readProcessOutput(process.getInputStream());
 
 			int exitCode = process.waitFor();
-			logger.info("ExitCode: " + exitCode);
+			LOGGER.info("ExitCode: " + exitCode);
 
 			if (exitCode != 0) {
 				throw new GraphEngineException(results.toString(), null);
 			}
+
 		} catch (IOException e) {
+			throw new GraphEngineException("GraphEngine error", e);
+		} catch (InterruptedException e) {
+			LOGGER.warn("Thread interrupted!");
+			// Restore interrupted state...
+			Thread.currentThread().interrupt();
 			throw new GraphEngineException("GraphEngine error", e);
 		}
 
