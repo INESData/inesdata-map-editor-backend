@@ -11,7 +11,7 @@ import com.inesdatamap.mapperbackend.controllers.errors.ErrorCode;
 public class FileCreationException extends BaseException {
 
 	@Serial
-	private static final long serialVersionUID = -8042818120450673744L;
+	private static final long serialVersionUID = 5808992052433690914L;
 	private static final ErrorCode CODE_ERROR = BaseErrorCode.UNEXPECTED_ERROR;
 
 	/**
