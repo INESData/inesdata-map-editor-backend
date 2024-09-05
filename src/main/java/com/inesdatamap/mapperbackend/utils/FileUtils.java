@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -104,7 +105,7 @@ public final class FileUtils {
 		try {
 
 			Files.createDirectories(Paths.get(path));
-			file.transferTo(new File(String.join(File.separator, path, FilenameUtils.getName(file.getOriginalFilename()))));
+			file.transferTo(new File(path, Objects.requireNonNull(FilenameUtils.getName(file.getOriginalFilename()))));
 
 		} catch (IOException e) {
 			throw new FileCreationException("Failed to save file: " + path, e);
