@@ -2,6 +2,7 @@ package com.inesdatamap.mapperbackend.services;
 
 import java.util.List;
 
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -84,8 +85,10 @@ public interface OntologyService {
 	 *            ontology identifier
 	 *
 	 * @return Ontology classes
+	 * @throws OWLOntologyCreationException
+	 *             if there is an error during the ontology creation process
 	 */
-	List<String> getOntologyClasses(Long id);
+	List<String> getOntologyClasses(Long id) throws OWLOntologyCreationException;
 
 	/**
 	 * Gets all ontology class attributes.
@@ -96,7 +99,9 @@ public interface OntologyService {
 	 *            ontologyClass
 	 *
 	 * @return Ontology class attributes
+	 * @throws OWLOntologyCreationException
+	 *             if there is an error during the ontology creation process
 	 */
-	List<String> getOntologyAttributes(Long id, String ontologyClass);
+	List<String> getOntologyAttributes(Long id, String ontologyClass) throws OWLOntologyCreationException;
 
 }

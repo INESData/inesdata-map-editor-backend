@@ -135,6 +135,11 @@ public final class FileUtils {
 	 */
 	public static String getOntologyContent(Ontology ontology) {
 
+		// Validate that the ontology is not null
+		if (ontology.getContent() == null) {
+			throw new IllegalArgumentException("Ontology has no content.");
+		}
+
 		// Get ontology bytes
 		byte[] contentBytes = ontology.getContent();
 
@@ -151,37 +156,37 @@ public final class FileUtils {
 	 * @param ontologyContent
 	 *            a string containing the ontology data in a format supported by OWL API
 	 * @return a list of class names as strings
-	 * @throws IllegalArgumentException
-	 *             if there is an error while creating or loading the ontology from the string content
+	 * @throws OWLOntologyCreationException
+	 *             if there is an error during the ontology creation process
 	 */
-	public static List<String> getClasses(String ontologyContent) throws IllegalArgumentException {
+	public static List<String> getClasses(String ontologyContent) throws OWLOntologyCreationException {
 
-		try {
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
-
-			// Create a list to store the classes as String
-			List<String> classList = new ArrayList<>();
-
-			// Iterating over all classes in the ontology
-			owl.classesInSignature().forEach(owlClass -> {
-
-				String className = owlClass.getIRI().getFragment();
-				// If there's no fragment, get name after last /
-				if (className == null) {
-					String iri = owlClass.getIRI().toString();
-					className = iri.substring(iri.lastIndexOf('/') + 1);
-				}
-
-				// Add the class to the list
-				classList.add(className);
-			});
-
-			// Return list with all classes
-			return classList;
-		} catch (OWLOntologyCreationException e) {
-			throw new IllegalArgumentException("The ontology could not be loaded or is invalid.", e);
+		if (ontologyContent == null || ontologyContent.isEmpty()) {
+			throw new IllegalArgumentException("Ontology content is empty.");
 		}
+
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+
+		// Create a list to store the classes as String
+		List<String> classList = new ArrayList<>();
+
+		// Check if the ontology contains classes
+		if (!owl.classesInSignature().iterator().hasNext()) {
+			return classList;
+		}
+
+		// Iterating over all classes in the ontology
+		owl.classesInSignature().forEach(owlClass -> {
+
+			String className = owlClass.getIRI().getFragment();
+
+			// Add the class to the list
+			classList.add(className);
+		});
+
+		// Return list with all classes
+		return classList;
 	}
 
 	/**
@@ -192,27 +197,30 @@ public final class FileUtils {
 	 * @param className
 	 *            The name of the class whose attributes are to be extracted.
 	 * @return A list of attributes for the specified class.
+	 * @throws OWLOntologyCreationException
+	 *             if there is an error during the ontology creation process
 	 */
-	public static List<String> getAttributes(String ontologyContent, String className) {
+	public static List<String> getAttributes(String ontologyContent, String className) throws OWLOntologyCreationException {
 
 		List<String> properties = new ArrayList<>();
-		try {
 
-			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-			OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
 
-			// Iterate over classes in the ontology and find the one that matches className
-			owl.classesInSignature().forEach(clazz -> {
-				// Get properties of the matching class
-				List<String> classProperties = getIndividuals(clazz, className, owl);
-
-				// Add the properties to the main list
-				properties.addAll(classProperties);
-			});
-
-		} catch (OWLOntologyCreationException e) {
-			throw new IllegalArgumentException("The ontology could not be loaded or is invalid.", e);
+		// Validate that class name is not null or empty
+		if (className == null || className.isEmpty()) {
+			throw new IllegalArgumentException("No class name selected.");
 		}
+
+		// Iterate over classes in the ontology and find the one that matches className
+		owl.classesInSignature().forEach(clazz -> {
+			// Get properties of the matching class
+			List<String> classProperties = getIndividuals(clazz, className, owl);
+
+			// Add the properties to the main list
+			properties.addAll(classProperties);
+		});
+
 		return properties;
 
 	}
@@ -233,9 +241,13 @@ public final class FileUtils {
 		// Get class name from clazz
 		String classFragment = clazz.getIRI().getFragment();
 
+		if (classFragment == null || classFragment.isEmpty()) {
+			throw new IllegalArgumentException("There is no class in the ontology.");
+		}
+
 		List<String> properties = new ArrayList<>();
 		// Check if ontology contains received class name
-		if (classFragment != null && classFragment.equals(className)) {
+		if (classFragment.equals(className)) {
 
 			// Find data properties for class
 			Set<OWLDataProperty> dataProperties = owl.dataPropertiesInSignature().collect(Collectors.toSet());
@@ -248,8 +260,6 @@ public final class FileUtils {
 					properties.add(dataProperty.getIRI().getFragment());
 				}
 			}
-		} else {
-			System.out.println("Class does not match: " + className);
 		}
 		return properties;
 	}

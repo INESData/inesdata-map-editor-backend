@@ -2,6 +2,7 @@ package com.inesdatamap.mapperbackend.controllers.rest;
 
 import java.util.List;
 
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -142,11 +143,14 @@ public class OntologyController {
 	 *            ontology identifier
 	 *
 	 * @return Ontology classes
+	 * @throws OWLOntologyCreationException
+	 *             if there is an error during the ontology creation process
 	 */
 	@GetMapping("/{id}")
 	@Operation(summary = "Get all ontology classes")
 	public ResponseEntity<List<String>> getOntologyClasses(
-			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier", required = true) Long id) {
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier", required = true) Long id)
+			throws OWLOntologyCreationException {
 		List<String> classes = this.ontologyService.getOntologyClasses(id);
 		return ResponseEntity.ok(classes);
 	}
@@ -161,12 +165,15 @@ public class OntologyController {
 	 *            ontologyClass
 	 *
 	 * @return Ontology class attributes
+	 * @throws OWLOntologyCreationException
+	 *             if there is an error during the ontology creation process
 	 */
 	@GetMapping("/{id}/{ontologyClass}")
 	@Operation(summary = "Get all ontology attributes")
 	public ResponseEntity<List<String>> getOntologyAttributes(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier", required = true) Long id,
-			@PathVariable(name = "ontologyClass") @Parameter(name = "ontologyClass", description = "Ontology class", required = true) String ontologyClass) {
+			@PathVariable(name = "ontologyClass") @Parameter(name = "ontologyClass", description = "Ontology class", required = true) String ontologyClass)
+			throws OWLOntologyCreationException {
 		List<String> classes = this.ontologyService.getOntologyAttributes(id, ontologyClass);
 		return ResponseEntity.ok(classes);
 	}

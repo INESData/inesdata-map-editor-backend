@@ -2,6 +2,7 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import java.util.List;
 
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -149,9 +150,11 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param id
 	 *            the ID of the ontology
 	 * @return a list of class names extracted from the ontology
+	 * @throws OWLOntologyCreationException
+	 *             if there is an error during the ontology creation process
 	 */
 	@Override
-	public List<String> getOntologyClasses(Long id) {
+	public List<String> getOntologyClasses(Long id) throws OWLOntologyCreationException {
 
 		// Get entity from DB
 		Ontology ontology = this.getEntity(id);
@@ -171,10 +174,12 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @param className
 	 *            The name of the class whose attributes are to be retrieved.
 	 * @return A list of attributes for the specified class from the ontology.
+	 * @throws OWLOntologyCreationException
+	 *             if there is an error during the ontology creation process
 	 *
 	 */
 	@Override
-	public List<String> getOntologyAttributes(Long id, String className) {
+	public List<String> getOntologyAttributes(Long id, String className) throws OWLOntologyCreationException {
 
 		// Get entity
 		Ontology ontology = this.getEntity(id);
