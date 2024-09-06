@@ -38,7 +38,6 @@ public interface OntologyMapper extends BaseEntityMapper<OntologyDTO, Ontology> 
 	/**
 	 * Merges the properties from the source Ontology entity into the target Ontology entity.target entity, except for the `content` field,
 	 * which is explicitly ignored.
-	 * </p>
 	 *
 	 * @param source
 	 *            the source Ontology entity containing the updated data
