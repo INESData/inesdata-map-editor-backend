@@ -147,7 +147,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 * Retrieves all class names from an ontology specified by its ID.
 	 *
 	 * @param id
-	 *            the ID of the ontology entity to be retrieved from the database
+	 *            the ID of the ontology
 	 * @return a list of class names extracted from the ontology
 	 */
 	@Override
@@ -161,6 +161,28 @@ public class OntologyServiceImpl implements OntologyService {
 
 		// Get all classes in ontology and return list
 		return FileUtils.getClasses(ontologyContent);
+	}
+
+	/**
+	 * Retrieves a list of attributes for a specified class from an ontology identified by its ID.
+	 *
+	 * @param id
+	 *            The ID of the ontology entity to retrieve.
+	 * @param className
+	 *            The name of the class whose attributes are to be retrieved.
+	 * @return A list of attributes for the specified class from the ontology.
+	 *
+	 */
+	@Override
+	public List<String> getOntologyAtributtes(Long id, String className) {
+
+		// Get entity
+		Ontology ontology = this.getEntity(id);
+
+		// Read ontology file content
+		String ontologyContent = FileUtils.getOntologyContent(ontology);
+
+		return FileUtils.getAtributtes(ontologyContent, className);
 	}
 
 }

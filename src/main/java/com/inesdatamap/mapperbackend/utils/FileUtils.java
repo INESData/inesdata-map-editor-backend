@@ -7,12 +7,17 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.search.EntitySearcher;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
@@ -154,6 +159,76 @@ public final class FileUtils {
 		} catch (OWLOntologyCreationException e) {
 			throw new IllegalArgumentException("The ontology could not be loaded or is invalid.", e);
 		}
+	}
+
+	/**
+	 * Extracts and returns a list of attributes for a specified class from an ontology represented by the given ontology content.
+	 *
+	 * @param ontologyContent
+	 *            The content of the ontology as a string.
+	 * @param className
+	 *            The name of the class whose attributes are to be extracted.
+	 * @return A list of attributes for the specified class.
+	 */
+	public static List<String> getAtributtes(String ontologyContent, String className) {
+
+		List<String> properties = new ArrayList<>();
+		try {
+
+			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+			OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+
+			// Iterate over classes in the ontology and find the one that matches className
+			owl.classesInSignature().forEach(clazz -> {
+				// Get properties of the matching class
+				List<String> classProperties = getIndividuals(clazz, className, owl);
+
+				// Add the properties to the main list
+				properties.addAll(classProperties);
+			});
+
+		} catch (OWLOntologyCreationException e) {
+			throw new IllegalArgumentException("The ontology could not be loaded or is invalid.", e);
+		}
+		return properties;
+
+	}
+
+	/**
+	 * Retrieves the data properties associated with a specified class from the given ontology.
+	 *
+	 * @param clazz
+	 *            The OWL class whose properties are to be retrieved.
+	 * @param className
+	 *            The name of the class to match against the provided OWL class.
+	 * @param owl
+	 *            The OWL ontology from which to retrieve the properties.
+	 * @return A list of data property names (fragments) associated with the specified class.
+	 */
+	public static List<String> getIndividuals(OWLClass clazz, String className, OWLOntology owl) {
+
+		// Get class name from clazz
+		String classFragment = clazz.getIRI().getFragment();
+
+		List<String> properties = new ArrayList<>();
+		// Check if ontology contains received class name
+		if (classFragment != null && classFragment.equals(className)) {
+
+			// Find data properties for class
+			Set<OWLDataProperty> dataProperties = owl.dataPropertiesInSignature().collect(Collectors.toSet());
+			for (OWLDataProperty dataProperty : dataProperties) {
+
+				// Check if the class is a domain of the data property
+				boolean isDomain = EntitySearcher.getDomains(dataProperty, owl).anyMatch(domain -> domain.equals(clazz));
+
+				if (isDomain) {
+					properties.add(dataProperty.getIRI().getFragment());
+				}
+			}
+		} else {
+			System.out.println("Class does not match: " + className);
+		}
+		return properties;
 	}
 
 }

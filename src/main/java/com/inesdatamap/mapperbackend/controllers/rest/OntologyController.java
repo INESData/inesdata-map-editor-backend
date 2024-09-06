@@ -150,4 +150,24 @@ public class OntologyController {
 		List<String> classes = this.ontologyService.getOntologyClasses(id);
 		return ResponseEntity.ok(classes);
 	}
+
+	/**
+	 * Gets all ontology class atributtes.
+	 *
+	 * @param id
+	 *            ontology identifier
+	 *
+	 * @param ontologyClass
+	 *            ontologyClass
+	 *
+	 * @return Ontology class atributtes
+	 */
+	@GetMapping("/{id}/{ontologyClass}")
+	@Operation(summary = "Get all ontology atributtes")
+	public ResponseEntity<List<String>> getOntologyAtributtes(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier", required = true) Long id,
+			@PathVariable(name = "ontologyClass") @Parameter(name = "ontologyClass", description = "Ontology class", required = true) String ontologyClass) {
+		List<String> classes = this.ontologyService.getOntologyAtributtes(id, ontologyClass);
+		return ResponseEntity.ok(classes);
+	}
 }
