@@ -24,7 +24,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
@@ -77,7 +76,6 @@ class OntologyControllerTest {
 		Long id = 1L;
 		OntologyDTO ontologyDto = new OntologyDTO();
 		OntologyDTO updatedOntology = new OntologyDTO();
-		MultipartFile file = new MockMultipartFile("file", "filename.csv", "text/csv", "file content".getBytes());
 
 		// Configure mock for service
 		Mockito.when(this.ontologyService.updateOntology(id, ontologyDto)).thenReturn(updatedOntology);
@@ -140,6 +138,63 @@ class OntologyControllerTest {
 		this.mockMvc.perform(multipart("/ontologies").file(jsonBody).contentType(MediaType.MULTIPART_FORM_DATA_VALUE))
 				.andExpect(status().isCreated()) // Changed from isOk() to isCreated()
 				.andExpect(jsonPath("$.name").value("Test Ontology"));
+	}
+
+	@Test
+	void testGetOntologies() {
+		// Arrange
+		SearchOntologyDTO ontology1 = new SearchOntologyDTO();
+		ontology1.setName("Ontology 1");
+
+		SearchOntologyDTO ontology2 = new SearchOntologyDTO();
+		ontology2.setName("Ontology 2");
+
+		List<SearchOntologyDTO> ontologies = Arrays.asList(ontology1, ontology2);
+
+		// Configurar mock para el servicio
+		Mockito.when(this.ontologyService.getOntologies(Sort.by(Constants.SORT_BY_NAME).ascending())).thenReturn(ontologies);
+
+		// Actuar: Llamar al método del controlador
+		ResponseEntity<List<SearchOntologyDTO>> result = this.controller.getOntologies();
+
+		// Verificaciones y aserciones
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals(ontologies, result.getBody());
+	}
+
+	@Test
+	void testGetOntologyClasses() {
+		// Arrange
+		Long ontologyId = 1L;
+		List<String> ontologyClasses = Arrays.asList("Class1", "Class2", "Class3");
+
+		// Configurar mock para el servicio
+		Mockito.when(this.ontologyService.getOntologyClasses(ontologyId)).thenReturn(ontologyClasses);
+
+		// Actuar: Llamar al método del controlador
+		ResponseEntity<List<String>> result = this.controller.getOntologyClasses(ontologyId);
+
+		// Verificaciones y aserciones
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals(ontologyClasses, result.getBody());
+	}
+
+	@Test
+	void testGetOntologyAttributes() {
+		// Arrange
+		Long ontologyId = 1L;
+		String ontologyClass = "TestOntologyClass";
+		List<String> ontologyAttributes = Arrays.asList("Attribute1", "Attribute2", "Attribute3");
+
+		// Configurar mock para el servicio
+		Mockito.when(this.ontologyService.getOntologyAttributes(ontologyId, ontologyClass)).thenReturn(ontologyAttributes);
+
+		// Actuar: Llamar al método del controlador
+		ResponseEntity<List<String>> result = this.controller.getOntologyAttributes(ontologyId, ontologyClass);
+
+		// Verificaciones y aserciones
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals(ontologyAttributes, result.getBody());
 	}
 
 }
