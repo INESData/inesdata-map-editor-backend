@@ -193,7 +193,7 @@ public final class FileUtils {
 	 *            The name of the class whose attributes are to be extracted.
 	 * @return A list of attributes for the specified class.
 	 */
-	public static List<String> getAtributtes(String ontologyContent, String className) {
+	public static List<String> getAttributes(String ontologyContent, String className) {
 
 		List<String> properties = new ArrayList<>();
 		try {

@@ -174,7 +174,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 *
 	 */
 	@Override
-	public List<String> getOntologyAtributtes(Long id, String className) {
+	public List<String> getOntologyAttributes(Long id, String className) {
 
 		// Get entity
 		Ontology ontology = this.getEntity(id);
@@ -182,7 +182,7 @@ public class OntologyServiceImpl implements OntologyService {
 		// Read ontology file content
 		String ontologyContent = FileUtils.getOntologyContent(ontology);
 
-		return FileUtils.getAtributtes(ontologyContent, className);
+		return FileUtils.getAttributes(ontologyContent, className);
 	}
 
 }

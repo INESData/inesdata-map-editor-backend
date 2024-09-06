@@ -88,15 +88,15 @@ public interface OntologyService {
 	List<String> getOntologyClasses(Long id);
 
 	/**
-	 * Gets all ontology class atributtes.
+	 * Gets all ontology class attributes.
 	 *
 	 * @param id
 	 *            ontology identifier
 	 * @param ontologyClass
 	 *            ontologyClass
 	 *
-	 * @return Ontology class atributtes
+	 * @return Ontology class attributes
 	 */
-	List<String> getOntologyAtributtes(Long id, String ontologyClass);
+	List<String> getOntologyAttributes(Long id, String ontologyClass);
 
 }
