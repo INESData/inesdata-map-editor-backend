@@ -33,7 +33,7 @@
 		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 		<sonar.exclusions>**/model/**/*_.class</sonar.exclusions>
 		<sonar.coverage.exclusions>**/model/**</sonar.coverage.exclusions>
-		<sonar.cpd.exclusions>**/model/**</sonar.cpd.exclusions>
+		<sonar.cpd.exclusions>**/model/**,**/exceptions/**</sonar.cpd.exclusions>
 		<sonar.surefire.reportsPath>${project.build.directory}/surefire-reports</sonar.surefire.reportsPath>
 		<sonar.core.codeCoveragePlugin>jacoco</sonar.core.codeCoveragePlugin>
 		<sonar.coverage.jacoco.xmlReportPaths>${project.coverage.result.path}/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>

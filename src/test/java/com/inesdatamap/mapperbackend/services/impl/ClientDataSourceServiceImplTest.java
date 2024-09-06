@@ -1,4 +1,4 @@
-package com.inesdatamap.mapperbackend.services;
+package com.inesdatamap.mapperbackend.services.impl;
 
 import java.util.List;
 
@@ -13,11 +13,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
 import com.inesdatamap.mapperbackend.model.routing.ClientDataSourceRouter;
-import com.inesdatamap.mapperbackend.services.impl.ClientDataSourceServiceImpl;
+import com.inesdatamap.mapperbackend.services.ClientDataSourceService;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = ClientDataSourceServiceImpl.class)
-class ClientDataSourceServiceTest {
+class ClientDataSourceServiceImplTest {
 
 	@Autowired
 	private ClientDataSourceService clientDataSourceService;

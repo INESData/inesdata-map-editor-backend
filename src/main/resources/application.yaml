@@ -26,7 +26,13 @@ spring:
     changeLog: db/db.changelog-master.xml
     default-schema: public
 
-# security
+# Datasource paths
+datasource-paths:
+  rml: /tmp
+  data-input: C:\data\input
+  data-output: C:\data\output
+
+# Security
 security:
   cors:
     - path: /**

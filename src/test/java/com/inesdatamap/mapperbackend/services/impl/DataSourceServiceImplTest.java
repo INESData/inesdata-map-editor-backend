@@ -1,10 +1,4 @@
-package com.inesdatamap.mapperbackend.services;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+package com.inesdatamap.mapperbackend.services.impl;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,12 +21,17 @@ import com.inesdatamap.mapperbackend.model.jpa.DataBaseSource;
 import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 import com.inesdatamap.mapperbackend.model.mappers.DataSourceMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
-import com.inesdatamap.mapperbackend.services.impl.DataSourceServiceImpl;
 
 import jakarta.persistence.EntityNotFoundException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
-class DataSourceServiceTest {
+class DataSourceServiceImplTest {
 
 	@Mock
 	private DataSourceRepository<DataBaseSource> dataBaseSourceRepository;
@@ -83,8 +82,6 @@ class DataSourceServiceTest {
 		// mock
 		DataBaseSource dbs = new DataBaseSource();
 		dbs.setId(1L);
-		dbs.setUserName("");
-		dbs.setPassword("");
 		dbs.setConnectionString("jdbc:mysql://localhost:3306/test");
 		dbs.setDatabaseType(DataBaseTypeEnum.MYSQL);
 
