@@ -21,8 +21,6 @@ spring:
   liquibase:
     enabled: false
 
-# Datasource paths
-datasource-paths:
-  rml: /test/tmp
-  data-input: /test/input
-  data-output: /test/output
+app:
+  data-processing-path: /test/data
+

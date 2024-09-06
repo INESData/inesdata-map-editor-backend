@@ -12,30 +12,20 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Unit test for the {@link DatasourcePathsProperties} class
+ * Unit test for the {@link AppProperties} class
  */
 @ExtendWith(SpringExtension.class)
-@EnableConfigurationProperties(value = DatasourcePathsProperties.class)
+@EnableConfigurationProperties(value = AppProperties.class)
 @TestPropertySource(properties = { "spring.config.location=classpath:application.yaml" })
 @ContextConfiguration(initializers = ConfigDataApplicationContextInitializer.class)
-class DatasourcePathsPropertiesTest {
+class AppPropertiesTest {
 
 	@Autowired
-	private DatasourcePathsProperties properties;
+	private AppProperties properties;
 
 	@Test
-	void getRmlTest() {
-		assertEquals("/test/tmp", properties.getRml());
-	}
-
-	@Test
-	void getDataInputTest() {
-		assertEquals("/test/input", properties.getDataInput());
-	}
-
-	@Test
-	void getDataOutputTest() {
-		assertEquals("/test/output", properties.getDataOutput());
+	void getDataProcessingPathTest() {
+		assertEquals("/test/input", properties.getDataProcessingPath());
 	}
 
 }

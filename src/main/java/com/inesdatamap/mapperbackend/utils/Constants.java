@@ -4,7 +4,6 @@ package com.inesdatamap.mapperbackend.utils;
  * Constants class
  *
  * @author gmv
- *
  */
 public final class Constants {
 
@@ -22,6 +21,16 @@ public final class Constants {
 	 * Constant representing the number 16
 	 */
 	public static final int NUMBER_16 = 16;
+
+	/**
+	 * Constant for the data input folder
+	 */
+	public static final String DATA_INPUT_FOLDER_NAME = "input";
+
+	/**
+	 * Constant for the data input folder
+	 */
+	public static final String DATA_OUTPUT_FOLDER_NAME = "output";
 
 	// Filters
 	/**

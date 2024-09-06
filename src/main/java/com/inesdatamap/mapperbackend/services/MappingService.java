@@ -46,6 +46,9 @@ public interface MappingService {
 	 *
 	 * @param id
 	 * 	the ID of the mapping to materialize
+	 *
+	 * @throws IOException
+	 * 	the exception
 	 */
 	void materialize(Long id) throws IOException;
 
