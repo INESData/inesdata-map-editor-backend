@@ -302,6 +302,7 @@
 					<excludes>
 						<exclude>**/owasp-suppressions-global.xml</exclude>
 						<exclude>**/test/resources/**</exclude>
+						<exclude>**/lib/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
