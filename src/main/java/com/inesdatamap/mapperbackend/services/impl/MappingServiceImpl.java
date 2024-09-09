@@ -126,7 +126,7 @@ public class MappingServiceImpl implements MappingService {
 
 		try {
 
-		// Create temporary file
+			// Create temporary file
 			String path = String.join("_", "mapping", mapping.getId().toString());
 			rmlTmpFile = FileUtils.createTemporaryFile(mapping.getRml(), path, null);
 
@@ -141,12 +141,10 @@ public class MappingServiceImpl implements MappingService {
 			throw e;
 		}
 
-			// Delete temporary file
+		// Delete temporary file
 		FileUtils.deleteFile(rmlTmpFile.toPath());
 
 		return results;
-		}
-
 	}
 
 }

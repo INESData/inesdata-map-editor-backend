@@ -43,7 +43,7 @@ public class GraphEngineException extends BaseException {
 	 */
 	@Override
 	public String getErrorMessage() {
-		return "Error accessing to the datasource";
+		return "Error executing the graph engine";
 	}
 
 	/**
