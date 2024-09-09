@@ -50,7 +50,7 @@ class GraphEngineServiceImplTest {
 
 		InputStream stream = new ByteArrayInputStream("Process\nExecuted".getBytes());
 
-		when(appProperties.getDataProcessingPath()).thenReturn("/home/mapper/data");
+		when(appProperties.getDataProcessingPath()).thenReturn(null);
 		when(processBuilderFactory.createProcessBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
 			anyString())).thenReturn(processBuilder);
 		when(processBuilder.start()).thenReturn(process);
@@ -69,7 +69,7 @@ class GraphEngineServiceImplTest {
 		Long mappingId = 1L;
 		List<MappingField> mappingFields = List.of(new MappingField());
 
-		when(appProperties.getDataProcessingPath()).thenReturn("/home/mapper/data");
+		when(appProperties.getDataProcessingPath()).thenReturn(null);
 		when(processBuilderFactory.createProcessBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
 			anyString())).thenReturn(processBuilder);
 		when(processBuilder.start()).thenReturn(process);

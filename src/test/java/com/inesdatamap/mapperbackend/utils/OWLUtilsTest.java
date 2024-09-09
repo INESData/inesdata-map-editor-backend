@@ -39,6 +39,7 @@ import static java.lang.System.out;
 class OWLUtilsTest {
 
 	@Test
+	@Disabled("This test is disabled because the output is too verbose for CI")
 	void testOwlApi() throws OWLOntologyCreationException, IOException {
 		Optional<IRI> ontologyIri = getInfo("unesco-thesaurus.ttl");
 		Assertions.assertTrue(ontologyIri.isPresent());

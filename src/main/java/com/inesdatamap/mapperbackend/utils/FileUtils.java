@@ -158,4 +158,19 @@ public final class FileUtils {
 		}
 	}
 
+	/**
+	 * Creates the directories at the specified path.
+	 *
+	 * @param path
+	 * 	the path
+	 */
+	public static void createDirectories(Path path) {
+
+		try {
+			Files.createDirectories(path);
+		} catch (IOException e) {
+			throw new FileCreationException("Failed to create directories: " + path, e);
+		}
+	}
+
 }

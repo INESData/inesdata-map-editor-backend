@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -19,6 +18,7 @@ import com.inesdatamap.mapperbackend.model.jpa.MappingField;
 import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.services.GraphEngineService;
 import com.inesdatamap.mapperbackend.utils.Constants;
+import com.inesdatamap.mapperbackend.utils.FileUtils;
 import com.inesdatamap.mapperbackend.utils.ProcessBuilderFactory;
 
 /**
@@ -46,22 +46,22 @@ public class GraphEngineServiceImpl implements GraphEngineService {
 		String outputDir = String.join(File.separator, appProperties.getDataProcessingPath(), Constants.DATA_OUTPUT_FOLDER_NAME,
 			mappingId.toString(), Constants.KG_OUTPUT_FILE_NAME);
 
+		// Create the output directory
+		FileUtils.createDirectories(Paths.get(outputDir).getParent());
+
+		String[] commands = new String[] { "python", "-m", "kg_generation", "-m", mappingPath, "-o", outputDir };
+
 		// Run the graph engine
-		results = startProcess(mappingPath, outputDir);
+		results = startProcess(commands);
 
 		return results;
 	}
 
-	private List<String> startProcess(String mappingPath, String outputDir) {
+	private List<String> startProcess(String... commands) {
 
 		List<String> results;
 
 		try {
-
-			// Create the output directory
-			Files.createDirectories(Paths.get(outputDir).getParent());
-
-			String[] commands = new String[] { "python", "-m", "kg_generation", "-m", mappingPath, "-o", outputDir };
 
 			ProcessBuilder processBuilder = processBuilderFactory.createProcessBuilder(commands);
 
