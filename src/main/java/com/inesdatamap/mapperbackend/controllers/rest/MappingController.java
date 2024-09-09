@@ -86,10 +86,11 @@ public class MappingController {
 	 */
 	@PostMapping(path = "/{id}/materialize")
 	@Operation(summary = "Materialize a mapping")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public ResponseEntity<Void> materializeMapping(
+	public ResponseEntity<List<String>> materializeMapping(
 		@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to materialize", required = true) Long id) {
-		this.mappingService.deleteMapping(id);
+		List<String> results = this.mappingService.materialize(id);
+		return ResponseEntity.ok(results);
+	}
 		return ResponseEntity.noContent().build();
 	}
 

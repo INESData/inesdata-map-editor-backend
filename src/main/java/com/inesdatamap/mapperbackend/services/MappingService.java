@@ -1,6 +1,6 @@
 package com.inesdatamap.mapperbackend.services;
 
-import java.io.IOException;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,9 +47,8 @@ public interface MappingService {
 	 * @param id
 	 * 	the ID of the mapping to materialize
 	 *
-	 * @throws IOException
-	 * 	the exception
+	 * @return the result of the materialization
 	 */
-	void materialize(Long id) throws IOException;
+	List<String> materialize(Long id);
 
 }

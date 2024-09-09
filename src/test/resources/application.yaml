@@ -22,5 +22,5 @@ spring:
     enabled: false
 
 app:
-  data-processing-path: /test/data
+  data-processing-path: /test/input
 

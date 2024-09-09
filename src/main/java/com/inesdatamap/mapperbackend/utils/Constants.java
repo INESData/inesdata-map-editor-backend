@@ -28,9 +28,14 @@ public final class Constants {
 	public static final String DATA_INPUT_FOLDER_NAME = "input";
 
 	/**
-	 * Constant for the data input folder
+	 * Constant for the data output folder
 	 */
 	public static final String DATA_OUTPUT_FOLDER_NAME = "output";
+
+	/**
+	 * Constant for the KG output file name
+	 */
+	public static final String KG_OUTPUT_FILE_NAME = "knowledge-graph.nt";
 
 	// Filters
 	/**

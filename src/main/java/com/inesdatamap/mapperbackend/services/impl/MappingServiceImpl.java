@@ -1,8 +1,6 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +17,7 @@ import com.inesdatamap.mapperbackend.model.jpa.MappingField;
 import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
 import com.inesdatamap.mapperbackend.services.GraphEngineService;
 import com.inesdatamap.mapperbackend.services.MappingService;
+import com.inesdatamap.mapperbackend.utils.FileUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -115,27 +114,37 @@ public class MappingServiceImpl implements MappingService {
 	 *
 	 * @param id
 	 * 	the ID of the mapping to materialize
+	 *
+	 * @return the results of the materialization
 	 */
 	@Override
-	public void materialize(Long id) throws IOException {
+	public List<String> materialize(Long id) {
 
 		Mapping mapping = this.getEntity(id);
-
-		// Create temporary file
-		File rmlTmpFile = File.createTempFile(String.join("_", "mapping", mapping.getId().toString(), mapping.getName()), null);
-
-		// Write RML to temporary file
-		Files.write(rmlTmpFile.toPath(), mapping.getRml());
+		List<String> results;
+		File rmlTmpFile = null;
 
 		try {
-			this.graphEngineService.run(rmlTmpFile.getAbsolutePath());
+
+		// Create temporary file
+			String path = String.join("_", "mapping", mapping.getId().toString());
+			rmlTmpFile = FileUtils.createTemporaryFile(mapping.getRml(), path, null);
+
+			// Run the graph engine
+			results = this.graphEngineService.run(rmlTmpFile.getAbsolutePath(), mapping.getId(), mapping.getFields());
+
 		} catch (GraphEngineException e) {
 			// Delete temporary file
-			Files.delete(rmlTmpFile.toPath());
+			if (rmlTmpFile != null) {
+				FileUtils.deleteFile(rmlTmpFile.toPath());
+			}
 			throw e;
-		} finally {
+		}
+
 			// Delete temporary file
-			Files.delete(rmlTmpFile.toPath());
+		FileUtils.deleteFile(rmlTmpFile.toPath());
+
+		return results;
 		}
 
 	}

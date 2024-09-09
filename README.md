@@ -16,5 +16,5 @@ A volume is needed to store the datasource's files. It is important that it is m
  
 For starting a container, run the following command:
 ```
-docker run --name mapper-backend -p 8080:8080 -d --env-file ./docker/env.list -v $(pwd)/inesdata-map-data:/home/mapper -d com.inesdata-map/mapper-backend:latest
+docker run --name mapper-backend -p 8080:8080 -d --env-file ./docker/env.list -v $(pwd)/inesdata-map-data:/home/mapper/data -d com.inesdata-map/mapper-backend:latest
 ```
