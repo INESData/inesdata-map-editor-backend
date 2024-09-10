@@ -119,20 +119,16 @@ public final class FileUtils {
 	 *
 	 * @param content
 	 * 	the content of the file
-	 * @param prefix
-	 * 	the prefix of the file
-	 * @param suffix
-	 * 	the suffix of the file
 	 *
 	 * @return the temporary file
 	 */
-	public static File createTemporaryFile(byte[] content, String prefix, String suffix) {
+	public static File createTemporaryFile(byte[] content) {
 		try {
 
-			File tmpFile = File.createTempFile(prefix, suffix);
-			Files.write(tmpFile.toPath(), content);
+			Path tmpFile = Files.createTempFile(null, null);
+			Files.write(tmpFile, content);
 
-			return tmpFile;
+			return tmpFile.toFile();
 
 		} catch (IOException e) {
 			throw new FileCreationException("Failed to create temporary file", e);

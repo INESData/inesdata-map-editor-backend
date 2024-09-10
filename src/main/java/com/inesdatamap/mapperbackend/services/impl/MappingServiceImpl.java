@@ -127,8 +127,7 @@ public class MappingServiceImpl implements MappingService {
 		try {
 
 			// Create temporary file
-			String path = String.join("_", "mapping", mapping.getId().toString());
-			rmlTmpFile = FileUtils.createTemporaryFile(mapping.getRml(), path, null);
+			rmlTmpFile = FileUtils.createTemporaryFile(mapping.getRml());
 
 			// Run the graph engine
 			results = this.graphEngineService.run(rmlTmpFile.getAbsolutePath(), mapping.getId(), mapping.getFields());
