@@ -13,9 +13,10 @@ import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.dto.FileSourceDTO;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.mappers.FileSourceMapper;
-import com.inesdatamap.mapperbackend.properties.DatasourcePathsProperties;
+import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.repositories.jpa.FileSourceRepository;
 import com.inesdatamap.mapperbackend.services.FileSourceService;
+import com.inesdatamap.mapperbackend.utils.Constants;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -36,7 +37,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	private FileSourceRepository fileSourceRepository;
 
 	@Autowired
-	private DatasourcePathsProperties datasourcePathsProperties;
+	private AppProperties appProperties;
 
 	/**
 	 * Saves a data source
@@ -70,7 +71,8 @@ public class FileSourceServiceImpl implements FileSourceService {
 			String headers = FileUtils.processFileHeaders(file);
 
 			// Build file path
-			String filePath = String.join(File.separator, datasourcePathsProperties.getDataInput(), savedFileSource.getId().toString());
+			String filePath = String.join(File.separator, appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME,
+				savedFileSource.getId().toString());
 
 			// Set values in FileSource
 			savedFileSource.setFields(headers);

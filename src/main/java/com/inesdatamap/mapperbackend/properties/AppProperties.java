@@ -7,16 +7,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Configuration properties for datasource paths
+ * Configuration properties for the app
  */
 @Configuration
-@ConfigurationProperties(prefix = "datasource-paths")
+@ConfigurationProperties(prefix = "app")
 @Getter
 @Setter
-public class DatasourcePathsProperties {
+public class AppProperties {
 
-	private String rml;
-	private String dataInput;
-	private String dataOutput;
+	private String dataProcessingPath;
 
 }

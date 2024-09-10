@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
@@ -13,6 +14,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.exceptions.FileCreationException;
+import com.inesdatamap.mapperbackend.exceptions.FileDeleteException;
 import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 
@@ -111,4 +113,60 @@ public final class FileUtils {
 			throw new FileCreationException("Failed to save file: " + path, e);
 		}
 	}
+
+	/**
+	 * Creates a temporary file with the given content, prefix, and suffix.
+	 *
+	 * @param content
+	 * 	the content of the file
+	 *
+	 * @return the temporary file
+	 */
+	public static File createTemporaryFile(byte[] content) {
+		try {
+
+			Path tmpFile = Files.createTempFile(null, null);
+			Files.write(tmpFile, content);
+
+			return tmpFile.toFile();
+
+		} catch (IOException e) {
+			throw new FileCreationException("Failed to create temporary file", e);
+		}
+	}
+
+	/**
+	 * Deletes the file at the specified path.
+	 *
+	 * @param path
+	 * 	the path of the file to delete
+	 */
+	public static void deleteFile(Path path) {
+
+		if (Files.notExists(path)) {
+			return;
+		}
+
+		try {
+			Files.delete(path);
+		} catch (IOException e) {
+			throw new FileDeleteException("Failed to delete file: " + path, e);
+		}
+	}
+
+	/**
+	 * Creates the directories at the specified path.
+	 *
+	 * @param path
+	 * 	the path
+	 */
+	public static void createDirectories(Path path) {
+
+		try {
+			Files.createDirectories(path);
+		} catch (IOException e) {
+			throw new FileCreationException("Failed to create directories: " + path, e);
+		}
+	}
+
 }

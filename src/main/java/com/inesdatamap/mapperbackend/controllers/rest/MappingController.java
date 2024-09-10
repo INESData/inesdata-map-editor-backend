@@ -1,5 +1,7 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -8,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -29,13 +32,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Validated
 public class MappingController {
 
-	private MappingService mappingService;
+	private final MappingService mappingService;
 
 	/**
 	 * This constructor initializes the controller with the provided MappingService
 	 *
 	 * @param mappingService
-	 *            mappingService
+	 * 	the mapping service
 	 */
 	public MappingController(MappingService mappingService) {
 		this.mappingService = mappingService;
@@ -45,10 +48,9 @@ public class MappingController {
 	 * Lists all mappings.
 	 *
 	 * @param page
-	 *            page number
-	 *
+	 * 	page number
 	 * @param size
-	 *            page size
+	 * 	page size
 	 *
 	 * @return List of all mappings
 	 */
@@ -63,16 +65,33 @@ public class MappingController {
 	 * Deletes mapping
 	 *
 	 * @param id
-	 *            mapping identifier
+	 * 	mapping identifier
+	 *
 	 * @return status code response
 	 */
 	@DeleteMapping("/{id}")
 	@Operation(summary = "Delete mapping")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public ResponseEntity<Void> deleteMapping(
-			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to delete", required = true) Long id) {
+		@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to delete", required = true) Long id) {
 		this.mappingService.deleteMapping(id);
 		return ResponseEntity.noContent().build();
+	}
+
+	/**
+	 * Materialize a mapping
+	 *
+	 * @param id
+	 * 	the mapping identifier
+	 *
+	 * @return the response
+	 */
+	@PostMapping(path = "/{id}/materialize")
+	@Operation(summary = "Materialize a mapping")
+	public ResponseEntity<List<String>> materializeMapping(
+		@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to materialize", required = true) Long id) {
+		List<String> results = this.mappingService.materialize(id);
+		return ResponseEntity.ok(results);
 	}
 
 }

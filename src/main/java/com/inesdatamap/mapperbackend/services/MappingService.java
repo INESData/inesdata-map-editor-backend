@@ -1,5 +1,7 @@
 package com.inesdatamap.mapperbackend.services;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,7 +17,7 @@ public interface MappingService {
 	 * Retrieves all mappings.
 	 *
 	 * @param pageable
-	 *            pageable
+	 * 	pageable
 	 *
 	 * @return List of mappings
 	 */
@@ -25,7 +27,7 @@ public interface MappingService {
 	 * Deletes a mapping by its id.
 	 *
 	 * @param id
-	 *            the ID of the mapping to delete
+	 * 	the ID of the mapping to delete
 	 */
 	void deleteMapping(Long id);
 
@@ -33,9 +35,20 @@ public interface MappingService {
 	 * Gets entity by its id.
 	 *
 	 * @param id
-	 *            the ID of the mapping to get
+	 * 	the ID of the mapping to get
+	 *
 	 * @return Mapping
 	 */
 	Mapping getEntity(Long id);
+
+	/**
+	 * Materializes a mapping by its id.
+	 *
+	 * @param id
+	 * 	the ID of the mapping to materialize
+	 *
+	 * @return the result of the materialization
+	 */
+	List<String> materialize(Long id);
 
 }
