@@ -2,17 +2,23 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
+import org.semanticweb.owlapi.model.OWLObjectHasValue;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -229,10 +235,10 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
-	 * Retrieves all class names (local names) from an ontology provided as a string.
+	 * Retrieves all class names from an ontology provided as a string
 	 *
-	 * This method parses the ontology content from a string, loads it into an OWLOntology object, and extracts the local names of all
-	 * classes defined in the ontology.
+	 * This method parses the ontology content from a string, loads it into an OWLOntology object, and extracts the names of all classes
+	 * defined in the ontology
 	 *
 	 * @param ontologyContent
 	 *            a string containing the ontology data in a format supported by OWL API
@@ -246,78 +252,92 @@ public class OntologyServiceImpl implements OntologyService {
 			throw new IllegalArgumentException("Ontology content is empty.");
 		}
 
+		// Create OWLOntologyManager instance and load the ontology
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
 
-		// Create a list to store the classes as String
-		List<String> classList = new ArrayList<>();
+		// Set to store the main (super) classes
+		Set<OWLClass> mainClasses = new HashSet<>();
 
-		// Check if the ontology contains classes
-		if (!owl.classesInSignature().iterator().hasNext()) {
-			return classList;
+		// Loop through all subclass axioms and collect the superclasses
+		for (OWLSubClassOfAxiom subClassAxiom : ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
+			if (subClassAxiom.getSuperClass().isOWLClass()) {
+				mainClasses.add(subClassAxiom.getSuperClass().asOWLClass());
+			}
 		}
 
-		// Iterating over all classes in the ontology
-		owl.classesInSignature().forEach(owlClass -> {
+		// List to store the final classes excluding the main (super) classes
+		List<String> classesList = new ArrayList<>();
 
-			String className = owlClass.getIRI().getFragment();
+		// Get all the classes in the ontology
+		Set<OWLClass> allClasses = ontology.getClassesInSignature();
 
-			// Add the class to the list
-			classList.add(className);
-		});
+		// Iterate over all classes and exclude the ones that are superclasses
+		for (OWLClass owlClass : allClasses) {
+			// Check if this class is NOT in the set of superclasses
+			if (!mainClasses.contains(owlClass)) {
+				// Extract the class name from its IRI fragment
+				String className = owlClass.getIRI().getFragment();
 
-		// Return list with all classes
-		return classList;
+				// Add the class name to the list only if it is not null or empty
+				if (className != null && !className.isEmpty()) {
+					classesList.add(className);
+				}
+			}
+		}
+
+		return classesList;
 	}
 
 	/**
-	 * Extracts and returns a list of attributes for a specified class from an ontology represented by the given ontology content.
+	 * Retrieves the data properties associated with a specified class from the given ontology
 	 *
 	 * @param ontologyContent
-	 *            The content of the ontology as a string.
+	 *            The content of the ontology as a string
 	 * @param className
-	 *            The name of the class whose attributes are to be extracted.
-	 * @return A list of attributes for the specified class.
+	 *            The name of the class for which the data properties are to be retrieved
+	 * @return A list of attributes associated with the specified class
 	 * @throws OWLOntologyCreationException
 	 *             if there is an error during the ontology creation process
 	 */
 	public List<String> getAttributes(String ontologyContent, String className) throws OWLOntologyCreationException {
 
-		List<String> properties = new ArrayList<>();
-
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
-
-		// Validate that class name is not null or empty
+		if (ontologyContent == null || ontologyContent.isEmpty()) {
+			throw new IllegalArgumentException("Ontology content is empty.");
+		}
 		if (className == null || className.isEmpty()) {
-			throw new IllegalArgumentException("No class name selected.");
+			throw new IllegalArgumentException("Class name is empty.");
 		}
 
-		// Iterate over classes in the ontology and find the one that matches className
-		owl.classesInSignature().forEach(clazz -> {
-			// Get properties of the matching class
-			List<String> classProperties = this.getIndividuals(clazz, className, owl);
+		// Create OWLOntologyManager instance and load the ontology
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
 
-			// Add the properties to the main list
-			properties.addAll(classProperties);
-		});
+		// Find the owlClass by className
+		OWLClass owlClass = ontology.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
 
-		return properties;
+		// Collect data properties and object properties
+		List<String> attributes = new ArrayList<>();
+		attributes.addAll(this.getDataProperties(owlClass, ontology));
+		attributes.addAll(this.getObjectProperties(owlClass, ontology));
+
+		return attributes;
 
 	}
 
 	/**
-	 * Retrieves the data properties associated with a specified class from the given ontology.
+	 * Retrieves the data properties associated with a specified OWL class in the ontology
 	 *
 	 * @param clazz
-	 *            The OWL class whose properties are to be retrieved.
-	 * @param className
-	 *            The name of the class to match against the provided OWL class.
-	 * @param owl
-	 *            The OWL ontology from which to retrieve the properties.
-	 * @return A list of data property names (fragments) associated with the specified class.
+	 *            The OWL class whose properties are to be retrieved
+	 * @param ontology
+	 *            The OWL ontology from which to retrieve the properties
+	 * @return A list of data property names associated with the specified class
 	 */
-	public List<String> getIndividuals(OWLClass clazz, String className, OWLOntology owl) {
+	public List<String> getDataProperties(OWLClass clazz, OWLOntology ontology) {
+
+		List<String> properties = new ArrayList<>();
 
 		// Get class name from clazz
 		String classFragment = clazz.getIRI().getFragment();
@@ -326,23 +346,56 @@ public class OntologyServiceImpl implements OntologyService {
 			throw new IllegalArgumentException("There is no class in the ontology.");
 		}
 
-		List<String> properties = new ArrayList<>();
-		// Check if ontology contains received class name
-		if (classFragment.equals(className)) {
+		// Find data properties for class
+		Set<OWLDataProperty> dataProperties = ontology.getDataPropertiesInSignature();
+		for (OWLDataProperty dataProperty : dataProperties) {
 
-			// Find data properties for class
-			Set<OWLDataProperty> dataProperties = owl.dataPropertiesInSignature().collect(Collectors.toSet());
-			for (OWLDataProperty dataProperty : dataProperties) {
+			// Check if the class is a domain of the data property
+			boolean isDomain = EntitySearcher.getDomains(dataProperty, ontology).anyMatch(domain -> domain.equals(clazz));
 
-				// Check if the class is a domain of the data property
-				boolean isDomain = EntitySearcher.getDomains(dataProperty, owl).anyMatch(domain -> domain.equals(clazz));
+			if (isDomain) {
+				properties.add(dataProperty.getIRI().getFragment());
+			}
+		}
 
-				if (isDomain) {
-					properties.add(dataProperty.getIRI().getFragment());
+		return properties;
+	}
+
+	/**
+	 * Retrieves the object properties associated with the specified OWL class by analyzing equivalent class axioms that involve object
+	 * property restrictions (ObjectHasValue).
+	 *
+	 * @param owlClass
+	 *            the OWL class whose object properties need to be retrieved
+	 * @param ontology
+	 *            the ontology containing the class and its object properties
+	 * @return a list of object property IRI fragments associated with the OWL class
+	 */
+	public List<String> getObjectProperties(OWLClass owlClass, OWLOntology ontology) {
+
+		List<String> objectProperties = new ArrayList<>();
+
+		// Retrieve all equivalent class axioms from the ontology
+		Set<OWLEquivalentClassesAxiom> equivalentClassAxioms = ontology.getAxioms(AxiomType.EQUIVALENT_CLASSES);
+
+		// Iterate through the equivalent class axioms
+		for (OWLEquivalentClassesAxiom axiom : equivalentClassAxioms) {
+			// Check if the given OWL class is present in the axiom
+			if (axiom.contains(owlClass)) {
+				// Iterate through the class expressions within the axiom
+				for (OWLClassExpression classExpression : axiom.getClassExpressions()) {
+					// Check if the class expression is an ObjectHasValue restriction
+					if (classExpression instanceof OWLObjectHasValue objectHasValue) {
+
+						// Get the related object property and add its IRI fragment to the list
+						OWLObjectProperty property = objectHasValue.getProperty().asOWLObjectProperty();
+						objectProperties.add(property.getIRI().getFragment());
+					}
 				}
 			}
 		}
-		return properties;
+
+		return objectProperties;
 	}
 
 }
