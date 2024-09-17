@@ -3,8 +3,13 @@ package com.inesdatamap.mapperbackend.services.impl;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -33,6 +39,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.inesdatamap.mapperbackend.exceptions.OntologyParserException;
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
@@ -103,12 +110,15 @@ class OntologyServiceImplTest {
 		when(this.ontologyMapper.entityToDto(ontologyUpdated)).thenReturn(ontologyDto);
 		when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontologyDB));
 
-		// Act
+		// Test case where ontologyDto is valid
 		OntologyDTO result = this.ontologyService.updateOntology(id, ontologyDto);
-
-		// Assert
 		assertEquals(ontologyDto, result);
 		verify(this.ontologyRepo).saveAndFlush(this.ontologyMapper.merge(ontologySource, ontologyDB));
+
+		// Test case where ontologyDto is null
+		assertThrows(IllegalArgumentException.class, () -> {
+			this.ontologyService.updateOntology(id, null);
+		}, "The ontology has no data to update");
 	}
 
 	@Test
@@ -243,20 +253,30 @@ class OntologyServiceImplTest {
 
 		// Mock OWLOntology and OWLClass
 		OWLOntology owlOntology = mock(OWLOntology.class);
-		OWLClass owlClass = mock(OWLClass.class);
 
-		// Mock IRI
+		// Mock OWLClass with valid and invalid names
+		OWLClass owlClass1 = mock(OWLClass.class);
+		OWLClass owlClass2 = mock(OWLClass.class); // Class with an empty name
+		OWLClass owlClass3 = mock(OWLClass.class); // Class with a null name
 		IRI iri1 = mock(IRI.class);
+		IRI iri2 = mock(IRI.class);
+		IRI iri3 = mock(IRI.class);
 
 		// Define the behavior for IRI objects
 		when(iri1.getFragment()).thenReturn("Class1");
+		when(iri2.getFragment()).thenReturn(""); // Simulate an empty class name
+		when(iri3.getFragment()).thenReturn(null); // Simulate a null class name
 
 		// Define the behavior for OWLClass objects
-		when(owlClass.getIRI()).thenReturn(iri1);
+		when(owlClass1.getIRI()).thenReturn(iri1);
+		when(owlClass2.getIRI()).thenReturn(iri2);
+		when(owlClass3.getIRI()).thenReturn(iri3);
 
 		// Create a set of classes to return from the ontology
 		Set<OWLClass> classes = new HashSet<>();
-		classes.add(owlClass);
+		classes.add(owlClass1);
+		classes.add(owlClass2);
+		classes.add(owlClass3);
 
 		// Define the behavior for OWLOntology
 		when(owlOntology.getClassesInSignature()).thenReturn(classes);
@@ -265,8 +285,45 @@ class OntologyServiceImplTest {
 		List<String> result = this.ontologyService.getClasses(owlOntology);
 
 		// Assert
+		// Expected result should only include the valid class name
 		List<String> expected = List.of("Class1");
 		assertEquals(expected, result);
+	}
+
+	@Test
+	void testGetOntologyAttributes() throws Exception {
+		// Mock data
+		Long id = 1L;
+		String className = "Class1";
+		String ontologyContent = "Ontology content";
+		List<String> expectedAttributes = List.of("Attribute1", "Attribute2");
+
+		// Mock Ontology and service methods
+		Ontology ontology = mock(Ontology.class);
+		when(ontology.getName()).thenReturn("TestOntology");
+
+		OntologyServiceImpl ontologyService = spy(new OntologyServiceImpl());
+
+		// Mock internal methods
+		doReturn(ontology).when(ontologyService).getEntity(id);
+		doReturn(ontologyContent).when(ontologyService).getOntologyContent(ontology);
+
+		// Mock the getAttributes method and handle OWLOntologyCreationException
+		doReturn(expectedAttributes).when(ontologyService).getAttributes(ontologyContent, className);
+
+		// Act
+		List<String> result = ontologyService.getOntologyAttributes(id, className);
+
+		// Assert
+		assertEquals(expectedAttributes, result);
+
+		// Test exception handling
+		doThrow(new OWLOntologyCreationException("Error")).when(ontologyService).getAttributes(anyString(), anyString());
+
+		OntologyParserException thrown = assertThrows(OntologyParserException.class, () -> {
+			ontologyService.getOntologyAttributes(id, className);
+		});
+		assertTrue(thrown.getMessage().contains("Failed getting attributes from ontology"));
 	}
 
 	@Test
