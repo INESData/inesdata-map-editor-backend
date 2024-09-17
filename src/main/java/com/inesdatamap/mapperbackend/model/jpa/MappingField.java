@@ -8,7 +8,6 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -19,7 +18,6 @@ import lombok.Setter;
  * MappingField db entity representation
  *
  * @author gmv
- *
  */
 @Getter
 @Setter
@@ -56,27 +54,22 @@ public class MappingField extends BaseEntity implements Serializable {
 	/**
 	 * The predicates associated with the mapping field.
 	 */
-	@OneToMany(mappedBy = "mappingField", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "mapping_field_id", nullable = false)
 	private List<PredicateObjectMap> predicates = new ArrayList<>();
 
 	/**
 	 * The source associated with the mapping field.
 	 */
 	@OneToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "source_id")
+	@JoinColumn(name = "source_id", nullable = false)
 	private DataSource source;
 
 	/**
 	 * The ontology associated with the mapping field.
 	 */
 	@OneToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "ontology_id")
+	@JoinColumn(name = "ontology_id", nullable = false)
 	private Ontology ontology;
 
-	/**
-	 * The mapping associated with the mapping field.
-	 */
-	@ManyToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "mapping_id")
-	private Mapping mapping;
 }

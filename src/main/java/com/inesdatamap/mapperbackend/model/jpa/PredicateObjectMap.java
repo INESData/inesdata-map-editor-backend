@@ -9,7 +9,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -19,7 +18,6 @@ import lombok.Setter;
  * ObjectMap db entity representation
  *
  * @author gmv
- *
  */
 
 @Getter
@@ -42,14 +40,8 @@ public class PredicateObjectMap extends BaseEntity implements Serializable {
 	/**
 	 * The object map associated with the predicate.
 	 */
-	@OneToMany(mappedBy = "predicateObjectMap", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "predicate_object_map_id", nullable = false)
 	private List<ObjectMap> objectMap = new ArrayList<>();
-
-	/**
-	 * The mapping field associated with the predicate object map.
-	 */
-	@ManyToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "mapping_field_id")
-	private MappingField mappingField;
 
 }

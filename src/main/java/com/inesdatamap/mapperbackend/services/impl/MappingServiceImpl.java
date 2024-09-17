@@ -9,12 +9,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.inesdatamap.mapperbackend.exceptions.GraphEngineException;
+import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
+import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
+import com.inesdatamap.mapperbackend.model.jpa.Ontology;
+import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
+import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
+import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.services.GraphEngineService;
 import com.inesdatamap.mapperbackend.services.MappingService;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
@@ -32,6 +39,15 @@ public class MappingServiceImpl implements MappingService {
 
 	@Autowired
 	private GraphEngineService graphEngineService;
+
+	@Autowired
+	private MappingMapper mappingMapper;
+
+	@Autowired
+	private OntologyRepository ontologyRepository;
+
+	@Autowired
+	private DataSourceRepository<DataSource> dataSourceRepository;
 
 	/**
 	 * Retrieves a list of all mappings and maps them to their corresponding DTOs.
@@ -112,20 +128,51 @@ public class MappingServiceImpl implements MappingService {
 	/**
 	 * Creates a new mapping.
 	 *
-	 * @param mapping
+	 * @param mappingDTO
 	 * 	the mapping to create
 	 *
 	 * @return the created mapping
 	 */
-	public Mapping create(Mapping mapping) {
+	@Override
+	public MappingDTO create(MappingDTO mappingDTO) {
 
-		byte[] rml = buildRml(mapping);
+		Mapping mapping = setRelationships(mappingDTO);
+
+		byte[] rml = buildRml(mappingDTO);
 		mapping.setRml(rml);
 
-		return this.mappingRepo.save(mapping);
+		return this.mappingMapper.entityToDto(this.mappingRepo.save(mapping));
 	}
 
-	private static byte[] buildRml(Mapping mapping) {
+	/**
+	 * Sets the relationships of a mapping.
+	 *
+	 * @param mappingDTO
+	 * 	the mapping dto
+	 *
+	 * @return the mapping with the relationships set
+	 */
+	private Mapping setRelationships(MappingDTO mappingDTO) {
+
+		Mapping mapping = mappingMapper.dtoToEntity(mappingDTO);
+
+		if (!CollectionUtils.isEmpty(mapping.getFields())) {
+
+			mapping.getFields().forEach(field -> {
+
+				Ontology ontology = this.ontologyRepository.getReferenceById(field.getOntology().getId());
+				DataSource dataSource = this.dataSourceRepository.getReferenceById(field.getSource().getId());
+
+				field.setOntology(ontology);
+				field.setSource(dataSource);
+
+			});
+		}
+
+		return mapping;
+	}
+
+	private static byte[] buildRml(MappingDTO mapping) {
 
 		mapping.getFields().forEach(field -> {
 
