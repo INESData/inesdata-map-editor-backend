@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -107,6 +109,36 @@ public class MappingServiceImpl implements MappingService {
 	@Override
 	public Mapping getEntity(Long id) {
 		return this.mappingRepo.findById(id).orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id));
+	}
+
+	/**
+	 * Creates a new mapping.
+	 *
+	 * @param mapping
+	 * 	the mapping to create
+	 *
+	 * @return the created mapping
+	 */
+	public Mapping create(Mapping mapping) {
+
+		byte[] rml = buildRml(mapping);
+		mapping.setRml(rml);
+
+		return this.mappingRepo.save(mapping);
+	}
+
+	private byte[] buildRml(Mapping mapping) {
+
+		mapping.getFields().forEach(field -> {
+
+			Model model = ModelFactory.createDefaultModel();
+
+			// TODO
+
+		});
+
+		return null;
+
 	}
 
 	/**
