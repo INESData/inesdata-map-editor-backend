@@ -7,13 +7,8 @@ import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
-import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLEquivalentClassesAxiom;
-import org.semanticweb.owlapi.model.OWLObjectHasValue;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -198,54 +193,6 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
-	 * Retrieves a list of attributes for a specified class from an ontology identified by its ID.
-	 *
-	 * @param id
-	 *            The ID of the ontology entity to retrieve.
-	 * @param className
-	 *            The name of the class whose attributes are to be retrieved.
-	 * @return A list of attributes for the specified class from the ontology.
-	 *
-	 */
-	@Override
-	public List<String> getOntologyAttributes(Long id, String className) {
-
-		// Get entity
-		Ontology ontology = this.getEntity(id);
-
-		// Read ontology file content
-		String ontologyContent = this.getOntologyContent(ontology);
-
-		try {
-			return this.getAttributes(ontologyContent, className);
-		} catch (OWLOntologyCreationException e) {
-			throw new OntologyParserException("Failed getting attributes from ontology: " + ontology.getName(), e);
-		}
-	}
-
-	/**
-	 * Retrieves the content of the ontology as a string. Converts the byte array content stored in the ontology to its original string
-	 * representation using UTF-8 encoding.
-	 *
-	 * @param ontology
-	 *            the Ontology entity containing the content as a byte array
-	 * @return the content of the ontology as a string in UTF-8 format
-	 */
-	public String getOntologyContent(Ontology ontology) {
-
-		// Validate that the ontology is not null
-		if (ontology.getContent() == null) {
-			throw new IllegalArgumentException("Ontology has no content.");
-		}
-
-		// Get ontology bytes
-		byte[] contentBytes = ontology.getContent();
-
-		// Convert bytes to String
-		return new String(contentBytes, StandardCharsets.UTF_8);
-	}
-
-	/**
 	 * Retrieves all the class names from the provided OWL ontology.
 	 *
 	 *
@@ -279,6 +226,32 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
+	 * Retrieves a list of attributes for a specified class from an ontology identified by its ID.
+	 *
+	 * @param id
+	 *            The ID of the ontology entity to retrieve.
+	 * @param className
+	 *            The name of the class whose attributes are to be retrieved.
+	 * @return A list of attributes for the specified class from the ontology.
+	 *
+	 */
+	@Override
+	public List<String> getOntologyAttributes(Long id, String className) {
+
+		// Get entity
+		Ontology ontology = this.getEntity(id);
+
+		// Read ontology file content
+		String ontologyContent = this.getOntologyContent(ontology);
+
+		try {
+			return this.getAttributes(ontologyContent, className);
+		} catch (OWLOntologyCreationException e) {
+			throw new OntologyParserException("Failed getting attributes from ontology: " + ontology.getName(), e);
+		}
+	}
+
+	/**
 	 * Retrieves the data properties associated with a specified class from the given ontology
 	 *
 	 * @param ontologyContent
@@ -300,16 +273,16 @@ public class OntologyServiceImpl implements OntologyService {
 
 		// Create OWLOntologyManager instance and load the ontology
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
 
 		// Find the owlClass by className
-		OWLClass owlClass = ontology.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
+		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
 
-		// Collect data properties and object properties
 		List<String> attributes = new ArrayList<>();
-		attributes.addAll(this.getDataProperties(owlClass, ontology));
-		attributes.addAll(this.getObjectProperties(owlClass, ontology));
+
+		// Collect data properties
+		attributes.addAll(this.getDataProperties(owlClass, owl));
 
 		return attributes;
 
@@ -351,40 +324,25 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
-	 * Retrieves the object properties associated with the specified OWL class by analyzing equivalent class axioms that involve object
-	 * property restrictions (ObjectHasValue).
+	 * Retrieves the content of the ontology as a string. Converts the byte array content stored in the ontology to its original string
+	 * representation using UTF-8 encoding.
 	 *
-	 * @param owlClass
-	 *            the OWL class whose object properties need to be retrieved
 	 * @param ontology
-	 *            the ontology containing the class and its object properties
-	 * @return a list of object property IRI fragments associated with the OWL class
+	 *            the Ontology entity containing the content as a byte array
+	 * @return the content of the ontology as a string in UTF-8 format
 	 */
-	public List<String> getObjectProperties(OWLClass owlClass, OWLOntology ontology) {
+	public String getOntologyContent(Ontology ontology) {
 
-		List<String> objectProperties = new ArrayList<>();
-
-		// Retrieve all equivalent class axioms from the ontology
-		Set<OWLEquivalentClassesAxiom> equivalentClassAxioms = ontology.getAxioms(AxiomType.EQUIVALENT_CLASSES);
-
-		// Iterate through the equivalent class axioms
-		for (OWLEquivalentClassesAxiom axiom : equivalentClassAxioms) {
-			// Check if the given OWL class is present in the axiom
-			if (axiom.contains(owlClass)) {
-				// Iterate through the class expressions within the axiom
-				for (OWLClassExpression classExpression : axiom.getClassExpressions()) {
-					// Check if the class expression is an ObjectHasValue restriction
-					if (classExpression instanceof OWLObjectHasValue objectHasValue) {
-
-						// Get the related object property and add its IRI fragment to the list
-						OWLObjectProperty property = objectHasValue.getProperty().asOWLObjectProperty();
-						objectProperties.add(property.getIRI().getFragment());
-					}
-				}
-			}
+		// Validate that the ontology is not null
+		if (ontology.getContent() == null) {
+			throw new IllegalArgumentException("Ontology has no content.");
 		}
 
-		return objectProperties;
+		// Get ontology bytes
+		byte[] contentBytes = ontology.getContent();
+
+		// Convert bytes to String
+		return new String(contentBytes, StandardCharsets.UTF_8);
 	}
 
 }
