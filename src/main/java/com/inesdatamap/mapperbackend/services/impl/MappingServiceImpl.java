@@ -4,8 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -127,17 +125,15 @@ public class MappingServiceImpl implements MappingService {
 		return this.mappingRepo.save(mapping);
 	}
 
-	private byte[] buildRml(Mapping mapping) {
+	private static byte[] buildRml(Mapping mapping) {
 
 		mapping.getFields().forEach(field -> {
-
-			Model model = ModelFactory.createDefaultModel();
 
 			// TODO
 
 		});
 
-		return null;
+		return new byte[0];
 
 	}
 

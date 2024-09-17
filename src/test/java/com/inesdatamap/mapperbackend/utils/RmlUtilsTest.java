@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @ExtendWith(SpringExtension.class)
 class RmlUtilsTest {
 
@@ -67,6 +69,11 @@ class RmlUtilsTest {
 		Rio.write(builder.build(), out, "http://example.org/", RDFFormat.TURTLE);
 
 		System.out.println(out);
+
+		assertTrue(out.toString().contains("rml:source \"people.csv\""));
+		assertTrue(out.toString().contains("rr:predicate ex:hasName"));
+		assertTrue(out.toString().contains("rr:predicate ex:hasAge"));
+
 	}
 
 	@Test
@@ -107,6 +114,9 @@ class RmlUtilsTest {
 
 		System.out.println(out);
 
+		assertTrue(out.toString().contains("rml:source \"people.csv\""));
+		assertTrue(out.toString().contains("rr:predicate ex:hasName"));
+		assertTrue(out.toString().contains("rr:predicate ex:hasAge"));
 	}
 
 }
