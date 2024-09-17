@@ -23,7 +23,7 @@ import com.inesdatamap.mapperbackend.model.dto.FileSourceDTO;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.mappers.FileSourceMapper;
 import com.inesdatamap.mapperbackend.model.mappers.FileSourceMapperImpl;
-import com.inesdatamap.mapperbackend.properties.DatasourcePathsProperties;
+import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.repositories.jpa.FileSourceRepository;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
 
@@ -45,7 +45,7 @@ import static org.mockito.Mockito.when;
  * @author gmv
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { DatasourcePathsProperties.class, FileSourceServiceImpl.class,
+@ContextConfiguration(classes = { AppProperties.class, FileSourceServiceImpl.class,
 	FileSourceMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
 class FileSourceServiceImplTest {
 
@@ -56,7 +56,7 @@ class FileSourceServiceImplTest {
 	private FileSourceMapper fileSourceMapper;
 
 	@Autowired
-	private DatasourcePathsProperties datasourcePathsProperties;
+	private AppProperties appProperties;
 
 	@Autowired
 	private FileSourceServiceImpl fileSourceService;
