@@ -29,6 +29,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -82,6 +83,32 @@ class OntologyServiceImplTest {
 		// Verify
 		assertEquals(searchOntologyDTOPage.getTotalElements(), result.getTotalElements());
 		assertEquals(searchOntologyDTOPage.getContent().size(), result.getContent().size());
+	}
+
+	@Test
+	void testUpdateOntology() {
+		// Mock data
+		Long id = 1L;
+		OntologyDTO ontologyDto = new OntologyDTO();
+		ontologyDto.setName("Updated Ontology");
+
+		Ontology ontologyDB = new Ontology();
+		Ontology ontologySource = new Ontology();
+		Ontology ontologyUpdated = new Ontology();
+		ontologyUpdated.setId(id); // Mock the updated ontology ID
+
+		// Define mock behavior
+		when(this.ontologyMapper.dtoToEntity(ontologyDto)).thenReturn(ontologySource);
+		when(this.ontologyRepo.saveAndFlush(this.ontologyMapper.merge(ontologySource, ontologyDB))).thenReturn(ontologyUpdated);
+		when(this.ontologyMapper.entityToDto(ontologyUpdated)).thenReturn(ontologyDto);
+		when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontologyDB));
+
+		// Act
+		OntologyDTO result = this.ontologyService.updateOntology(id, ontologyDto);
+
+		// Assert
+		assertEquals(ontologyDto, result);
+		verify(this.ontologyRepo).saveAndFlush(this.ontologyMapper.merge(ontologySource, ontologyDB));
 	}
 
 	@Test
@@ -187,6 +214,28 @@ class OntologyServiceImplTest {
 
 		// Test & Verify
 		assertThrows(EntityNotFoundException.class, () -> this.ontologyService.getEntity(id));
+	}
+
+	@Test
+	void testGetOntologies() {
+		// Mock data
+		Ontology ontology1 = new Ontology();
+		Ontology ontology2 = new Ontology();
+		List<Ontology> ontologiesList = Arrays.asList(ontology1, ontology2);
+
+		SearchOntologyDTO dto1 = new SearchOntologyDTO();
+		SearchOntologyDTO dto2 = new SearchOntologyDTO();
+		List<SearchOntologyDTO> dtoList = Arrays.asList(dto1, dto2);
+
+		// Mock behavior
+		when(this.ontologyRepo.findAll(Sort.by(Sort.Order.asc("name")))).thenReturn(ontologiesList);
+		when(this.ontologyMapper.entitytoSearchOntologyDTO(ontologiesList)).thenReturn(dtoList);
+
+		// Act
+		List<SearchOntologyDTO> result = this.ontologyService.getOntologies(Sort.by(Sort.Order.asc("name")));
+
+		// Assert
+		assertEquals(dtoList, result);
 	}
 
 	@Test
