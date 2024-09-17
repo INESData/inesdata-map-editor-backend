@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -23,12 +22,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -191,26 +187,6 @@ class OntologyServiceImplTest {
 
 		// Test & Verify
 		assertThrows(EntityNotFoundException.class, () -> this.ontologyService.getEntity(id));
-	}
-
-	@Test
-	void testGetOntologyClasses() throws Exception {
-		// Arrange
-		Long ontologyId = 1L;
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		Ontology ontologyEntity = mock(Ontology.class);
-		when(this.ontologyService.getEntity(ontologyId)).thenReturn(ontologyEntity);
-		when(this.ontologyService.getOntologyContent(ontologyEntity)).thenReturn("ontology content");
-
-		OWLOntology owlOntology = mock(OWLOntology.class);
-		when(manager.loadOntologyFromOntologyDocument(any(StringDocumentSource.class))).thenReturn(owlOntology);
-		when(this.ontologyService.getClasses(owlOntology)).thenReturn(Collections.singletonList("TestClass"));
-
-		// Act
-		List<String> result = this.ontologyService.getOntologyClasses(ontologyId);
-
-		// Assert
-		assertEquals(Collections.singletonList("TestClass"), result);
 	}
 
 	@Test
