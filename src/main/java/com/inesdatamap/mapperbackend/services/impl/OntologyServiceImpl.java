@@ -2,7 +2,6 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +17,6 @@ import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
 import org.semanticweb.owlapi.search.EntitySearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -163,27 +161,40 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
-	 * Retrieves all class names from an ontology specified by its ID.
+	 * Retrieves all class names from the ontology specified by the given ID.
 	 *
 	 * @param id
-	 *            the ID of the ontology
-	 * @return a list of class names extracted from the ontology
+	 *            the unique identifier of the ontology entity in the database
+	 * @return a list of class names extracted from the ontology; each name is a non-null, non-empty string
+	 * @throws OntologyParserException
+	 *             if there is an error retrieving or processing the ontology, including errors from loading the ontology
 	 */
 	@Override
 	public List<String> getOntologyClasses(Long id) {
 
-		// Get entity from DB
-		Ontology ontology = this.getEntity(id);
+		List<String> classNamesList = new ArrayList<>();
 
-		// Read ontology file content
-		String ontologyContent = this.getOntologyContent(ontology);
-
-		// Get all classes in ontology and return list
 		try {
-			return this.getClasses(ontologyContent);
+
+			// Get entity from DB
+			Ontology ontologyEntity = this.getEntity(id);
+
+			// Read ontology file content
+			String ontologyContent = this.getOntologyContent(ontologyEntity);
+
+			// Create OWLOntologyManager instance and load the ontology
+			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+			OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+
+			// Get all classes in ontology and return list
+			classNamesList = this.getClasses(owl);
+
 		} catch (OWLOntologyCreationException e) {
-			throw new OntologyParserException("Failed getting classes from ontology: " + ontology.getName(), e);
+			throw new OntologyParserException("Failed getting classes from ontology with id: " + id, e);
 		}
+
+		return classNamesList;
+
 	}
 
 	/**
@@ -235,55 +246,33 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
-	 * Retrieves all class names from an ontology provided as a string
+	 * Retrieves all the class names from the provided OWL ontology.
 	 *
-	 * This method parses the ontology content from a string, loads it into an OWLOntology object, and extracts the names of all classes
-	 * defined in the ontology
 	 *
-	 * @param ontologyContent
-	 *            a string containing the ontology data in a format supported by OWL API
-	 * @return a list of class names as strings
+	 * @param owl
+	 *            the OWL ontology from which to retrieve class names
+	 * @return a list of class names, where each name is a non-null, non-empty string
 	 * @throws OWLOntologyCreationException
-	 *             if there is an error during the ontology creation process
+	 *             if there is an error accessing or processing the ontology
 	 */
-	public List<String> getClasses(String ontologyContent) throws OWLOntologyCreationException {
-
-		if (ontologyContent == null || ontologyContent.isEmpty()) {
-			throw new IllegalArgumentException("Ontology content is empty.");
-		}
-
-		// Create OWLOntologyManager instance and load the ontology
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
-
-		// Set to store the main (super) classes
-		Set<OWLClass> mainClasses = new HashSet<>();
-
-		// Loop through all subclass axioms and collect the superclasses
-		for (OWLSubClassOfAxiom subClassAxiom : ontology.getAxioms(AxiomType.SUBCLASS_OF)) {
-			if (subClassAxiom.getSuperClass().isOWLClass()) {
-				mainClasses.add(subClassAxiom.getSuperClass().asOWLClass());
-			}
-		}
-
-		// List to store the final classes excluding the main (super) classes
-		List<String> classesList = new ArrayList<>();
+	public List<String> getClasses(OWLOntology owl) throws OWLOntologyCreationException {
 
 		// Get all the classes in the ontology
-		Set<OWLClass> allClasses = ontology.getClassesInSignature();
+		Set<OWLClass> classes = owl.getClassesInSignature();
 
-		// Iterate over all classes and exclude the ones that are superclasses
-		for (OWLClass owlClass : allClasses) {
-			// Check if this class is NOT in the set of superclasses
-			if (!mainClasses.contains(owlClass)) {
-				// Extract the class name from its IRI fragment
-				String className = owlClass.getIRI().getFragment();
+		// List to store the classes
+		List<String> classesList = new ArrayList<>();
 
-				// Add the class name to the list only if it is not null or empty
-				if (className != null && !className.isEmpty()) {
-					classesList.add(className);
-				}
+		// Iterate over all classes
+		for (OWLClass owlClass : classes) {
+			// Extract the class name from its IRI fragment
+			String className = owlClass.getIRI().getFragment();
+
+			// Add the class name to the list only if it is not null or empty
+			if (className != null && !className.isEmpty()) {
+				classesList.add(className);
 			}
+
 		}
 
 		return classesList;
