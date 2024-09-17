@@ -167,7 +167,7 @@ public class OntologyServiceImpl implements OntologyService {
 	@Override
 	public List<String> getOntologyClasses(Long id) {
 
-		List<String> classNamesList = new ArrayList<>();
+		List<String> classList = new ArrayList<>();
 
 		try {
 
@@ -182,13 +182,13 @@ public class OntologyServiceImpl implements OntologyService {
 			OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
 
 			// Get all classes in ontology and return list
-			classNamesList = this.getClasses(owl);
+			classList = this.getClasses(owl);
 
 		} catch (OWLOntologyCreationException e) {
 			throw new OntologyParserException("Failed getting classes from ontology with id: " + id, e);
 		}
 
-		return classNamesList;
+		return classList;
 
 	}
 
@@ -291,18 +291,18 @@ public class OntologyServiceImpl implements OntologyService {
 	/**
 	 * Retrieves the data properties associated with a specified OWL class in the ontology
 	 *
-	 * @param clazz
+	 * @param owlClass
 	 *            The OWL class whose properties are to be retrieved
 	 * @param ontology
 	 *            The OWL ontology from which to retrieve the properties
 	 * @return A list of data property names associated with the specified class
 	 */
-	public List<String> getDataProperties(OWLClass clazz, OWLOntology ontology) {
+	public List<String> getDataProperties(OWLClass owlClass, OWLOntology ontology) {
 
 		List<String> properties = new ArrayList<>();
 
 		// Get class name from clazz
-		String classFragment = clazz.getIRI().getFragment();
+		String classFragment = owlClass.getIRI().getFragment();
 
 		if (classFragment == null || classFragment.isEmpty()) {
 			throw new IllegalArgumentException("There is no class in the ontology.");
@@ -313,7 +313,7 @@ public class OntologyServiceImpl implements OntologyService {
 		for (OWLDataProperty dataProperty : dataProperties) {
 
 			// Check if the class is a domain of the data property
-			boolean isDomain = EntitySearcher.getDomains(dataProperty, ontology).anyMatch(domain -> domain.equals(clazz));
+			boolean isDomain = EntitySearcher.getDomains(dataProperty, ontology).anyMatch(domain -> domain.equals(owlClass));
 
 			if (isDomain) {
 				properties.add(dataProperty.getIRI().getFragment());
