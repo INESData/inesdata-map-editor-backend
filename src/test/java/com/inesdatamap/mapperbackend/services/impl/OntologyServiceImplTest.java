@@ -9,9 +9,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +23,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.StringDocumentSource;
+import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -181,5 +191,79 @@ class OntologyServiceImplTest {
 
 		// Test & Verify
 		assertThrows(EntityNotFoundException.class, () -> this.ontologyService.getEntity(id));
+	}
+
+	@Test
+	void testGetOntologyClasses() throws Exception {
+		// Arrange
+		Long ontologyId = 1L;
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		Ontology ontologyEntity = mock(Ontology.class);
+		when(this.ontologyService.getEntity(ontologyId)).thenReturn(ontologyEntity);
+		when(this.ontologyService.getOntologyContent(ontologyEntity)).thenReturn("ontology content");
+
+		OWLOntology owlOntology = mock(OWLOntology.class);
+		when(manager.loadOntologyFromOntologyDocument(any(StringDocumentSource.class))).thenReturn(owlOntology);
+		when(this.ontologyService.getClasses(owlOntology)).thenReturn(Collections.singletonList("TestClass"));
+
+		// Act
+		List<String> result = this.ontologyService.getOntologyClasses(ontologyId);
+
+		// Assert
+		assertEquals(Collections.singletonList("TestClass"), result);
+	}
+
+	@Test
+	void testGetClasses() throws Exception {
+
+		// Mock OWLOntology and OWLClass
+		OWLOntology owlOntology = mock(OWLOntology.class);
+		OWLClass owlClass = mock(OWLClass.class);
+
+		// Mock IRI
+		IRI iri1 = mock(IRI.class);
+
+		// Define the behavior for IRI objects
+		when(iri1.getFragment()).thenReturn("Class1");
+
+		// Define the behavior for OWLClass objects
+		when(owlClass.getIRI()).thenReturn(iri1);
+
+		// Create a set of classes to return from the ontology
+		Set<OWLClass> classes = new HashSet<>();
+		classes.add(owlClass);
+
+		// Define the behavior for OWLOntology
+		when(owlOntology.getClassesInSignature()).thenReturn(classes);
+
+		// Act
+		List<String> result = this.ontologyService.getClasses(owlOntology);
+
+		// Assert
+		List<String> expected = List.of("Class1");
+		assertEquals(expected, result);
+	}
+
+	@Test
+	void testGetOntologyContent() {
+		// Case 1: Ontology with content
+		Ontology ontologyWithContent = new Ontology();
+		byte[] contentBytes = "Ontology content".getBytes(StandardCharsets.UTF_8);
+		ontologyWithContent.setContent(contentBytes);
+
+		// Act
+		String resultWithContent = this.ontologyService.getOntologyContent(ontologyWithContent);
+
+		// Assert
+		assertEquals("Ontology content", resultWithContent);
+
+		// Case 2: Ontology without content
+		Ontology ontologyWithoutContent = new Ontology();
+		ontologyWithoutContent.setContent(null);
+
+		// Act and Assert
+		assertThrows(IllegalArgumentException.class, () -> {
+			this.ontologyService.getOntologyContent(ontologyWithoutContent);
+		}, "Ontology has no content.");
 	}
 }
