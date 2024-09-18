@@ -159,8 +159,8 @@ public class OntologyServiceImpl implements OntologyService {
 	 * Retrieves all class names from the ontology specified by the given ID.
 	 *
 	 * @param id
-	 *            the unique identifier of the ontology entity in the database
-	 * @return a list of class names extracted from the ontology; each name is a non-null, non-empty string
+	 *            the unique identifier of the ontology entity
+	 * @return a list of class names extracted from the ontology
 	 * @throws OntologyParserException
 	 *             if there is an error retrieving or processing the ontology, including errors from loading the ontology
 	 */
@@ -195,10 +195,9 @@ public class OntologyServiceImpl implements OntologyService {
 	/**
 	 * Retrieves all the class names from the provided OWL ontology.
 	 *
-	 *
 	 * @param owl
 	 *            the OWL ontology from which to retrieve class names
-	 * @return a list of class names, where each name is a non-null, non-empty string
+	 * @return a list of class names
 	 * @throws OWLOntologyCreationException
 	 *             if there is an error accessing or processing the ontology
 	 */
@@ -301,7 +300,7 @@ public class OntologyServiceImpl implements OntologyService {
 
 		List<String> properties = new ArrayList<>();
 
-		// Get class name from clazz
+		// Get class name from owlClass
 		String classFragment = owlClass.getIRI().getFragment();
 
 		if (classFragment == null || classFragment.isEmpty()) {
@@ -333,7 +332,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 */
 	public String getOntologyContent(Ontology ontology) {
 
-		// Validate that the ontology is not null
+		// Validate ontology is not null
 		if (ontology.getContent() == null) {
 			throw new IllegalArgumentException("Ontology has no content.");
 		}

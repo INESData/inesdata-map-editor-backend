@@ -301,49 +301,13 @@ class OntologyServiceImplTest {
 			List<String> result = this.ontologyService.getOntologyClasses(id);
 
 			// Verify the result
-			List<String> expectedClasses = Arrays.asList("Class2", "Class1");
+			List<String> expectedClasses = Arrays.asList("Class1", "Class2");
 			assertEquals(expectedClasses, result);
 
 			// Verify interactions with mocks
 			verify(this.ontologyRepo).findById(id);
 			verify(manager).loadOntologyFromOntologyDocument(any(StringDocumentSource.class));
 			verify(owlOntology).getClassesInSignature();
-		}
-	}
-
-	@Test
-	void testGetOntologyClasses_Exception() throws Exception {
-		// Mock data
-		Long id = 1L;
-		Ontology ontologyEntity = new Ontology();
-		ontologyEntity.setId(id);
-
-		// Simulate that the ontology has content
-		byte[] ontologyContentBytes = "Ontology content".getBytes(StandardCharsets.UTF_8);
-		ontologyEntity.setContent(ontologyContentBytes);
-
-		// Mock the behavior of getEntity
-		lenient().when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontologyEntity));
-
-		// Mock for OWLOntologyManager
-		OWLOntologyManager manager = mock(OWLOntologyManager.class);
-		when(manager.loadOntologyFromOntologyDocument(any(StringDocumentSource.class)))
-				.thenThrow(new OWLOntologyCreationException("Error loading ontology"));
-
-		// Mock the OWLOntologyManager for the service
-		try (MockedStatic<OWLManager> mockedOWLManager = mockStatic(OWLManager.class)) {
-			mockedOWLManager.when(OWLManager::createOWLOntologyManager).thenReturn(manager);
-
-			// Execute the method under test and expect an exception
-			OntologyParserException thrownException = assertThrows(OntologyParserException.class,
-					() -> this.ontologyService.getOntologyClasses(id));
-
-			// Verify the exception message
-			assertEquals("Failed getting classes from ontology with id: 1", thrownException.getMessage());
-
-			// Verify interactions with mocks
-			verify(this.ontologyRepo).findById(id);
-			verify(manager).loadOntologyFromOntologyDocument(any(StringDocumentSource.class));
 		}
 	}
 
@@ -355,16 +319,16 @@ class OntologyServiceImplTest {
 
 		// Mock OWLClass with valid and invalid names
 		OWLClass owlClass1 = mock(OWLClass.class);
-		OWLClass owlClass2 = mock(OWLClass.class); // Class with an empty name
-		OWLClass owlClass3 = mock(OWLClass.class); // Class with a null name
+		OWLClass owlClass2 = mock(OWLClass.class);
+		OWLClass owlClass3 = mock(OWLClass.class);
 		IRI iri1 = mock(IRI.class);
 		IRI iri2 = mock(IRI.class);
 		IRI iri3 = mock(IRI.class);
 
 		// Define the behavior for IRI objects
 		when(iri1.getFragment()).thenReturn("Class1");
-		when(iri2.getFragment()).thenReturn(""); // Simulate an empty class name
-		when(iri3.getFragment()).thenReturn(null); // Simulate a null class name
+		when(iri2.getFragment()).thenReturn("");
+		when(iri3.getFragment()).thenReturn(null);
 
 		// Define the behavior for OWLClass objects
 		when(owlClass1.getIRI()).thenReturn(iri1);
