@@ -1,5 +1,7 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -51,7 +53,7 @@ public class OntologyController {
 	}
 
 	/**
-	 * Lists all ontologies.
+	 * Lists all ontologies paginated.
 	 *
 	 * @param page
 	 *            page number
@@ -61,8 +63,8 @@ public class OntologyController {
 	 *
 	 * @return List of all ontologies
 	 */
-	@GetMapping(path = "")
-	@Operation(summary = "List all ontologies")
+	@GetMapping(path = "paged")
+	@Operation(summary = "List all ontologies paged")
 	public ResponseEntity<Page<SearchOntologyDTO>> listOntologies(@RequestParam int page, @RequestParam int size) {
 		Page<SearchOntologyDTO> ontologies = this.ontologyService
 				.listOntologies(PageRequest.of(page, size, Sort.by(Constants.SORT_BY_NAME).ascending()));
@@ -119,5 +121,53 @@ public class OntologyController {
 			@RequestPart(value = "file", required = false) MultipartFile file) {
 		OntologyDTO createdOntology = this.ontologyService.createOntology(ontologyDto, file);
 		return ResponseEntity.status(HttpStatus.CREATED).body(createdOntology);
+	}
+
+	/**
+	 * Gets all ontologies.
+	 *
+	 * @return Gets all ontologies
+	 */
+	@GetMapping(path = "")
+	@Operation(summary = "Get all ontologies")
+	public ResponseEntity<List<SearchOntologyDTO>> getOntologies() {
+		List<SearchOntologyDTO> ontologies = this.ontologyService.getOntologies(Sort.by(Constants.SORT_BY_NAME).ascending());
+		return ResponseEntity.ok(ontologies);
+	}
+
+	/**
+	 * Gets all ontology classes.
+	 *
+	 * @param id
+	 *            ontology identifier
+	 *
+	 * @return Ontology classes
+	 */
+	@GetMapping("/{id}")
+	@Operation(summary = "Get all ontology classes")
+	public ResponseEntity<List<String>> getOntologyClasses(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier", required = true) Long id) {
+		List<String> classes = this.ontologyService.getOntologyClasses(id);
+		return ResponseEntity.ok(classes);
+	}
+
+	/**
+	 * Gets all ontology class attributes.
+	 *
+	 * @param id
+	 *            ontology identifier
+	 *
+	 * @param ontologyClass
+	 *            ontologyClass
+	 *
+	 * @return Ontology class attributes
+	 */
+	@GetMapping("/{id}/{ontologyClass}")
+	@Operation(summary = "Get all ontology attributes")
+	public ResponseEntity<List<String>> getOntologyAttributes(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier", required = true) Long id,
+			@PathVariable(name = "ontologyClass") @Parameter(name = "ontologyClass", description = "Ontology class", required = true) String ontologyClass) {
+		List<String> classes = this.ontologyService.getOntologyAttributes(id, ontologyClass);
+		return ResponseEntity.ok(classes);
 	}
 }
