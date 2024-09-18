@@ -8,7 +8,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,12 +27,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -61,6 +67,9 @@ class OntologyServiceImplTest {
 
 	@Mock
 	private OntologyMapper ontologyMapper;
+
+	@Mock
+	private OWLOntology owlOntology;
 
 	@InjectMocks
 	private OntologyServiceImpl ontologyService;
@@ -246,6 +255,58 @@ class OntologyServiceImplTest {
 
 		// Assert
 		assertEquals(dtoList, result);
+	}
+
+	@Test
+	void testGetOntologyClasses() throws Exception {
+
+		// Mock data
+		Long id = 1L;
+		Ontology ontologyEntity = new Ontology();
+		ontologyEntity.setId(id);
+
+		// Simulate that the ontology has content
+		byte[] ontologyContentBytes = "Ontology content".getBytes(StandardCharsets.UTF_8);
+		ontologyEntity.setContent(ontologyContentBytes);
+
+		// Mock the behavior of getEntity
+		lenient().when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontologyEntity));
+
+		// Mock for OWLOntologyManager and OWLOntology
+		OWLOntologyManager manager = mock(OWLOntologyManager.class);
+		OWLOntology owlOntology = mock(OWLOntology.class);
+		when(manager.loadOntologyFromOntologyDocument(any(StringDocumentSource.class))).thenReturn(owlOntology);
+
+		// Mock the classes within the OWLOntology
+		OWLClass owlClass1 = mock(OWLClass.class);
+		OWLClass owlClass2 = mock(OWLClass.class);
+		IRI iri1 = mock(IRI.class);
+		IRI iri2 = mock(IRI.class);
+		when(iri1.getFragment()).thenReturn("Class1");
+		when(iri2.getFragment()).thenReturn("Class2");
+		when(owlClass1.getIRI()).thenReturn(iri1);
+		when(owlClass2.getIRI()).thenReturn(iri2);
+
+		// Configure the mock to return the classes
+		Set<OWLClass> classes = new HashSet<>(Arrays.asList(owlClass1, owlClass2));
+		when(owlOntology.getClassesInSignature()).thenReturn(classes);
+
+		// Mock the OWLOntologyManager for the service
+		try (MockedStatic<OWLManager> mockedOWLManager = mockStatic(OWLManager.class)) {
+			mockedOWLManager.when(OWLManager::createOWLOntologyManager).thenReturn(manager);
+
+			// Execute the method under test
+			List<String> result = this.ontologyService.getOntologyClasses(id);
+
+			// Verify the result
+			List<String> expectedClasses = Arrays.asList("Class1", "Class2");
+			assertEquals(expectedClasses, result);
+
+			// Verify interactions with mocks
+			verify(this.ontologyRepo).findById(id);
+			verify(manager).loadOntologyFromOntologyDocument(any(StringDocumentSource.class));
+			verify(owlOntology).getClassesInSignature();
+		}
 	}
 
 	@Test
