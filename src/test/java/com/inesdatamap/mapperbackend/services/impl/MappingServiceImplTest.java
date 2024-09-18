@@ -1,32 +1,50 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.inesdatamap.mapperbackend.exceptions.GraphEngineException;
+import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
+import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
+import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.DataSource;
+import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
+import com.inesdatamap.mapperbackend.model.jpa.ObjectMap;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
+import com.inesdatamap.mapperbackend.model.jpa.PredicateObjectMap;
+import com.inesdatamap.mapperbackend.model.jpa.SubjectMap;
+import com.inesdatamap.mapperbackend.model.mappers.MappingFieldMapperImpl;
+import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
+import com.inesdatamap.mapperbackend.model.mappers.MappingMapperImpl;
+import com.inesdatamap.mapperbackend.model.mappers.PredicateObjectMapMapperImpl;
+import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
+import com.inesdatamap.mapperbackend.repositories.jpa.FileSourceRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
+import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.services.GraphEngineService;
 
 import jakarta.persistence.EntityNotFoundException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -37,16 +55,30 @@ import static org.mockito.Mockito.when;
  *
  * @author gmv
  */
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = { MappingServiceImpl.class, MappingMapperImpl.class, MappingFieldMapperImpl.class,
+	PredicateObjectMapMapperImpl.class })
 class MappingServiceImplTest {
 
-	@Mock
+	@MockBean
 	private MappingRepository mappingRepo;
 
-	@Mock
+	@MockBean
+	private OntologyRepository ontologyRepository;
+
+	@MockBean
+	private DataSourceRepository<DataSource> dataSourceRepository;
+
+	@MockBean
+	private FileSourceRepository fileSourceRepository;
+
+	@MockBean
 	private GraphEngineService graphEngineService;
 
-	@InjectMocks
+	@Autowired
+	private MappingMapper mappingMapper;
+
+	@Autowired
 	private MappingServiceImpl mappingService;
 
 	@Test
@@ -120,7 +152,6 @@ class MappingServiceImplTest {
 	void materializeMappingThrowsExceptionTest() {
 
 		Mapping mapping = buildMapping();
-		List<String> expectedResults = List.of("Graph", "created!");
 
 		// Mock behavior
 		when(this.mappingRepo.findById(anyLong())).thenReturn(Optional.of(mapping));
@@ -129,11 +160,52 @@ class MappingServiceImplTest {
 		assertThrows(GraphEngineException.class, () -> this.mappingService.materialize(1L));
 	}
 
+	@Test
+	void testCreateMapping() {
+
+		MappingDTO mappingDTO = new MappingDTO();
+
+		String fileName = "file.csv";
+		String filePath = String.join(File.separator, "path", "to");
+
+		FileSource source = buildFileSource(filePath, fileName, DataFileTypeEnum.CSV, DataSourceTypeEnum.FILE);
+		SubjectMap subjectMap = buildSubjectMap("http://example.org/Person", "http://example.org/person/{id}");
+		ObjectMap objectMap = buildObjectMap("rml:reference", "name");
+		PredicateObjectMap predicateObjectMap = buildPredicateObjectMap("http://example.org/hasName", List.of(objectMap));
+		MappingField field1 = buildMappingField(source, subjectMap, List.of(predicateObjectMap));
+
+		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
+
+		when(mappingRepo.save(mapping)).thenReturn(mapping);
+		when(ontologyRepository.getReferenceById(anyLong())).thenReturn(field1.getOntology());
+		when(dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+		when(fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+
+		Mapping result = mappingService.create(mappingMapper.entityToDto(mapping));
+
+		String rmlContent = new String(result.getRml(), StandardCharsets.UTF_8);
+
+		assertTrue(rmlContent.contains("rr:predicate ex:hasName"));
+		assertTrue(rmlContent.contains("rml:reference \"name\""));
+
+	}
+
+	@Test
+	void testSave() {
+		Mapping mapping = buildMapping();
+
+		when(mappingRepo.save(mapping)).thenReturn(mapping);
+
+		MappingDTO result = mappingService.save(mapping);
+
+		assertEquals(mapping.getName(), result.getName());
+	}
+
 	private static Mapping buildMapping() {
 		Mapping mapping = new Mapping();
+		mapping.setRml("RML CONTENT".getBytes());
 		mapping.setId(1L);
 		mapping.setName("Test Mapping");
-		mapping.setRml("RML CONTENT".getBytes());
 
 		MappingField field1 = new MappingField();
 		Ontology ontology = new Ontology();
@@ -146,5 +218,58 @@ class MappingServiceImplTest {
 
 		mapping.setFields(List.of(field1));
 		return mapping;
+	}
+
+	private static Mapping buildMapping(String name, List<MappingField> fields) {
+		Mapping mapping = new Mapping();
+		mapping.setId(1L);
+		mapping.setName(name);
+		mapping.setFields(fields);
+		return mapping;
+	}
+
+	private static MappingField buildMappingField(FileSource source, SubjectMap subjectMap, List<PredicateObjectMap> predicates) {
+		MappingField field = new MappingField();
+
+		Ontology ontology = new Ontology();
+		ontology.setId(1L);
+		ontology.setName("Ontology1");
+
+		field.setOntology(ontology);
+		field.setSource(source);
+		field.setSubject(subjectMap);
+		field.setPredicates(predicates);
+		return field;
+	}
+
+	private static FileSource buildFileSource(String filePath, String fileName, DataFileTypeEnum fileType, DataSourceTypeEnum type) {
+		FileSource source = new FileSource();
+		source.setId(1L);
+		source.setFilePath(filePath);
+		source.setFileName(fileName);
+		source.setFileType(fileType);
+		source.setType(type);
+		return source;
+	}
+
+	private static SubjectMap buildSubjectMap(String className, String template) {
+		SubjectMap subjectMap = new SubjectMap();
+		subjectMap.setClassName(className);
+		subjectMap.setTemplate(template);
+		return subjectMap;
+	}
+
+	private static PredicateObjectMap buildPredicateObjectMap(String predicate, List<ObjectMap> objectMaps) {
+		PredicateObjectMap predicateObjectMap = new PredicateObjectMap();
+		predicateObjectMap.setPredicate(predicate);
+		predicateObjectMap.setObjectMap(objectMaps);
+		return predicateObjectMap;
+	}
+
+	private static ObjectMap buildObjectMap(String key, String literalValue) {
+		ObjectMap objectMap = new ObjectMap();
+		objectMap.setKey(key);
+		objectMap.setLiteralValue(literalValue);
+		return objectMap;
 	}
 }

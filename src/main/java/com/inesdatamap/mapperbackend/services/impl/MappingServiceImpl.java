@@ -163,13 +163,26 @@ public class MappingServiceImpl implements MappingService {
 	 * @return the created mapping
 	 */
 	@Override
-	public MappingDTO create(MappingDTO mappingDTO) {
+	public Mapping create(MappingDTO mappingDTO) {
 
 		Mapping mapping = setRelationships(mappingDTO);
 
 		byte[] rml = buildRml(mapping);
 		mapping.setRml(rml);
 
+		return mapping;
+	}
+
+	/**
+	 * Saves a mapping.
+	 *
+	 * @param mapping
+	 * 	the mapping to save
+	 *
+	 * @return the saved mapping
+	 */
+	@Override
+	public MappingDTO save(Mapping mapping) {
 		return this.mappingMapper.entityToDto(this.mappingRepo.save(mapping));
 	}
 
@@ -243,7 +256,6 @@ public class MappingServiceImpl implements MappingService {
 		});
 
 		try {
-			// Write to string
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			Rio.write(builder.build(), out, baseUri, RDFFormat.TURTLE);
 

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
+import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.services.MappingService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -75,8 +76,9 @@ public class MappingController {
 	@PostMapping(path = "")
 	@Operation(summary = "Create a new mapping")
 	public ResponseEntity<MappingDTO> create(@RequestBody @Valid MappingDTO mappingDTO) {
-		MappingDTO mapping = this.mappingService.create(mappingDTO);
-		return ResponseEntity.ok(mapping);
+		Mapping mapping = this.mappingService.create(mappingDTO);
+		MappingDTO body = this.mappingService.save(mapping);
+		return ResponseEntity.ok(body);
 	}
 
 	/**

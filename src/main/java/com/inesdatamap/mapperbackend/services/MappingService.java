@@ -32,7 +32,17 @@ public interface MappingService {
 	 *
 	 * @return the created mapping
 	 */
-	MappingDTO create(MappingDTO mappingDTO);
+	Mapping create(MappingDTO mappingDTO);
+
+	/**
+	 * Saves a mapping.
+	 *
+	 * @param mappingDTO
+	 * 	the mapping to save
+	 *
+	 * @return the saved mapping
+	 */
+	MappingDTO save(Mapping mappingDTO);
 
 	/**
 	 * Deletes a mapping by its id.

@@ -6,6 +6,7 @@ import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.springframework.util.CollectionUtils;
 
 import com.inesdatamap.mapperbackend.model.dto.ObjectMapDTO;
 
@@ -122,7 +123,7 @@ public final class RmlUtils {
 				builder.subject(parentNode).add(objectMap.getKey(), vf.createLiteral(objectMap.getLiteralValue()));
 			}
 
-			if (objectMap.getObjectValue() != null) {
+			if (!CollectionUtils.isEmpty(objectMap.getObjectValue())) {
 
 				BNode nestedObjectMapNode = vf.createBNode();
 
