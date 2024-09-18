@@ -39,7 +39,6 @@
 		<sonar.coverage.jacoco.xmlReportPaths>${project.coverage.result.path}/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 	</properties>
 	<dependencies>
-
 		<!-- Spring -->
 
 		<dependency>

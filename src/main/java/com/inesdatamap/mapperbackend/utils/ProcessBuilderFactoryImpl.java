@@ -18,7 +18,7 @@ public class ProcessBuilderFactoryImpl implements ProcessBuilderFactory {
 	@Override
 	public ProcessBuilder createProcessBuilder(String... commands) {
 
-		logger.info(commands);
+		logger.info("Commands: " + String.join(" ", commands));
 
 		ProcessBuilder processBuilder = new ProcessBuilder(commands);
 		processBuilder.redirectErrorStream(true);

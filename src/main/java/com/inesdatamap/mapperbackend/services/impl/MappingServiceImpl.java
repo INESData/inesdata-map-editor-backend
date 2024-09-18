@@ -110,6 +110,34 @@ public class MappingServiceImpl implements MappingService {
 	}
 
 	/**
+	 * Creates a new mapping.
+	 *
+	 * @param mapping
+	 * 	the mapping to create
+	 *
+	 * @return the created mapping
+	 */
+	public Mapping create(Mapping mapping) {
+
+		byte[] rml = buildRml(mapping);
+		mapping.setRml(rml);
+
+		return this.mappingRepo.save(mapping);
+	}
+
+	private static byte[] buildRml(Mapping mapping) {
+
+		mapping.getFields().forEach(field -> {
+
+			// TODO
+
+		});
+
+		return new byte[0];
+
+	}
+
+	/**
 	 * Materializes a mapping by its id.
 	 *
 	 * @param id
