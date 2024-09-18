@@ -1,6 +1,8 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.inesdatamap.mapperbackend.exceptions.FileCreationException;
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.dto.FileSourceDTO;
+import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.mappers.FileSourceMapper;
 import com.inesdatamap.mapperbackend.properties.AppProperties;
@@ -43,9 +46,9 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Saves a data source
 	 *
 	 * @param fileSourceDTO
-	 * 	the FileSourceDTO
+	 *            the FileSourceDTO
 	 * @param file
-	 * 	file content to save
+	 *            file content to save
 	 *
 	 * @return the saved data source
 	 */
@@ -71,8 +74,8 @@ public class FileSourceServiceImpl implements FileSourceService {
 			String headers = FileUtils.processFileHeaders(file);
 
 			// Build file path
-			String filePath = String.join(File.separator, appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME,
-				savedFileSource.getId().toString());
+			String filePath = String.join(File.separator, this.appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME,
+					savedFileSource.getId().toString());
 
 			// Set values in FileSource
 			savedFileSource.setFields(headers);
@@ -85,16 +88,16 @@ public class FileSourceServiceImpl implements FileSourceService {
 			savedFileSource = this.fileSourceRepository.save(savedFileSource);
 		}
 
-		return this.fileSourceMapper.toDTO(savedFileSource);
+		return this.fileSourceMapper.entityToDto(savedFileSource);
 	}
 
 	/**
 	 * Updates an existing file source
 	 *
 	 * @param id
-	 * 	The identifier of the file source to be updated
+	 *            The identifier of the file source to be updated
 	 * @param fileSourceDTO
-	 * 	The FileSourceDTO
+	 *            The FileSourceDTO
 	 *
 	 * @return the updated file source.
 	 */
@@ -111,14 +114,14 @@ public class FileSourceServiceImpl implements FileSourceService {
 		// Update existing entity
 		this.fileSourceMapper.merge(fileSourceDTO, fileSourceDB);
 
-		return this.fileSourceMapper.toDTO(fileSourceDB);
+		return this.fileSourceMapper.entityToDto(fileSourceDB);
 	}
 
 	/**
 	 * Retrieves a file source entity by its ID.
 	 *
 	 * @param id
-	 * 	the ID of the file source to retrieve
+	 *            the ID of the file source to retrieve
 	 *
 	 * @return the file source entity corresponding to the given ID
 	 */
@@ -131,13 +134,53 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a FileSourceDTO by its identifier.
 	 *
 	 * @param id
-	 * 	the unique identifier of the file source entity
+	 *            the unique identifier of the file source entity
 	 *
 	 * @return the file source dto corresponding to the given ID
 	 */
 	@Override
 	public FileSourceDTO getFileSourceById(Long id) {
 		return this.fileSourceMapper.entityToDto(this.getEntity(id));
+
+	}
+
+	/**
+	 * Retrieves a list of FileSourceDTO objects filtered by the specified file type.
+	 *
+	 * @param fileType
+	 *            The type of the file sources to retrieve
+	 *
+	 * @return A list of `FileSourceDTO` objects representing the file sources of the specified type.
+	 */
+	@Override
+	public List<FileSourceDTO> getFileSourceByType(String fileType) {
+
+		DataFileTypeEnum typeEnum = DataFileTypeEnum.valueOf(fileType);
+		List<FileSource> fileSources = this.fileSourceRepository.findByFileTypeOrderByNameAsc(typeEnum);
+
+		return this.fileSourceMapper.fileSourcesToFileSourceDTOs(fileSources);
+	}
+
+	/**
+	 * Retrieves the fields of a file source as a list of strings, based on the given source ID.
+	 *
+	 * @param id
+	 *            The ID of the file source whose fields are to be retrieved.
+	 *
+	 * @return A list of field names extracted from the fields property of the FileSource entity
+	 *
+	 */
+	@Override
+	public List<String> getFileFields(Long id) {
+
+		FileSource fileSource = this.getEntity(id);
+
+		String fields = fileSource.getFields();
+		if (fields != null && !fields.isEmpty()) {
+			return Arrays.asList(fields.split(Constants.FIELD_DELIMITER_REGEX));
+		} else {
+			return Arrays.asList();
+		}
 
 	}
 

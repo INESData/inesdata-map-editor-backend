@@ -1,5 +1,7 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -94,6 +96,36 @@ public class FileSourceController {
 	public ResponseEntity<FileSourceDTO> getFileSource(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
 		return ResponseEntity.ok(this.fileSourceService.getFileSourceById(id));
+	}
+
+	/**
+	 * Get all file sources filtered by type
+	 *
+	 * @param fileType
+	 *            file type
+	 *
+	 * @return List of file sources
+	 */
+	@GetMapping("/type/{fileType}")
+	@Operation(summary = "Gets all file sources filtered by type")
+	public ResponseEntity<List<FileSourceDTO>> getFileSourceByType(
+			@PathVariable(name = "fileType") @Parameter(name = "fileType", description = "File source type", required = true) String fileType) {
+		return ResponseEntity.ok(this.fileSourceService.getFileSourceByType(fileType));
+	}
+
+	/**
+	 * Get all file fields
+	 *
+	 * @param id
+	 *            identifier
+	 *
+	 * @return List of file fields
+	 */
+	@GetMapping("/fields/{id}")
+	@Operation(summary = "Gets all file fields")
+	public ResponseEntity<List<String>> getFileFields(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
+		return ResponseEntity.ok(this.fileSourceService.getFileFields(id));
 	}
 
 }

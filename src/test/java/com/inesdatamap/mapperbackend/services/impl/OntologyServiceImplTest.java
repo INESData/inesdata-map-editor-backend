@@ -290,8 +290,8 @@ class OntologyServiceImplTest {
 		when(owlClass2.getIRI()).thenReturn(iri2);
 
 		// Configure the mock to return the classes
-		Set<OWLClass> classes = new HashSet<>(Arrays.asList(owlClass1, owlClass2));
-		when(owlOntology.getClassesInSignature()).thenReturn(classes);
+		List<OWLClass> classes = Arrays.asList(owlClass1, owlClass2);
+		when(owlOntology.getClassesInSignature()).thenReturn(new HashSet<>(classes));
 
 		// Mock the OWLOntologyManager for the service
 		try (MockedStatic<OWLManager> mockedOWLManager = mockStatic(OWLManager.class)) {
