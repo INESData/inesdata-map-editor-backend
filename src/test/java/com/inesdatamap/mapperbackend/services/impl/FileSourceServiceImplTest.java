@@ -1,10 +1,21 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -20,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.inesdatamap.mapperbackend.exceptions.FileCreationException;
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.dto.FileSourceDTO;
+import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.mappers.FileSourceMapper;
 import com.inesdatamap.mapperbackend.model.mappers.FileSourceMapperImpl;
@@ -29,16 +41,6 @@ import com.inesdatamap.mapperbackend.utils.FileUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Unit tests for the {@link FileSourceServiceImpl}
  *
@@ -46,7 +48,7 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { AppProperties.class, FileSourceServiceImpl.class,
-	FileSourceMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
+		FileSourceMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
 class FileSourceServiceImplTest {
 
 	@MockBean
@@ -165,6 +167,27 @@ class FileSourceServiceImplTest {
 
 		// Test & Verify
 		assertThrows(EntityNotFoundException.class, () -> this.fileSourceService.getEntity(id));
+	}
+
+	@Test
+	void testGetFileSourceByType() {
+
+		// Arrange
+		String fileType = "CSV";
+		DataFileTypeEnum typeEnum = DataFileTypeEnum.valueOf(fileType);
+
+		List<FileSource> fileSources = List.of(new FileSource());
+		when(this.fileSourceRepository.findByFileTypeOrderByNameAsc(typeEnum)).thenReturn(fileSources);
+
+		// No es necesario hacer mock del mapper, se usará la implementación real
+
+		// Act
+		List<FileSourceDTO> result = this.fileSourceService.getFileSourceByType(fileType);
+
+		// Assert
+		assertNotNull(result);
+		verify(this.fileSourceRepository).findByFileTypeOrderByNameAsc(typeEnum);
+		// No es necesario verificar el mapper si es una implementación real
 	}
 
 }
