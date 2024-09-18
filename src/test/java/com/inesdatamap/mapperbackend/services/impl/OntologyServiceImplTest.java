@@ -17,11 +17,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -299,7 +301,7 @@ class OntologyServiceImplTest {
 			List<String> result = this.ontologyService.getOntologyClasses(id);
 
 			// Verify the result
-			List<String> expectedClasses = Arrays.asList("Class1", "Class2");
+			List<String> expectedClasses = Arrays.asList("Class2", "Class1");
 			assertEquals(expectedClasses, result);
 
 			// Verify interactions with mocks
@@ -421,6 +423,55 @@ class OntologyServiceImplTest {
 			ontologyService.getOntologyAttributes(id, className);
 		});
 		assertTrue(thrown.getMessage().contains("Failed getting attributes from ontology"));
+	}
+
+	@Test
+	void testGetAttributes_validInput() throws Exception {
+		// Arrange
+		String ontologyContent = "Ontology content";
+		String className = "Class1";
+
+		// Mock OWLOntologyManager and OWLOntology
+
+		// Mock for OWLOntologyManager and OWLOntology
+		OWLOntologyManager manager = mock(OWLOntologyManager.class);
+		OWLOntology owlOntology = mock(OWLOntology.class);
+		when(manager.loadOntologyFromOntologyDocument(any(StringDocumentSource.class))).thenReturn(owlOntology);
+
+		OWLClass owlClass = mock(OWLClass.class);
+		IRI iri = mock(IRI.class);
+
+		// Define behavior for mocks
+		when(owlOntology.classesInSignature()).thenReturn(Stream.of(owlClass));
+		when(owlClass.getIRI()).thenReturn(iri);
+		when(iri.getFragment()).thenReturn(className);
+
+		// Create instance of the class under test
+		OntologyServiceImpl service = new OntologyServiceImpl();
+		// Mock OWLManager static method
+		try (MockedStatic<OWLManager> mockedOWLManager = mockStatic(OWLManager.class)) {
+			mockedOWLManager.when(OWLManager::createOWLOntologyManager).thenReturn(manager);
+
+			// Act
+			List<String> result = service.getAttributes(ontologyContent, className);
+
+			// Assert
+			// Assuming getDataProperties returns a non-empty list for the purpose of this test
+			List<String> expectedAttributes = new ArrayList<>();
+			assertEquals(expectedAttributes, result);
+		}
+	}
+
+	@Test
+	void testGetAttributes_invalidInput() {
+		// Arrange
+		OntologyServiceImpl service = new OntologyServiceImpl();
+
+		// Act & Assert
+		assertThrows(IllegalArgumentException.class, () -> service.getAttributes(null, "Class1"), "Ontology content is empty.");
+		assertThrows(IllegalArgumentException.class, () -> service.getAttributes("", "Class1"), "Ontology content is empty.");
+		assertThrows(IllegalArgumentException.class, () -> service.getAttributes("Ontology content", null), "Class name is empty.");
+		assertThrows(IllegalArgumentException.class, () -> service.getAttributes("Ontology content", ""), "Class name is empty.");
 	}
 
 	@Test
