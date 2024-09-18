@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -302,6 +303,11 @@ class OntologyServiceImplTest {
 
 			// Verify the result
 			List<String> expectedClasses = Arrays.asList("Class1", "Class2");
+
+			// Sort both lists before comparing
+			Collections.sort(result);
+			Collections.sort(expectedClasses);
+
 			assertEquals(expectedClasses, result);
 
 			// Verify interactions with mocks
