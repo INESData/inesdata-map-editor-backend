@@ -310,6 +310,42 @@ class OntologyServiceImplTest {
 	}
 
 	@Test
+	void testGetOntologyClasses_Exception() throws Exception {
+		// Mock data
+		Long id = 1L;
+		Ontology ontologyEntity = new Ontology();
+		ontologyEntity.setId(id);
+
+		// Simulate that the ontology has content
+		byte[] ontologyContentBytes = "Ontology content".getBytes(StandardCharsets.UTF_8);
+		ontologyEntity.setContent(ontologyContentBytes);
+
+		// Mock the behavior of getEntity
+		lenient().when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontologyEntity));
+
+		// Mock for OWLOntologyManager
+		OWLOntologyManager manager = mock(OWLOntologyManager.class);
+		when(manager.loadOntologyFromOntologyDocument(any(StringDocumentSource.class)))
+				.thenThrow(new OWLOntologyCreationException("Error loading ontology"));
+
+		// Mock the OWLOntologyManager for the service
+		try (MockedStatic<OWLManager> mockedOWLManager = mockStatic(OWLManager.class)) {
+			mockedOWLManager.when(OWLManager::createOWLOntologyManager).thenReturn(manager);
+
+			// Execute the method under test and expect an exception
+			OntologyParserException thrownException = assertThrows(OntologyParserException.class,
+					() -> this.ontologyService.getOntologyClasses(id));
+
+			// Verify the exception message
+			assertEquals("Failed getting classes from ontology with id: 1", thrownException.getMessage());
+
+			// Verify interactions with mocks
+			verify(this.ontologyRepo).findById(id);
+			verify(manager).loadOntologyFromOntologyDocument(any(StringDocumentSource.class));
+		}
+	}
+
+	@Test
 	void testGetClasses() throws Exception {
 
 		// Mock OWLOntology and OWLClass
