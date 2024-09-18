@@ -150,7 +150,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * @param fileType
 	 *            The type of the file sources to retrieve
 	 *
-	 * @return A list of `FileSourceDTO` objects representing the file sources of the specified type.
+	 * @return A list of FileSourceDTO objects representing the file sources of the specified type.
 	 */
 	@Override
 	public List<FileSourceDTO> getFileSourceByType(String fileType) {

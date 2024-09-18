@@ -72,14 +72,14 @@ class FileSourceServiceImplTest {
 		FileSource savedFileSourceEntity = new FileSource();
 		savedFileSourceEntity.setId(1L);
 
-		// Configurar un InputStream simulado para el archivo
+		// Config InputStream simulated for file
 		InputStream inputStream = new ByteArrayInputStream("data".getBytes());
 		when(file.getInputStream()).thenReturn(inputStream);
 		when(file.isEmpty()).thenReturn(false);
 		when(file.getContentType()).thenReturn("text/csv");
 		when(file.getOriginalFilename()).thenReturn("file.csv");
 
-		// Configuración de mocks adicionales
+		// Config additional mocks
 		when(this.fileSourceRepository.save(any())).thenReturn(savedFileSourceEntity);
 
 		// Act
@@ -98,13 +98,13 @@ class FileSourceServiceImplTest {
 		FileSource savedFileSourceEntity = new FileSource();
 		FileSourceDTO inputDto = new FileSourceDTO();
 
-		// Configurar un InputStream simulado para el archivo
+		// Config InputStream simulated for file
 		InputStream inputStream = new ByteArrayInputStream("data".getBytes());
 		when(file.getInputStream()).thenReturn(inputStream);
 		when(file.isEmpty()).thenReturn(false);
 		when(file.getContentType()).thenReturn("text/csv");
 
-		// Configuración de mocks adicionales
+		// Config additional mocks
 		when(this.fileSourceRepository.save(any())).thenReturn(savedFileSourceEntity);
 		when(FileUtils.processFileHeaders(file)).thenThrow(new IOException());
 
@@ -120,14 +120,14 @@ class FileSourceServiceImplTest {
 		savedFileSourceEntity.setId(1L);
 		FileSourceDTO inputDto = new FileSourceDTO();
 
-		// Configurar un InputStream simulado para el archivo
+		// Config InputStream simulated for file
 		InputStream inputStream = new ByteArrayInputStream("data".getBytes());
 		when(file.getInputStream()).thenReturn(inputStream);
 		when(file.isEmpty()).thenReturn(false);
 		when(file.getContentType()).thenReturn("text/csv");
 		when(file.getOriginalFilename()).thenReturn("file.csv");
 
-		// Configuración de mocks adicionales
+		// Config additional mocks
 		when(this.fileSourceRepository.save(any())).thenReturn(savedFileSourceEntity);
 
 		doThrow(IOException.class).when(file).transferTo(any(File.class));
@@ -145,15 +145,15 @@ class FileSourceServiceImplTest {
 		inputDto.setId(id);
 		FileSource fileSourceEntity = new FileSource();
 
-		// Configuración de mocks
+		// Mock config
 		when(this.fileSourceRepository.findById(id)).thenReturn(Optional.of(fileSourceEntity));
 
 		// Act
 		DataSourceDTO result = this.fileSourceService.updateFileSource(id, inputDto);
 
 		// Assert
-		assertNotNull(result); // Asegura que el resultado no es null
-		assertEquals(inputDto.getId(), result.getId()); // Asegura que el resultado es igual al esperado
+		assertNotNull(result);
+		assertEquals(inputDto.getId(), result.getId());
 		verify(this.fileSourceRepository).findById(id);
 	}
 
@@ -179,15 +179,12 @@ class FileSourceServiceImplTest {
 		List<FileSource> fileSources = List.of(new FileSource());
 		when(this.fileSourceRepository.findByFileTypeOrderByNameAsc(typeEnum)).thenReturn(fileSources);
 
-		// No es necesario hacer mock del mapper, se usará la implementación real
-
 		// Act
 		List<FileSourceDTO> result = this.fileSourceService.getFileSourceByType(fileType);
 
 		// Assert
 		assertNotNull(result);
 		verify(this.fileSourceRepository).findByFileTypeOrderByNameAsc(typeEnum);
-		// No es necesario verificar el mapper si es una implementación real
 	}
 
 }
