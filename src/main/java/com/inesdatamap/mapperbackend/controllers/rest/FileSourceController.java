@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -101,16 +102,16 @@ public class FileSourceController {
 	/**
 	 * Get all file sources filtered by type
 	 *
-	 * @param fileType
-	 *            file type
+	 * @param type
+	 *            type
 	 *
 	 * @return List of file sources
 	 */
-	@GetMapping("/type/{fileType}")
+	@GetMapping("/file-sources")
 	@Operation(summary = "Gets all file sources filtered by type")
 	public ResponseEntity<List<FileSourceDTO>> getFileSourceByType(
-			@PathVariable(name = "fileType") @Parameter(name = "fileType", description = "File source type", required = true) String fileType) {
-		return ResponseEntity.ok(this.fileSourceService.getFileSourceByType(fileType));
+			@RequestParam(name = "type") @Parameter(name = "type", description = "File source type", required = true) String type) {
+		return ResponseEntity.ok(this.fileSourceService.getFileSourceByType(type));
 	}
 
 	/**
@@ -121,7 +122,7 @@ public class FileSourceController {
 	 *
 	 * @return List of file fields
 	 */
-	@GetMapping("/fields/{id}")
+	@GetMapping("/{id}/fields")
 	@Operation(summary = "Gets all file fields")
 	public ResponseEntity<List<String>> getFileFields(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
