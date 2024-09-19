@@ -16,10 +16,10 @@ import org.springframework.test.context.ContextConfiguration;
 
 import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
-import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.services.MappingService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -72,7 +72,7 @@ class MappingControllerTest {
 		MappingDTO mappingDTO = new MappingDTO();
 		MappingDTO createdMapping = new MappingDTO();
 
-		when(mappingService.create(mappingDTO)).thenReturn(new Mapping());
+		when(mappingService.save(any())).thenReturn(createdMapping);
 
 		ResponseEntity<MappingDTO> response = mappingController.create(mappingDTO);
 
