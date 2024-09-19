@@ -3,6 +3,7 @@ package com.inesdatamap.mapperbackend.services.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -185,6 +187,43 @@ class FileSourceServiceImplTest {
 		// Assert
 		assertNotNull(result);
 		verify(this.fileSourceRepository).findByFileTypeOrderByNameAsc(typeEnum);
+	}
+
+	@Test
+	void testGetFileFields() {
+
+		// Valid fields and delimited by ;
+		Long idWithValidFields = 1L;
+		String fieldsWithValid = "field1;field2;field3";
+		FileSource fileSourceWithValidFields = new FileSource();
+		fileSourceWithValidFields.setFields(fieldsWithValid);
+		when(this.fileSourceRepository.findById(idWithValidFields)).thenReturn(Optional.of(fileSourceWithValidFields));
+
+		// Empty fields
+		Long idWithEmptyFields = 2L;
+		String fieldsWithEmpty = "";
+		FileSource fileSourceWithEmptyFields = new FileSource();
+		fileSourceWithEmptyFields.setFields(fieldsWithEmpty);
+		when(this.fileSourceRepository.findById(idWithEmptyFields)).thenReturn(Optional.of(fileSourceWithEmptyFields));
+
+		// Fields are null
+		Long idWithNullFields = 3L;
+		FileSource fileSourceWithNullFields = new FileSource();
+		fileSourceWithNullFields.setFields(null);
+		when(this.fileSourceRepository.findById(idWithNullFields)).thenReturn(Optional.of(fileSourceWithNullFields));
+
+		// Act and Assert for valid fields
+		List<String> resultWithValidFields = this.fileSourceService.getFileFields(idWithValidFields);
+		List<String> expectedWithValidFields = Arrays.asList("field1", "field2", "field3");
+		assertEquals(expectedWithValidFields, resultWithValidFields);
+
+		// Act and Assert for empty fields
+		List<String> resultWithEmptyFields = this.fileSourceService.getFileFields(idWithEmptyFields);
+		assertTrue(resultWithEmptyFields.isEmpty());
+
+		// Act and Assert for null fields
+		List<String> resultWithNullFields = this.fileSourceService.getFileFields(idWithNullFields);
+		assertTrue(resultWithNullFields.isEmpty());
 	}
 
 }
