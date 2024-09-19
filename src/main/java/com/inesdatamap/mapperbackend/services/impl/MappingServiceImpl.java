@@ -1,23 +1,48 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.inesdatamap.mapperbackend.exceptions.GraphEngineException;
+import com.inesdatamap.mapperbackend.exceptions.RmlWriteException;
+import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
+import com.inesdatamap.mapperbackend.model.dto.PredicateObjectMapDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
+import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
+import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
+import com.inesdatamap.mapperbackend.model.jpa.DataSource;
+import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
+import com.inesdatamap.mapperbackend.model.jpa.Ontology;
+import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
+import com.inesdatamap.mapperbackend.model.mappers.PredicateObjectMapMapper;
+import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
+import com.inesdatamap.mapperbackend.repositories.jpa.FileSourceRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
+import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.services.GraphEngineService;
 import com.inesdatamap.mapperbackend.services.MappingService;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
+import com.inesdatamap.mapperbackend.utils.RmlUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -32,6 +57,26 @@ public class MappingServiceImpl implements MappingService {
 
 	@Autowired
 	private GraphEngineService graphEngineService;
+
+	@Autowired
+	private MappingMapper mappingMapper;
+
+	@Autowired
+	private PredicateObjectMapMapper predicateObjectMapMapper;
+
+	@Autowired
+	private OntologyRepository ontologyRepository;
+
+	@Autowired
+	private DataSourceRepository<DataSource> dataSourceRepository;
+
+	@Autowired
+	private FileSourceRepository fileSourceRepository;
+
+	/**
+	 * Logger
+	 */
+	protected final Log logger = LogFactory.getLog(this.getClass());
 
 	/**
 	 * Retrieves a list of all mappings and maps them to their corresponding DTOs.
@@ -112,28 +157,158 @@ public class MappingServiceImpl implements MappingService {
 	/**
 	 * Creates a new mapping.
 	 *
-	 * @param mapping
+	 * @param mappingDTO
 	 * 	the mapping to create
 	 *
 	 * @return the created mapping
 	 */
-	public Mapping create(Mapping mapping) {
+	@Override
+	public Mapping create(MappingDTO mappingDTO) {
+
+		Mapping mapping = setRelationships(mappingDTO);
 
 		byte[] rml = buildRml(mapping);
 		mapping.setRml(rml);
 
-		return this.mappingRepo.save(mapping);
+		return mapping;
 	}
 
-	private static byte[] buildRml(Mapping mapping) {
+	/**
+	 * Saves a mapping.
+	 *
+	 * @param mapping
+	 * 	the mapping to save
+	 *
+	 * @return the saved mapping
+	 */
+	@Override
+	public MappingDTO save(Mapping mapping) {
+		return this.mappingMapper.entityToDto(this.mappingRepo.save(mapping));
+	}
+
+	/**
+	 * Sets the relationships of a mapping.
+	 *
+	 * @param mappingDTO
+	 * 	the mapping dto
+	 *
+	 * @return the mapping with the relationships set
+	 */
+	private Mapping setRelationships(MappingDTO mappingDTO) {
+
+		Mapping mapping = mappingMapper.dtoToEntity(mappingDTO);
+
+		if (!CollectionUtils.isEmpty(mapping.getFields())) {
+
+			mapping.getFields().forEach(field -> {
+
+				Ontology ontology = this.ontologyRepository.getReferenceById(field.getOntology().getId());
+				DataSource dataSource = this.dataSourceRepository.getReferenceById(field.getSource().getId());
+
+				field.setOntology(ontology);
+				field.setSource(dataSource);
+
+			});
+		}
+
+		return mapping;
+	}
+
+	/**
+	 * Builds the RML for a mapping.
+	 *
+	 * @param mapping
+	 * 	the mapping to build the RML for
+	 *
+	 * @return the RML for the mapping
+	 */
+	private byte[] buildRml(Mapping mapping) {
+
+		ModelBuilder builder = new ModelBuilder();
+		SimpleValueFactory vf = SimpleValueFactory.getInstance();
+		byte[] rmlContent;
+
+		// TODO: ¿En función de qué va?
+		String baseUri = "http://example.org/";
+		setNamespaces(builder, baseUri);
 
 		mapping.getFields().forEach(field -> {
 
-			// TODO
+			// Every field is a triples map
+
+			BNode mappingNode = vf.createBNode();
+
+			// Logical source or logical table
+			if (field.getSource().getType().equals(DataSourceTypeEnum.FILE)) {
+				FileSource fileSource = fileSourceRepository.getReferenceById(field.getSource().getId());
+				createLogicalSource(builder, mappingNode, fileSource);
+			}
+
+			// Subject map
+			RmlUtils.createSubjectMapNode(builder, mappingNode, field.getSubject().getTemplate(), field.getSubject().getClassName());
+
+			// Predicate-object maps
+			field.getPredicates().forEach(predicate -> {
+				PredicateObjectMapDTO predicateObjectMapDTO = predicateObjectMapMapper.entityToDto(predicate);
+				RmlUtils.createPredicateObjectMapNode(builder, mappingNode, predicate.getPredicate(), predicateObjectMapDTO.getObjectMap());
+			});
 
 		});
 
-		return new byte[0];
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			Rio.write(builder.build(), out, baseUri, RDFFormat.TURTLE);
+
+			rmlContent = out.toByteArray();
+			logger.info(new String(rmlContent, StandardCharsets.UTF_8));
+
+		} catch (URISyntaxException e) {
+			throw new RmlWriteException(e.getMessage(), e);
+		}
+
+		return rmlContent;
+
+	}
+
+	/**
+	 * Sets the namespaces for the RML.
+	 *
+	 * @param builder
+	 * 	the model builder
+	 * @param baseUri
+	 * 	the base URI
+	 */
+	private static void setNamespaces(ModelBuilder builder, String baseUri) {
+
+		// Define namespaces and base IRI
+		builder.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
+
+			.setNamespace("rml", "http://semweb.mmlab.be/ns/rml#")
+
+			.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
+
+			.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#")
+
+			.setNamespace("ex", baseUri);
+
+	}
+
+	/**
+	 * Creates a logical source node.
+	 *
+	 * @param builder
+	 * 	the model builder
+	 * @param mappingNode
+	 * 	the parent mapping node
+	 * @param source
+	 * 	the source
+	 */
+	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, FileSource source) {
+
+		if (source.getFileType().equals(DataFileTypeEnum.CSV)) {
+			String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
+			RmlUtils.createCsvLogicalSourceNode(builder, mappingNode, sourcePath);
+		}
 
 	}
 

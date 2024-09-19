@@ -2,16 +2,18 @@ package com.inesdatamap.mapperbackend.utils;
 
 import java.io.StringWriter;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
-import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import com.inesdatamap.mapperbackend.model.dto.ObjectMapDTO;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -103,11 +105,28 @@ class RmlUtilsTest {
 		// Create subject map
 		RmlUtils.createSubjectMapNode(builder, mappingNode, baseUri + "person/{id}", baseUri + "Person");
 
+		// Create object map for name
+		ObjectMapDTO objectMapDTO = new ObjectMapDTO();
+		objectMapDTO.setKey("rml:reference");
+		objectMapDTO.setLiteralValue("name");
+
+		List<ObjectMapDTO> objectMap = List.of(objectMapDTO);
+
 		// Create name predicate-object map
-		RmlUtils.createPredicateObjectMapNode(builder, mappingNode, baseUri + "hasName", "name", null);
+		RmlUtils.createPredicateObjectMapNode(builder, mappingNode, baseUri + "hasName", objectMap);
+
+		ObjectMapDTO objectMapAgeDTO = new ObjectMapDTO();
+		objectMapAgeDTO.setKey("rml:reference");
+		objectMapAgeDTO.setLiteralValue("age");
+
+		ObjectMapDTO objectMapTypeAgeDTO = new ObjectMapDTO();
+		objectMapTypeAgeDTO.setKey("rr:datatype");
+		objectMapTypeAgeDTO.setLiteralValue("xsd:integer");
+
+		List<ObjectMapDTO> objectMapAge = List.of(objectMapAgeDTO, objectMapTypeAgeDTO);
 
 		// Create age predicate-object map
-		RmlUtils.createPredicateObjectMapNode(builder, mappingNode, baseUri + "hasAge", "age", XSD.INTEGER);
+		RmlUtils.createPredicateObjectMapNode(builder, mappingNode, baseUri + "hasAge", objectMapAge);
 
 		StringWriter out = new StringWriter();
 		Rio.write(builder.build(), out, baseUri, RDFFormat.TURTLE);
@@ -116,7 +135,10 @@ class RmlUtilsTest {
 
 		assertTrue(out.toString().contains("rml:source \"people.csv\""));
 		assertTrue(out.toString().contains("rr:predicate ex:hasName"));
+		assertTrue(out.toString().contains("rml:reference \"name\""));
 		assertTrue(out.toString().contains("rr:predicate ex:hasAge"));
+		assertTrue(out.toString().contains("rml:reference \"age\""));
+
 	}
 
 }
