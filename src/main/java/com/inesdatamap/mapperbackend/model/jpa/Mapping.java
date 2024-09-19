@@ -9,6 +9,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -19,7 +20,6 @@ import lombok.Setter;
  * Mapping db entity representation
  *
  * @author gmv
- *
  */
 @Getter
 @Setter
@@ -41,7 +41,8 @@ public class Mapping extends BaseEntity implements Serializable {
 	/**
 	 * Fields associated with the mapping.
 	 */
-	@OneToMany(mappedBy = "mapping", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "mapping_id", nullable = false)
 	private List<MappingField> fields = new ArrayList<>();
 
 	/**

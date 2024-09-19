@@ -1,10 +1,14 @@
 package com.inesdatamap.mapperbackend.utils;
 
+import java.util.List;
+
 import org.eclipse.rdf4j.model.BNode;
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.springframework.util.CollectionUtils;
+
+import com.inesdatamap.mapperbackend.model.dto.ObjectMapDTO;
 
 /**
  * Utility class for RML.
@@ -77,32 +81,59 @@ public final class RmlUtils {
 	 * 	the parent mapping node
 	 * @param predicate
 	 * 	the predicate
-	 * @param reference
-	 * 	the reference for the object map
-	 * @param datatype
-	 * 	the data type IRI for the object map (see {@link org.eclipse.rdf4j.model.vocabulary.XSD})
+	 * @param objectMap
+	 * 	the object map
 	 */
-	public static void createPredicateObjectMapNode(ModelBuilder builder, Resource mappingNode, String predicate, String reference,
-		IRI datatype) {
+	public static void createPredicateObjectMapNode(ModelBuilder builder, Resource mappingNode, String predicate,
+		List<ObjectMapDTO> objectMap) {
 		SimpleValueFactory vf = SimpleValueFactory.getInstance();
 
 		BNode predicateObjectMapNode = vf.createBNode();
-		BNode objectMapNode = vf.createBNode();
 		builder.subject(mappingNode)
 			// rr:predicateObjectMap
 			.add("rr:predicateObjectMap", predicateObjectMapNode);
 		builder.subject(predicateObjectMapNode)
 			// rr:predicate
-			.add("rr:predicate", vf.createIRI(predicate))
-			// rr:objectMap
-			.add("rr:objectMap", objectMapNode);
-		builder.subject(objectMapNode)
-			// rml:reference
-			.add("rml:reference", vf.createLiteral(reference));
+			.add("rr:predicate", vf.createIRI(predicate));
 
-		if (datatype != null) {
-			builder.subject(objectMapNode).add("rr:datatype", datatype);
-		}
+		Resource objectMapNode = createObjectMapNode(builder, vf.createBNode(), objectMap);
+
+		builder.subject(predicateObjectMapNode).add("rr:objectMap", objectMapNode);
+	}
+
+	/**
+	 * Create an object map node.
+	 *
+	 * @param builder
+	 * 	the model builder
+	 * @param parentNode
+	 * 	the parent node
+	 * @param objectMapDTO
+	 * 	the object map DTO
+	 *
+	 * @return the object map node
+	 */
+	public static Resource createObjectMapNode(ModelBuilder builder, Resource parentNode, List<ObjectMapDTO> objectMapDTO) {
+
+		SimpleValueFactory vf = SimpleValueFactory.getInstance();
+
+		objectMapDTO.forEach(objectMap -> {
+
+			if (objectMap.getLiteralValue() != null) {
+				builder.subject(parentNode).add(objectMap.getKey(), vf.createLiteral(objectMap.getLiteralValue()));
+			}
+
+			if (!CollectionUtils.isEmpty(objectMap.getObjectValue())) {
+
+				BNode nestedObjectMapNode = vf.createBNode();
+
+				builder.subject(parentNode).add(objectMap.getKey(),
+					createObjectMapNode(builder, nestedObjectMapNode, objectMap.getObjectValue()));
+			}
+
+		});
+
+		return parentNode;
 	}
 
 }
