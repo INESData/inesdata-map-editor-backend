@@ -1,7 +1,5 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -108,10 +106,11 @@ public class MappingController {
 	 */
 	@PostMapping(path = "/{id}/materialize")
 	@Operation(summary = "Materialize a mapping")
-	public ResponseEntity<List<String>> materializeMapping(
+	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public ResponseEntity<Void> materializeMapping(
 		@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to materialize", required = true) Long id) {
-		List<String> results = this.mappingService.materialize(id);
-		return ResponseEntity.ok(results);
+		this.mappingService.materialize(id);
+		return ResponseEntity.noContent().build();
 	}
 
 }

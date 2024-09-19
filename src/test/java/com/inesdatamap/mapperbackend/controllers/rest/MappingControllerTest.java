@@ -87,9 +87,9 @@ class MappingControllerTest {
 
 		when(mappingService.materialize(id)).thenReturn(expectedResults);
 
-		ResponseEntity<List<String>> response = mappingController.materializeMapping(id);
+		ResponseEntity<Void> response = mappingController.materializeMapping(id);
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(expectedResults, response.getBody());
+		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+
 	}
 }
