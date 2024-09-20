@@ -107,7 +107,7 @@ public class FileSourceController {
 	 *
 	 * @return List of file sources
 	 */
-	@GetMapping("/file-sources")
+	@GetMapping("")
 	@Operation(summary = "Gets all file sources filtered by type")
 	public ResponseEntity<List<FileSourceDTO>> getFileSourceByType(
 			@RequestParam(name = "type") @Parameter(name = "type", description = "File source type", required = true) String type) {
