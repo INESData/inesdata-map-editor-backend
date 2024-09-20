@@ -1,10 +1,23 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -20,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.inesdatamap.mapperbackend.exceptions.FileCreationException;
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.dto.FileSourceDTO;
+import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.mappers.FileSourceMapper;
 import com.inesdatamap.mapperbackend.model.mappers.FileSourceMapperImpl;
@@ -29,16 +43,6 @@ import com.inesdatamap.mapperbackend.utils.FileUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Unit tests for the {@link FileSourceServiceImpl}
  *
@@ -46,7 +50,7 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { AppProperties.class, FileSourceServiceImpl.class,
-	FileSourceMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
+		FileSourceMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
 class FileSourceServiceImplTest {
 
 	@MockBean
@@ -70,14 +74,14 @@ class FileSourceServiceImplTest {
 		FileSource savedFileSourceEntity = new FileSource();
 		savedFileSourceEntity.setId(1L);
 
-		// Configurar un InputStream simulado para el archivo
+		// Config InputStream simulated for file
 		InputStream inputStream = new ByteArrayInputStream("data".getBytes());
 		when(file.getInputStream()).thenReturn(inputStream);
 		when(file.isEmpty()).thenReturn(false);
 		when(file.getContentType()).thenReturn("text/csv");
 		when(file.getOriginalFilename()).thenReturn("file.csv");
 
-		// Configuración de mocks adicionales
+		// Config additional mocks
 		when(this.fileSourceRepository.save(any())).thenReturn(savedFileSourceEntity);
 
 		// Act
@@ -96,13 +100,13 @@ class FileSourceServiceImplTest {
 		FileSource savedFileSourceEntity = new FileSource();
 		FileSourceDTO inputDto = new FileSourceDTO();
 
-		// Configurar un InputStream simulado para el archivo
+		// Config InputStream simulated for file
 		InputStream inputStream = new ByteArrayInputStream("data".getBytes());
 		when(file.getInputStream()).thenReturn(inputStream);
 		when(file.isEmpty()).thenReturn(false);
 		when(file.getContentType()).thenReturn("text/csv");
 
-		// Configuración de mocks adicionales
+		// Config additional mocks
 		when(this.fileSourceRepository.save(any())).thenReturn(savedFileSourceEntity);
 		when(FileUtils.processFileHeaders(file)).thenThrow(new IOException());
 
@@ -118,14 +122,14 @@ class FileSourceServiceImplTest {
 		savedFileSourceEntity.setId(1L);
 		FileSourceDTO inputDto = new FileSourceDTO();
 
-		// Configurar un InputStream simulado para el archivo
+		// Config InputStream simulated for file
 		InputStream inputStream = new ByteArrayInputStream("data".getBytes());
 		when(file.getInputStream()).thenReturn(inputStream);
 		when(file.isEmpty()).thenReturn(false);
 		when(file.getContentType()).thenReturn("text/csv");
 		when(file.getOriginalFilename()).thenReturn("file.csv");
 
-		// Configuración de mocks adicionales
+		// Config additional mocks
 		when(this.fileSourceRepository.save(any())).thenReturn(savedFileSourceEntity);
 
 		doThrow(IOException.class).when(file).transferTo(any(File.class));
@@ -143,15 +147,15 @@ class FileSourceServiceImplTest {
 		inputDto.setId(id);
 		FileSource fileSourceEntity = new FileSource();
 
-		// Configuración de mocks
+		// Mock config
 		when(this.fileSourceRepository.findById(id)).thenReturn(Optional.of(fileSourceEntity));
 
 		// Act
 		DataSourceDTO result = this.fileSourceService.updateFileSource(id, inputDto);
 
 		// Assert
-		assertNotNull(result); // Asegura que el resultado no es null
-		assertEquals(inputDto.getId(), result.getId()); // Asegura que el resultado es igual al esperado
+		assertNotNull(result);
+		assertEquals(inputDto.getId(), result.getId());
 		verify(this.fileSourceRepository).findById(id);
 	}
 
@@ -165,6 +169,61 @@ class FileSourceServiceImplTest {
 
 		// Test & Verify
 		assertThrows(EntityNotFoundException.class, () -> this.fileSourceService.getEntity(id));
+	}
+
+	@Test
+	void testGetFileSourceByType() {
+
+		// Arrange
+		String fileType = "CSV";
+		DataFileTypeEnum typeEnum = DataFileTypeEnum.valueOf(fileType);
+
+		List<FileSource> fileSources = List.of(new FileSource());
+		when(this.fileSourceRepository.findByFileTypeOrderByNameAsc(typeEnum)).thenReturn(fileSources);
+
+		// Act
+		List<FileSourceDTO> result = this.fileSourceService.getFileSourceByType(fileType);
+
+		// Assert
+		assertNotNull(result);
+		verify(this.fileSourceRepository).findByFileTypeOrderByNameAsc(typeEnum);
+	}
+
+	@Test
+	void testGetFileFields() {
+
+		// Valid fields and delimited by ;
+		Long idWithValidFields = 1L;
+		String fieldsWithValid = "field1;field2;field3";
+		FileSource fileSourceWithValidFields = new FileSource();
+		fileSourceWithValidFields.setFields(fieldsWithValid);
+		when(this.fileSourceRepository.findById(idWithValidFields)).thenReturn(Optional.of(fileSourceWithValidFields));
+
+		// Empty fields
+		Long idWithEmptyFields = 2L;
+		String fieldsWithEmpty = "";
+		FileSource fileSourceWithEmptyFields = new FileSource();
+		fileSourceWithEmptyFields.setFields(fieldsWithEmpty);
+		when(this.fileSourceRepository.findById(idWithEmptyFields)).thenReturn(Optional.of(fileSourceWithEmptyFields));
+
+		// Fields are null
+		Long idWithNullFields = 3L;
+		FileSource fileSourceWithNullFields = new FileSource();
+		fileSourceWithNullFields.setFields(null);
+		when(this.fileSourceRepository.findById(idWithNullFields)).thenReturn(Optional.of(fileSourceWithNullFields));
+
+		// Act and Assert for valid fields
+		List<String> resultWithValidFields = this.fileSourceService.getFileFields(idWithValidFields);
+		List<String> expectedWithValidFields = Arrays.asList("field1", "field2", "field3");
+		assertEquals(expectedWithValidFields, resultWithValidFields);
+
+		// Act and Assert for empty fields
+		List<String> resultWithEmptyFields = this.fileSourceService.getFileFields(idWithEmptyFields);
+		assertTrue(resultWithEmptyFields.isEmpty());
+
+		// Act and Assert for null fields
+		List<String> resultWithNullFields = this.fileSourceService.getFileFields(idWithNullFields);
+		assertTrue(resultWithNullFields.isEmpty());
 	}
 
 }

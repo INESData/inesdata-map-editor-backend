@@ -1,5 +1,7 @@
 package com.inesdatamap.mapperbackend.services;
 
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
@@ -51,5 +53,25 @@ public interface FileSourceService {
 	 * @return The data file source
 	 */
 	FileSourceDTO getFileSourceById(Long id);
+
+	/**
+	 * Get all file sources by filtered by type
+	 *
+	 * @param fileType
+	 *            file type
+	 *
+	 * @return List of file sources
+	 */
+	List<FileSourceDTO> getFileSourceByType(String fileType);
+
+	/**
+	 * Get all file fields
+	 *
+	 * @param id
+	 *            identifier
+	 *
+	 * @return List of file fields
+	 */
+	List<String> getFileFields(Long id);
 
 }

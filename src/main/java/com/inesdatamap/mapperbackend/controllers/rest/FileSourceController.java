@@ -1,5 +1,7 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -94,6 +97,36 @@ public class FileSourceController {
 	public ResponseEntity<FileSourceDTO> getFileSource(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
 		return ResponseEntity.ok(this.fileSourceService.getFileSourceById(id));
+	}
+
+	/**
+	 * Get all file sources filtered by type
+	 *
+	 * @param type
+	 *            type
+	 *
+	 * @return List of file sources
+	 */
+	@GetMapping("")
+	@Operation(summary = "Gets all file sources filtered by type")
+	public ResponseEntity<List<FileSourceDTO>> getFileSourceByType(
+			@RequestParam(name = "type") @Parameter(name = "type", description = "File source type", required = true) String type) {
+		return ResponseEntity.ok(this.fileSourceService.getFileSourceByType(type));
+	}
+
+	/**
+	 * Get all file fields
+	 *
+	 * @param id
+	 *            identifier
+	 *
+	 * @return List of file fields
+	 */
+	@GetMapping("/{id}/fields")
+	@Operation(summary = "Gets all file fields")
+	public ResponseEntity<List<String>> getFileFields(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
+		return ResponseEntity.ok(this.fileSourceService.getFileFields(id));
 	}
 
 }

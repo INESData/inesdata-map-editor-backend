@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -290,8 +291,8 @@ class OntologyServiceImplTest {
 		when(owlClass2.getIRI()).thenReturn(iri2);
 
 		// Configure the mock to return the classes
-		Set<OWLClass> classes = new HashSet<>(Arrays.asList(owlClass1, owlClass2));
-		when(owlOntology.getClassesInSignature()).thenReturn(classes);
+		List<OWLClass> classes = Arrays.asList(owlClass1, owlClass2);
+		when(owlOntology.getClassesInSignature()).thenReturn(new HashSet<>(classes));
 
 		// Mock the OWLOntologyManager for the service
 		try (MockedStatic<OWLManager> mockedOWLManager = mockStatic(OWLManager.class)) {
@@ -302,6 +303,11 @@ class OntologyServiceImplTest {
 
 			// Verify the result
 			List<String> expectedClasses = Arrays.asList("Class1", "Class2");
+
+			// Sort both lists before comparing
+			Collections.sort(result);
+			Collections.sort(expectedClasses);
+
 			assertEquals(expectedClasses, result);
 
 			// Verify interactions with mocks

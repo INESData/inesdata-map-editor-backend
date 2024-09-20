@@ -43,6 +43,13 @@ public final class Constants {
 	 */
 	public static final String SORT_BY_NAME = "name";
 
+	// Regex
+
+	/**
+	 * Constant for field delimiter regex
+	 */
+	public static final String FIELD_DELIMITER_REGEX = "[;]";
+
 	private Constants() {
 		// Empty constructor to avoid initialization
 	}
