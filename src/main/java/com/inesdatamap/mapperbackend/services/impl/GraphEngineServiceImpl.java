@@ -72,7 +72,8 @@ public class GraphEngineServiceImpl implements GraphEngineService {
 			logger.info("ExitCode: " + exitCode);
 
 			if (exitCode != 0) {
-				throw new GraphEngineException(results.toString(), null);
+				logger.error(results.toString());
+				throw new GraphEngineException("GraphEngine error", null);
 			}
 
 		} catch (IOException e) {
@@ -84,6 +85,7 @@ public class GraphEngineServiceImpl implements GraphEngineService {
 			throw new GraphEngineException("GraphEngine error", e);
 		}
 
+		logger.info("Result: " + results.toString());
 		return results;
 	}
 
