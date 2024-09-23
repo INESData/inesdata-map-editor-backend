@@ -1,7 +1,6 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.inesdatamap.mapperbackend.exceptions.GraphEngineException;
-import com.inesdatamap.mapperbackend.model.jpa.MappingField;
-import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.services.GraphEngineService;
-import com.inesdatamap.mapperbackend.utils.Constants;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
 import com.inesdatamap.mapperbackend.utils.ProcessBuilderFactory;
 
@@ -28,9 +24,6 @@ import com.inesdatamap.mapperbackend.utils.ProcessBuilderFactory;
 public class GraphEngineServiceImpl implements GraphEngineService {
 
 	@Autowired
-	private AppProperties appProperties;
-
-	@Autowired
 	private ProcessBuilderFactory processBuilderFactory;
 
 	/**
@@ -39,25 +32,22 @@ public class GraphEngineServiceImpl implements GraphEngineService {
 	protected final Log logger = LogFactory.getLog(this.getClass());
 
 	@Override
-	public List<String> run(String mappingPath, Long mappingId, List<MappingField> mappingFields) {
+	public List<String> run(String mappingPath, String knowledgeGraphOutputFilePath, String logFilePath) {
 
 		List<String> results;
 
-		String outputDir = String.join(File.separator, appProperties.getDataProcessingPath(), Constants.DATA_OUTPUT_FOLDER_NAME,
-			mappingId.toString(), Constants.KG_OUTPUT_FILE_NAME);
-
 		// Create the output directory
-		FileUtils.createDirectories(Paths.get(outputDir).getParent());
+		FileUtils.createDirectories(Paths.get(knowledgeGraphOutputFilePath).getParent());
 
-		String[] commands = new String[] { "python", "-m", "kg_generation", "-m", mappingPath, "-o", outputDir };
+		String[] commands = new String[] { "python", "-m", "kg_generation", "-m", mappingPath, "-o", knowledgeGraphOutputFilePath };
 
 		// Run the graph engine
-		results = startProcess(commands);
+		results = startProcess(logFilePath, commands);
 
 		return results;
 	}
 
-	private List<String> startProcess(String... commands) {
+	private List<String> startProcess(String logFilePath, String... commands) {
 
 		List<String> results;
 
@@ -71,8 +61,13 @@ public class GraphEngineServiceImpl implements GraphEngineService {
 			int exitCode = process.waitFor();
 			logger.info("ExitCode: " + exitCode);
 
+			String processOutput = String.join(System.lineSeparator(), results);
+
+			// Create log file
+			FileUtils.createFile(processOutput.getBytes(), logFilePath);
+
 			if (exitCode != 0) {
-				logger.error(results.toString());
+				logger.error(processOutput);
 				throw new GraphEngineException("GraphEngine error", null);
 			}
 
@@ -85,7 +80,6 @@ public class GraphEngineServiceImpl implements GraphEngineService {
 			throw new GraphEngineException("GraphEngine error", e);
 		}
 
-		logger.info("Result: " + results.toString());
 		return results;
 	}
 
