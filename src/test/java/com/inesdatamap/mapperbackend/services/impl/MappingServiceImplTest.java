@@ -148,8 +148,7 @@ class MappingServiceImplTest {
 	void materializeMappingTest() {
 
 		Mapping mapping = buildMapping();
-		String mappingPath = "/output/path/mapping.ttl";
-		Path path = Paths.get(mappingPath);
+		Path path = Paths.get("");
 		List<String> expectedResults = List.of("Graph", "created!");
 
 		try (MockedStatic<Files> mockFiles = mockStatic(Files.class)) {
@@ -172,8 +171,7 @@ class MappingServiceImplTest {
 	void materializeMappingThrowsExceptionTest() {
 
 		Mapping mapping = buildMapping();
-		String mappingPath = "/output/path/mapping.ttl";
-		Path path = Paths.get(mappingPath);
+		Path path = Paths.get("");
 		try (MockedStatic<Files> mockFiles = mockStatic(Files.class)) {
 			// Mock behavior
 			when(this.mappingRepo.findById(anyLong())).thenReturn(Optional.of(mapping));

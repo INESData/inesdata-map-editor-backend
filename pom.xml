@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.1</version>
+		<version>3.3.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.inesdata-map</groupId>
@@ -122,7 +122,6 @@
 			<version>${org.mapstruct.version}</version>
 		</dependency>
 
-
 		<!-- OWL Api -->
 		<dependency>
 			<groupId>net.sourceforge.owlapi</groupId>
@@ -148,8 +147,20 @@
 			<artifactId>apache-jena-libs</artifactId>
 			<type>pom</type>
 			<version>5.0.0</version>
+			<exclusions>
+				<exclusion>
+					<!-- Exclude the transitive dependency of the protobuf-java because of CVE-2024-7254 (https://ossindex.sonatype.org/vulnerability/CVE-2024-7254) -->
+					<groupId>com.google.protobuf</groupId>
+					<artifactId>protobuf-java</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>3.25.5</version>
+		</dependency>
 
 		<!-- Testing -->
 
