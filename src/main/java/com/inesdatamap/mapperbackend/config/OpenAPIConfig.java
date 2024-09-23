@@ -12,6 +12,7 @@ import com.inesdatamap.mapperbackend.properties.RestApiInfoProperties;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.servers.Server;
 
 /**
  * OpenAPI configuration
@@ -42,7 +43,7 @@ public class OpenAPIConfig {
 	@Bean
 	public OpenAPI getOpenApiInfo(RestApiInfoProperties restApiInfoProperties) {
 		return new OpenAPI().info(new Info().title(restApiInfoProperties.getName()).version(restApiInfoProperties.getVersion())
-			.description(restApiInfoProperties.getDescription()));
+			.description(restApiInfoProperties.getDescription())).addServersItem(new Server().url("/"));
 	}
 
 }
