@@ -44,14 +44,11 @@ class GraphEngineServiceImplTest {
 	@Test
 	void runTest() throws IOException, InterruptedException {
 
-		String mappingPath = "/output/path/mapping.ttl";
-		String knowledgeGraphOutputFilePath = "/output/path/output.nt";
-		String logFilePath = "/output/log.txt";
 		List<String> expectedResult = List.of("Process", "Executed");
 
 		InputStream stream = new ByteArrayInputStream("Process\nExecuted".getBytes());
 
-		Path path = Paths.get(mappingPath);
+		Path path = Paths.get("");
 
 		try (MockedStatic<Files> mockFiles = mockStatic(Files.class)) {
 
@@ -65,7 +62,7 @@ class GraphEngineServiceImplTest {
 			when(process.getInputStream()).thenReturn(stream);
 			when(process.waitFor()).thenReturn(0);
 
-			List<String> result = graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
+			List<String> result = graphEngineService.run("", "", "");
 
 			assertEquals(expectedResult, result);
 			mockFiles.verify(() -> Files.createFile(any()));
@@ -76,11 +73,8 @@ class GraphEngineServiceImplTest {
 
 	@Test
 	void runThrowsGraphEngineExceptionOnExitCode() throws IOException, InterruptedException {
-		String mappingPath = "/mapping/path";
-		String knowledgeGraphOutputFilePath = "/output/path/output.nt";
-		String logFilePath = "/output/log.txt";
 
-		Path path = Paths.get(mappingPath);
+		Path path = Paths.get("");
 
 		try (MockedStatic<Files> mockFiles = mockStatic(Files.class)) {
 
@@ -94,7 +88,7 @@ class GraphEngineServiceImplTest {
 			when(process.waitFor()).thenReturn(1);
 
 			assertThrows(GraphEngineException.class, () -> {
-				graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
+				graphEngineService.run("", "", "");
 			});
 			mockFiles.verify(() -> Files.createFile(any()));
 			mockFiles.verify(() -> Files.createDirectories(any()), times(2));
@@ -105,11 +99,8 @@ class GraphEngineServiceImplTest {
 
 	@Test
 	void runThrowsGraphEngineExceptionOnIOException() throws IOException {
-		String mappingPath = "valid/mapping/path";
-		String knowledgeGraphOutputFilePath = "/output/path/output.nt";
-		String logFilePath = "/output/log.txt";
 
-		Path path = Paths.get(mappingPath);
+		Path path = Paths.get("");
 
 		try (MockedStatic<Files> mockFiles = mockStatic(Files.class)) {
 
@@ -120,7 +111,7 @@ class GraphEngineServiceImplTest {
 			when(processBuilder.start()).thenThrow(IOException.class);
 
 			assertThrows(GraphEngineException.class, () -> {
-				graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
+				graphEngineService.run("", "", "");
 			});
 
 			mockFiles.verify(() -> Files.createDirectories(any()));
@@ -129,11 +120,8 @@ class GraphEngineServiceImplTest {
 
 	@Test
 	void runThrowsGraphEngineExceptionOnInterruptedException() throws IOException, InterruptedException {
-		String mappingPath = "valid/mapping/path";
-		String knowledgeGraphOutputFilePath = "/output/path/output.nt";
-		String logFilePath = "/output/log.txt";
 
-		Path path = Paths.get(mappingPath);
+		Path path = Paths.get("");
 
 		try (MockedStatic<Files> mockFiles = mockStatic(Files.class)) {
 			mockFiles.when(() -> Files.createDirectories(any())).thenReturn(path);
@@ -144,7 +132,7 @@ class GraphEngineServiceImplTest {
 			when(process.waitFor()).thenThrow(InterruptedException.class);
 
 			assertThrows(GraphEngineException.class, () -> {
-				graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
+				graphEngineService.run("", "", "");
 			});
 
 			mockFiles.verify(() -> Files.createDirectories(any()));
