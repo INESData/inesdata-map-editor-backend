@@ -37,6 +37,16 @@ public final class Constants {
 	 */
 	public static final String KG_OUTPUT_FILE_NAME = "knowledge-graph.nt";
 
+	/**
+	 * Constant for the graph engine log file name
+	 */
+	public static final String GRAPH_ENGINE_LOG_FILE_NAME = "graph-engine.log";
+
+	/**
+	 * Constant for the mapping file name
+	 */
+	public static final String MAPPING_FILE_NAME = "mapping.ttl";
+
 	// Filters
 	/**
 	 * Constant representing the sort by name

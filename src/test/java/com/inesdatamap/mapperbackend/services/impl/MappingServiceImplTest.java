@@ -2,13 +2,18 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -34,10 +39,12 @@ import com.inesdatamap.mapperbackend.model.mappers.MappingFieldMapperImpl;
 import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
 import com.inesdatamap.mapperbackend.model.mappers.MappingMapperImpl;
 import com.inesdatamap.mapperbackend.model.mappers.PredicateObjectMapMapperImpl;
+import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.FileSourceRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
+import com.inesdatamap.mapperbackend.services.ExecutionService;
 import com.inesdatamap.mapperbackend.services.GraphEngineService;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -45,9 +52,10 @@ import jakarta.persistence.EntityNotFoundException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 /**
@@ -56,8 +64,8 @@ import static org.mockito.Mockito.when;
  * @author gmv
  */
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = { MappingServiceImpl.class, MappingMapperImpl.class, MappingFieldMapperImpl.class,
-	PredicateObjectMapMapperImpl.class })
+@ContextConfiguration(classes = { AppProperties.class, MappingServiceImpl.class, MappingMapperImpl.class, MappingFieldMapperImpl.class,
+	PredicateObjectMapMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
 class MappingServiceImplTest {
 
 	@MockBean
@@ -74,6 +82,9 @@ class MappingServiceImplTest {
 
 	@MockBean
 	private GraphEngineService graphEngineService;
+
+	@MockBean
+	private ExecutionService executionService;
 
 	@Autowired
 	private MappingMapper mappingMapper;
@@ -141,7 +152,7 @@ class MappingServiceImplTest {
 
 		// Mock behavior
 		when(this.mappingRepo.findById(anyLong())).thenReturn(Optional.of(mapping));
-		when(this.graphEngineService.run(anyString(), anyLong(), anyList())).thenReturn(expectedResults);
+		when(this.graphEngineService.run(anyString(), anyString(), anyString())).thenReturn(expectedResults);
 
 		List<String> results = this.mappingService.materialize(1L);
 
@@ -152,10 +163,13 @@ class MappingServiceImplTest {
 	void materializeMappingThrowsExceptionTest() {
 
 		Mapping mapping = buildMapping();
-
+		String mappingPath = "/output/path/mapping.ttl";
+		Path path = Paths.get(mappingPath);
+		MockedStatic<Files> mockFiles = mockStatic(Files.class);
 		// Mock behavior
 		when(this.mappingRepo.findById(anyLong())).thenReturn(Optional.of(mapping));
-		when(this.graphEngineService.run(anyString(), anyLong(), anyList())).thenThrow(GraphEngineException.class);
+		when(this.graphEngineService.run(anyString(), anyString(), anyString())).thenThrow(GraphEngineException.class);
+		mockFiles.when(() -> Files.createFile(any())).thenReturn(path);
 
 		assertThrows(GraphEngineException.class, () -> this.mappingService.materialize(1L));
 	}

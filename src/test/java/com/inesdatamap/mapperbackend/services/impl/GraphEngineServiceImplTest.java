@@ -3,31 +3,31 @@ package com.inesdatamap.mapperbackend.services.impl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.inesdatamap.mapperbackend.exceptions.GraphEngineException;
-import com.inesdatamap.mapperbackend.model.jpa.MappingField;
-import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.utils.ProcessBuilderFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GraphEngineServiceImplTest {
-
-	@Mock
-	private AppProperties appProperties;
 
 	@Mock
 	private ProcessBuilderFactory processBuilderFactory;
@@ -43,40 +43,47 @@ class GraphEngineServiceImplTest {
 
 	@Test
 	void runTest() throws IOException, InterruptedException {
-		String mappingPath = "/mapping/path";
-		Long mappingId = 1L;
-		List<MappingField> mappingFields = List.of(new MappingField());
+		MockedStatic<Files> mockFiles = mockStatic(Files.class);
+		String mappingPath = "/output/path/mapping.ttl";
+		String knowledgeGraphOutputFilePath = "/output/path/output.nt";
+		String logFilePath = "/output/log.txt";
 		List<String> expectedResult = List.of("Process", "Executed");
 
 		InputStream stream = new ByteArrayInputStream("Process\nExecuted".getBytes());
 
-		when(appProperties.getDataProcessingPath()).thenReturn(null);
+		Path path = Paths.get(mappingPath);
+
+		mockFiles.when(() -> Files.createFile(any())).thenReturn(path);
+		mockFiles.when(() -> Files.createDirectories(any())).thenReturn(path);
+		mockFiles.when(() -> Files.write(any(), any(byte[].class))).thenReturn(path);
+
 		when(processBuilderFactory.createProcessBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
 			anyString())).thenReturn(processBuilder);
 		when(processBuilder.start()).thenReturn(process);
 		when(process.getInputStream()).thenReturn(stream);
 		when(process.waitFor()).thenReturn(0);
 
-		List<String> result = graphEngineService.run(mappingPath, mappingId, mappingFields);
+		List<String> result = graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
 
 		assertEquals(expectedResult, result);
-		verify(appProperties, times(1)).getDataProcessingPath();
+		mockFiles.verify(() -> Files.createFile(any()));
+		mockFiles.verify(() -> Files.createDirectories(any()), times(2));
+		mockFiles.verify(() -> Files.write(any(), any(byte[].class)));
 	}
 
 	@Test
 	void runThrowsGraphEngineExceptionOnExitCode() throws IOException, InterruptedException {
 		String mappingPath = "/mapping/path";
-		Long mappingId = 1L;
-		List<MappingField> mappingFields = List.of(new MappingField());
+		String knowledgeGraphOutputFilePath = "/output/path/output.nt";
+		String logFilePath = "/output/log.txt";
 
-		when(appProperties.getDataProcessingPath()).thenReturn(null);
 		when(processBuilderFactory.createProcessBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
 			anyString())).thenReturn(processBuilder);
 		when(processBuilder.start()).thenReturn(process);
 		when(process.waitFor()).thenReturn(1);
 
 		assertThrows(GraphEngineException.class, () -> {
-			graphEngineService.run(mappingPath, mappingId, mappingFields);
+			graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
 		});
 
 	}
@@ -84,23 +91,23 @@ class GraphEngineServiceImplTest {
 	@Test
 	void runThrowsGraphEngineExceptionOnIOException() throws IOException {
 		String mappingPath = "valid/mapping/path";
-		Long mappingId = 2L;
-		List<MappingField> mappingFields = List.of(new MappingField());
+		String knowledgeGraphOutputFilePath = "/output/path/output.nt";
+		String logFilePath = "/output/log.txt";
 
 		when(processBuilderFactory.createProcessBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
 			anyString())).thenReturn(processBuilder);
 		when(processBuilder.start()).thenThrow(IOException.class);
 
 		assertThrows(GraphEngineException.class, () -> {
-			graphEngineService.run(mappingPath, mappingId, mappingFields);
+			graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
 		});
 	}
 
 	@Test
 	void runThrowsGraphEngineExceptionOnInterruptedException() throws IOException, InterruptedException {
 		String mappingPath = "valid/mapping/path";
-		Long mappingId = 2L;
-		List<MappingField> mappingFields = List.of(new MappingField());
+		String knowledgeGraphOutputFilePath = "/output/path/output.nt";
+		String logFilePath = "/output/log.txt";
 
 		when(processBuilderFactory.createProcessBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
 			anyString())).thenReturn(processBuilder);
@@ -108,7 +115,7 @@ class GraphEngineServiceImplTest {
 		when(process.waitFor()).thenThrow(InterruptedException.class);
 
 		assertThrows(GraphEngineException.class, () -> {
-			graphEngineService.run(mappingPath, mappingId, mappingFields);
+			graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
 		});
 	}
 

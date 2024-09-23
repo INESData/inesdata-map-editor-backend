@@ -7,6 +7,7 @@
 
 	<include file="classpath:db/changelog/1.1.0/updateObjectMap.xml"/>
 	<include file="classpath:db/changelog/1.1.0/addColumnFilePath.xml"/>
+	<include file="classpath:db/changelog/1.1.0/createExecution.xml"/>
 
 
 </databaseChangeLog>

@@ -46,6 +46,13 @@ public class Mapping extends BaseEntity implements Serializable {
 	private List<MappingField> fields = new ArrayList<>();
 
 	/**
+	 * Executions associated to the materialization of a mapping.
+	 */
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name = "mapping_id", nullable = false)
+	private List<Execution> executions = new ArrayList<>();
+
+	/**
 	 * Resource Mapping Language (RML) associated with the mapping.
 	 */
 	@Lob

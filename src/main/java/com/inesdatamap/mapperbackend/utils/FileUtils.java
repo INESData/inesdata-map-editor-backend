@@ -115,23 +115,27 @@ public final class FileUtils {
 	}
 
 	/**
-	 * Creates a temporary file with the given content, prefix, and suffix.
+	 * Creates a file with the specified content.
 	 *
 	 * @param content
 	 * 	the content of the file
+	 * @param path
+	 * 	the path where the file will be created
 	 *
-	 * @return the temporary file
+	 * @return the file
 	 */
-	public static File createTemporaryFile(byte[] content) {
+	public static File createFile(byte[] content, String path) {
 		try {
 
-			Path tmpFile = Files.createTempFile(null, null);
-			Files.write(tmpFile, content);
+			Path filePath = Paths.get(path);
+			Files.createDirectories(filePath.getParent());
+			Path file = Files.createFile(filePath);
+			Files.write(file, content);
 
-			return tmpFile.toFile();
+			return file.toFile();
 
 		} catch (IOException e) {
-			throw new FileCreationException("Failed to create temporary file", e);
+			throw new FileCreationException("Failed to create file", e);
 		}
 	}
 

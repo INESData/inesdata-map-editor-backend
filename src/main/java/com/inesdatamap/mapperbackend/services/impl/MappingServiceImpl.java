@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.inesdatamap.mapperbackend.exceptions.GraphEngineException;
 import com.inesdatamap.mapperbackend.exceptions.RmlWriteException;
 import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.PredicateObjectMapDTO;
@@ -29,18 +30,22 @@ import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
 import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.DataSource;
+import com.inesdatamap.mapperbackend.model.jpa.Execution;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
 import com.inesdatamap.mapperbackend.model.mappers.PredicateObjectMapMapper;
+import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.FileSourceRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
+import com.inesdatamap.mapperbackend.services.ExecutionService;
 import com.inesdatamap.mapperbackend.services.GraphEngineService;
 import com.inesdatamap.mapperbackend.services.MappingService;
+import com.inesdatamap.mapperbackend.utils.Constants;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
 import com.inesdatamap.mapperbackend.utils.RmlUtils;
 
@@ -59,6 +64,9 @@ public class MappingServiceImpl implements MappingService {
 	private GraphEngineService graphEngineService;
 
 	@Autowired
+	private ExecutionService executionService;
+
+	@Autowired
 	private MappingMapper mappingMapper;
 
 	@Autowired
@@ -72,6 +80,9 @@ public class MappingServiceImpl implements MappingService {
 
 	@Autowired
 	private FileSourceRepository fileSourceRepository;
+
+	@Autowired
+	private AppProperties appProperties;
 
 	/**
 	 * Logger
@@ -325,28 +336,112 @@ public class MappingServiceImpl implements MappingService {
 
 		Mapping mapping = this.getEntity(id);
 		List<String> results;
-		File rmlTmpFile = null;
 
-		try {
+		OffsetDateTime now = OffsetDateTime.now();
 
-			// Create temporary file
-			rmlTmpFile = FileUtils.createTemporaryFile(mapping.getRml());
+		String mappingFilePath = getMappingFilePath(id, now);
 
-			// Run the graph engine
-			results = this.graphEngineService.run(rmlTmpFile.getAbsolutePath(), mapping.getId(), mapping.getFields());
+		String knowledgeGraphOutputFilePath = getKnowledgeGraphOutputFilePath(id, now);
 
-		} catch (GraphEngineException e) {
-			// Delete temporary file
-			if (rmlTmpFile != null) {
-				FileUtils.deleteFile(rmlTmpFile.toPath());
-			}
-			throw e;
-		}
+		String logFilePath = getLogFilePath(id, now);
 
-		// Delete temporary file
-		FileUtils.deleteFile(rmlTmpFile.toPath());
+		// Create mapping file
+		File mappingFile = FileUtils.createFile(mapping.getRml(), mappingFilePath);
+
+		// Run the graph engine
+		results = this.graphEngineService.run(mappingFile.getAbsolutePath(), knowledgeGraphOutputFilePath, logFilePath);
+
+		saveExecution(mapping, now, mappingFilePath, knowledgeGraphOutputFilePath, logFilePath);
 
 		return results;
 	}
 
+	/**
+	 * Gets the mapping file path.
+	 *
+	 * @param mappingId
+	 * 	the mapping id
+	 * @param executionTime
+	 * 	the execution time
+	 *
+	 * @return the mapping file path
+	 */
+	private String getMappingFilePath(Long mappingId, OffsetDateTime executionTime) {
+		return getFilePathFromOutputDirectory(mappingId, executionTime, Constants.MAPPING_FILE_NAME);
+	}
+
+	/**
+	 * Gets the knowledge graph output file path.
+	 *
+	 * @param mappingId
+	 * 	the mapping id
+	 * @param executionTime
+	 * 	the execution time
+	 *
+	 * @return the knowledge graph output file path
+	 */
+	private String getKnowledgeGraphOutputFilePath(Long mappingId, OffsetDateTime executionTime) {
+		return getFilePathFromOutputDirectory(mappingId, executionTime, Constants.KG_OUTPUT_FILE_NAME);
+	}
+
+	/**
+	 * Gets the log file path.
+	 *
+	 * @param mappingId
+	 * 	the mapping id
+	 * @param executionTime
+	 * 	the execution time
+	 *
+	 * @return the log file path
+	 */
+	private String getLogFilePath(Long mappingId, OffsetDateTime executionTime) {
+		return getFilePathFromOutputDirectory(mappingId, executionTime, Constants.GRAPH_ENGINE_LOG_FILE_NAME);
+	}
+
+	/**
+	 * Gets the file path from the output directory.
+	 *
+	 * @param mappingId
+	 * 	the mapping id
+	 * @param executionTime
+	 * 	the execution time
+	 * @param fileName
+	 * 	the file name
+	 *
+	 * @return the file path from the output directory
+	 */
+	private String getFilePathFromOutputDirectory(Long mappingId, OffsetDateTime executionTime, String fileName) {
+		return String.join(File.separator, appProperties.getDataProcessingPath(), Constants.DATA_OUTPUT_FOLDER_NAME, mappingId.toString(),
+			String.valueOf(executionTime.toEpochSecond()), fileName);
+	}
+
+	/**
+	 * Saves an execution.
+	 *
+	 * @param mapping
+	 * 	the mapping
+	 * @param executionDateTime
+	 * 	the execution date time
+	 * @param mappingFilePath
+	 * 	the mapping file path
+	 * @param knowledgeGraphOutputFilePath
+	 * 	the knowledge graph output file path
+	 * @param logFilePath
+	 * 	the log file path
+	 */
+	private void saveExecution(Mapping mapping, OffsetDateTime executionDateTime, String mappingFilePath,
+		String knowledgeGraphOutputFilePath, String logFilePath) {
+
+		Execution execution = new Execution();
+
+		execution.setExecutionDate(executionDateTime);
+		execution.setMappingFileName(Paths.get(mappingFilePath).getFileName().toString());
+		execution.setKnowledgeGraphFileName(Paths.get(knowledgeGraphOutputFilePath).getFileName().toString());
+		execution.setLogFileName(Paths.get(logFilePath).getFileName().toString());
+
+		mapping.getExecutions().add(execution);
+
+		this.executionService.save(execution);
+
+	}
 }
