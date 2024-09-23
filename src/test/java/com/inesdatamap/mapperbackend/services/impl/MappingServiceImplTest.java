@@ -148,15 +148,24 @@ class MappingServiceImplTest {
 	void materializeMappingTest() {
 
 		Mapping mapping = buildMapping();
+		String mappingPath = "/output/path/mapping.ttl";
+		Path path = Paths.get(mappingPath);
 		List<String> expectedResults = List.of("Graph", "created!");
 
-		// Mock behavior
-		when(this.mappingRepo.findById(anyLong())).thenReturn(Optional.of(mapping));
-		when(this.graphEngineService.run(anyString(), anyString(), anyString())).thenReturn(expectedResults);
+		try (MockedStatic<Files> mockFiles = mockStatic(Files.class)) {
+			// Mock behavior
+			when(this.mappingRepo.findById(anyLong())).thenReturn(Optional.of(mapping));
+			when(this.graphEngineService.run(anyString(), anyString(), anyString())).thenReturn(expectedResults);
+			mockFiles.when(() -> Files.createFile(any())).thenReturn(path);
 
-		List<String> results = this.mappingService.materialize(1L);
+			List<String> results = this.mappingService.materialize(1L);
 
-		assertEquals(expectedResults, results);
+			assertEquals(expectedResults, results);
+
+			mockFiles.verify(() -> Files.createFile(any()));
+			mockFiles.verify(() -> Files.createDirectories(any()));
+			mockFiles.verify(() -> Files.write(any(), any(byte[].class)));
+		}
 	}
 
 	@Test
@@ -165,19 +174,18 @@ class MappingServiceImplTest {
 		Mapping mapping = buildMapping();
 		String mappingPath = "/output/path/mapping.ttl";
 		Path path = Paths.get(mappingPath);
-		MockedStatic<Files> mockFiles = mockStatic(Files.class);
-		// Mock behavior
-		when(this.mappingRepo.findById(anyLong())).thenReturn(Optional.of(mapping));
-		when(this.graphEngineService.run(anyString(), anyString(), anyString())).thenThrow(GraphEngineException.class);
-		mockFiles.when(() -> Files.createFile(any())).thenReturn(path);
+		try (MockedStatic<Files> mockFiles = mockStatic(Files.class)) {
+			// Mock behavior
+			when(this.mappingRepo.findById(anyLong())).thenReturn(Optional.of(mapping));
+			when(this.graphEngineService.run(anyString(), anyString(), anyString())).thenThrow(GraphEngineException.class);
+			mockFiles.when(() -> Files.createFile(any())).thenReturn(path);
 
-		assertThrows(GraphEngineException.class, () -> this.mappingService.materialize(1L));
+			assertThrows(GraphEngineException.class, () -> this.mappingService.materialize(1L));
+		}
 	}
 
 	@Test
 	void testCreateMapping() {
-
-		MappingDTO mappingDTO = new MappingDTO();
 
 		String fileName = "file.csv";
 		String filePath = String.join(File.separator, "path", "to");

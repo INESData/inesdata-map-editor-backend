@@ -43,7 +43,7 @@ class GraphEngineServiceImplTest {
 
 	@Test
 	void runTest() throws IOException, InterruptedException {
-		MockedStatic<Files> mockFiles = mockStatic(Files.class);
+
 		String mappingPath = "/output/path/mapping.ttl";
 		String knowledgeGraphOutputFilePath = "/output/path/output.nt";
 		String logFilePath = "/output/log.txt";
@@ -53,22 +53,25 @@ class GraphEngineServiceImplTest {
 
 		Path path = Paths.get(mappingPath);
 
-		mockFiles.when(() -> Files.createFile(any())).thenReturn(path);
-		mockFiles.when(() -> Files.createDirectories(any())).thenReturn(path);
-		mockFiles.when(() -> Files.write(any(), any(byte[].class))).thenReturn(path);
+		try (MockedStatic<Files> mockFiles = mockStatic(Files.class)) {
 
-		when(processBuilderFactory.createProcessBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
-			anyString())).thenReturn(processBuilder);
-		when(processBuilder.start()).thenReturn(process);
-		when(process.getInputStream()).thenReturn(stream);
-		when(process.waitFor()).thenReturn(0);
+			mockFiles.when(() -> Files.createFile(any())).thenReturn(path);
+			mockFiles.when(() -> Files.createDirectories(any())).thenReturn(path);
+			mockFiles.when(() -> Files.write(any(), any(byte[].class))).thenReturn(path);
 
-		List<String> result = graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
+			when(processBuilderFactory.createProcessBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
+				anyString())).thenReturn(processBuilder);
+			when(processBuilder.start()).thenReturn(process);
+			when(process.getInputStream()).thenReturn(stream);
+			when(process.waitFor()).thenReturn(0);
 
-		assertEquals(expectedResult, result);
-		mockFiles.verify(() -> Files.createFile(any()));
-		mockFiles.verify(() -> Files.createDirectories(any()), times(2));
-		mockFiles.verify(() -> Files.write(any(), any(byte[].class)));
+			List<String> result = graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
+
+			assertEquals(expectedResult, result);
+			mockFiles.verify(() -> Files.createFile(any()));
+			mockFiles.verify(() -> Files.createDirectories(any()), times(2));
+			mockFiles.verify(() -> Files.write(any(), any(byte[].class)));
+		}
 	}
 
 	@Test
@@ -77,14 +80,26 @@ class GraphEngineServiceImplTest {
 		String knowledgeGraphOutputFilePath = "/output/path/output.nt";
 		String logFilePath = "/output/log.txt";
 
-		when(processBuilderFactory.createProcessBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
-			anyString())).thenReturn(processBuilder);
-		when(processBuilder.start()).thenReturn(process);
-		when(process.waitFor()).thenReturn(1);
+		Path path = Paths.get(mappingPath);
 
-		assertThrows(GraphEngineException.class, () -> {
-			graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
-		});
+		try (MockedStatic<Files> mockFiles = mockStatic(Files.class)) {
+
+			mockFiles.when(() -> Files.createFile(any())).thenReturn(path);
+			mockFiles.when(() -> Files.createDirectories(any())).thenReturn(path);
+			mockFiles.when(() -> Files.write(any(), any(byte[].class))).thenReturn(path);
+
+			when(processBuilderFactory.createProcessBuilder(anyString(), anyString(), anyString(), anyString(), anyString(), anyString(),
+				anyString())).thenReturn(processBuilder);
+			when(processBuilder.start()).thenReturn(process);
+			when(process.waitFor()).thenReturn(1);
+
+			assertThrows(GraphEngineException.class, () -> {
+				graphEngineService.run(mappingPath, knowledgeGraphOutputFilePath, logFilePath);
+			});
+			mockFiles.verify(() -> Files.createFile(any()));
+			mockFiles.verify(() -> Files.createDirectories(any()), times(2));
+			mockFiles.verify(() -> Files.write(any(), any(byte[].class)));
+		}
 
 	}
 
