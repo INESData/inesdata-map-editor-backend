@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { ExecutionServiceImpl.class, ExecutionMapperImpl.class })
-public class ExecutionServiceImplTest {
+class ExecutionServiceImplTest {
 
 	@MockBean
 	private ExecutionRepository executionRepository;
