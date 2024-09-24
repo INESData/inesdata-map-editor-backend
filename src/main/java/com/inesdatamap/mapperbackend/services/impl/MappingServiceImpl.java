@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.inesdatamap.mapperbackend.exceptions.GraphEngineException;
 import com.inesdatamap.mapperbackend.exceptions.RmlWriteException;
 import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.PredicateObjectMapDTO;
@@ -348,8 +349,14 @@ public class MappingServiceImpl implements MappingService {
 		// Create mapping file
 		File mappingFile = FileUtils.createFile(mapping.getRml(), mappingFilePath);
 
-		// Run the graph engine
-		results = this.graphEngineService.run(mappingFile.getAbsolutePath(), knowledgeGraphOutputFilePath, logFilePath);
+		try {
+			// Run the graph engine
+			results = this.graphEngineService.run(mappingFile.getAbsolutePath(), knowledgeGraphOutputFilePath, logFilePath);
+		} catch (GraphEngineException e) {
+			// Delete execution folder
+			FileUtils.deleteDirectory(Paths.get(mappingFilePath).getParent());
+			throw e;
+		}
 
 		saveExecution(mapping, now, mappingFilePath, knowledgeGraphOutputFilePath, logFilePath);
 
@@ -439,7 +446,7 @@ public class MappingServiceImpl implements MappingService {
 		execution.setKnowledgeGraphFileName(Paths.get(knowledgeGraphOutputFilePath).getFileName().toString());
 		execution.setLogFileName(Paths.get(logFilePath).getFileName().toString());
 
-		mapping.getExecutions().add(execution);
+		execution.setMapping(mapping);
 
 		this.executionService.save(execution);
 

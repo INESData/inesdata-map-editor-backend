@@ -6,6 +6,8 @@ import java.time.OffsetDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,4 +48,10 @@ public class Execution extends BaseEntity implements Serializable {
 	@Column(name = "log_file_name", nullable = false)
 	private String logFileName;
 
+	/**
+	 * The mapping associated with the execution
+	 */
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "mapping_id", nullable = false)
+	private Mapping mapping;
 }

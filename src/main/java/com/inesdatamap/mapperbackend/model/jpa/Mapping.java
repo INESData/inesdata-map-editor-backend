@@ -48,8 +48,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	/**
 	 * Executions associated to the materialization of a mapping.
 	 */
-	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name = "mapping_id", nullable = false)
+	@OneToMany(mappedBy = "mapping", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Execution> executions = new ArrayList<>();
 
 	/**

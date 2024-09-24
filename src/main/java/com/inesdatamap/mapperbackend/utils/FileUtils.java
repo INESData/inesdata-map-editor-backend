@@ -140,22 +140,19 @@ public final class FileUtils {
 	}
 
 	/**
-	 * Deletes the file at the specified path.
+	 * Deletes the directory at the specified path.
 	 *
 	 * @param path
 	 * 	the path of the file to delete
 	 */
-	public static void deleteFile(Path path) {
-
-		if (Files.notExists(path)) {
-			return;
-		}
+	public static void deleteDirectory(Path path) {
 
 		try {
-			Files.delete(path);
+			org.apache.commons.io.FileUtils.deleteDirectory(path.toFile());
 		} catch (IOException e) {
-			throw new FileDeleteException("Failed to delete file: " + path, e);
+			throw new FileDeleteException("Failed to delete directory: " + path, e);
 		}
+
 	}
 
 	/**
