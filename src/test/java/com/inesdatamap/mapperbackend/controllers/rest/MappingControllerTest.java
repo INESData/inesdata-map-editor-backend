@@ -10,12 +10,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 
+import com.inesdatamap.mapperbackend.model.dto.ExecutionDTO;
 import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
+import com.inesdatamap.mapperbackend.services.ExecutionService;
 import com.inesdatamap.mapperbackend.services.MappingService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +36,9 @@ class MappingControllerTest {
 
 	@Autowired
 	private MappingController mappingController;
+
+	@MockBean
+	private ExecutionService executionService;
 
 	@MockBean
 	private MappingService mappingService;
@@ -91,5 +97,20 @@ class MappingControllerTest {
 
 		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 
+	}
+
+	@Test
+	void testListExecutions() {
+
+		Long mappingId = 1L;
+		int page = 0;
+		int size = 10;
+		Page<ExecutionDTO> expectedExecutions = new PageImpl<>(List.of(new ExecutionDTO()));
+
+		when(executionService.listExecutions(mappingId, PageRequest.of(page, size))).thenReturn(expectedExecutions);
+
+		ResponseEntity<PagedModel<ExecutionDTO>> response = mappingController.listExecutions(mappingId, page, size);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
 	}
 }

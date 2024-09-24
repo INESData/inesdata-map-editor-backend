@@ -2,6 +2,7 @@ package com.inesdatamap.mapperbackend.controllers.rest;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.inesdatamap.mapperbackend.model.dto.ExecutionDTO;
 import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
+import com.inesdatamap.mapperbackend.services.ExecutionService;
 import com.inesdatamap.mapperbackend.services.MappingService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,14 +39,19 @@ public class MappingController {
 
 	private final MappingService mappingService;
 
+	private final ExecutionService executionService;
+
 	/**
 	 * This constructor initializes the controller with the provided MappingService
 	 *
 	 * @param mappingService
 	 * 	the mapping service
+	 * @param executionService
+	 * 	the execution service
 	 */
-	public MappingController(MappingService mappingService) {
+	public MappingController(MappingService mappingService, ExecutionService executionService) {
 		this.mappingService = mappingService;
+		this.executionService = executionService;
 	}
 
 	/**
@@ -113,4 +121,24 @@ public class MappingController {
 		return ResponseEntity.noContent().build();
 	}
 
+	/**
+	 * List all executions for a mapping
+	 *
+	 * @param id
+	 * 	mapping identifier
+	 * @param page
+	 * 	page number
+	 * @param size
+	 * 	page size
+	 *
+	 * @return List of all executions
+	 */
+	@GetMapping(path = "/{id}/executions")
+	@Operation(summary = "List all executions for a mapping")
+	public ResponseEntity<PagedModel<ExecutionDTO>> listExecutions(
+		@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier", required = true) Long id,
+		@RequestParam int page, @RequestParam int size) {
+		Page<ExecutionDTO> executions = this.executionService.listExecutions(id, PageRequest.of(page, size));
+		return ResponseEntity.ok(new PagedModel<>(executions));
+	}
 }
