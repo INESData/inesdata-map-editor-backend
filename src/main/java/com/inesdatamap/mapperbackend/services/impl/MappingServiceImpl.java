@@ -374,7 +374,8 @@ public class MappingServiceImpl implements MappingService {
 	 * @return the mapping file path
 	 */
 	private String getMappingFilePath(Long mappingId, OffsetDateTime executionTime) {
-		return getFilePathFromOutputDirectory(mappingId, executionTime, Constants.MAPPING_FILE_NAME);
+		return FileUtils.getFilePathFromOutputDirectory(appProperties.getDataProcessingPath(), mappingId, executionTime,
+			Constants.MAPPING_FILE_NAME);
 	}
 
 	/**
@@ -388,7 +389,8 @@ public class MappingServiceImpl implements MappingService {
 	 * @return the knowledge graph output file path
 	 */
 	private String getKnowledgeGraphOutputFilePath(Long mappingId, OffsetDateTime executionTime) {
-		return getFilePathFromOutputDirectory(mappingId, executionTime, Constants.KG_OUTPUT_FILE_NAME);
+		return FileUtils.getFilePathFromOutputDirectory(appProperties.getDataProcessingPath(), mappingId, executionTime,
+			Constants.KG_OUTPUT_FILE_NAME);
 	}
 
 	/**
@@ -402,24 +404,8 @@ public class MappingServiceImpl implements MappingService {
 	 * @return the log file path
 	 */
 	private String getLogFilePath(Long mappingId, OffsetDateTime executionTime) {
-		return getFilePathFromOutputDirectory(mappingId, executionTime, Constants.GRAPH_ENGINE_LOG_FILE_NAME);
-	}
-
-	/**
-	 * Gets the file path from the output directory.
-	 *
-	 * @param mappingId
-	 * 	the mapping id
-	 * @param executionTime
-	 * 	the execution time
-	 * @param fileName
-	 * 	the file name
-	 *
-	 * @return the file path from the output directory
-	 */
-	private String getFilePathFromOutputDirectory(Long mappingId, OffsetDateTime executionTime, String fileName) {
-		return String.join(File.separator, appProperties.getDataProcessingPath(), Constants.DATA_OUTPUT_FOLDER_NAME, mappingId.toString(),
-			String.valueOf(executionTime.toEpochSecond()), fileName);
+		return FileUtils.getFilePathFromOutputDirectory(appProperties.getDataProcessingPath(), mappingId, executionTime,
+			Constants.GRAPH_ENGINE_LOG_FILE_NAME);
 	}
 
 	/**

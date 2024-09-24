@@ -8,6 +8,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.OffsetDateTime;
 import java.util.Objects;
 
 import org.apache.commons.io.FilenameUtils;
@@ -170,4 +171,23 @@ public final class FileUtils {
 		}
 	}
 
+	/**
+	 * Gets the file path from the output directory.
+	 *
+	 * @param dataProcessingPath
+	 * 	the data processing path
+	 * @param mappingId
+	 * 	the mapping id
+	 * @param executionTime
+	 * 	the execution time
+	 * @param fileName
+	 * 	the file name
+	 *
+	 * @return the file path from the output directory
+	 */
+	public static String getFilePathFromOutputDirectory(String dataProcessingPath, Long mappingId, OffsetDateTime executionTime,
+		String fileName) {
+		return String.join(File.separator, dataProcessingPath, Constants.DATA_OUTPUT_FOLDER_NAME, mappingId.toString(),
+			String.valueOf(executionTime.toEpochSecond()), fileName);
+	}
 }

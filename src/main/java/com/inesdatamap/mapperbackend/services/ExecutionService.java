@@ -1,5 +1,8 @@
 package com.inesdatamap.mapperbackend.services;
 
+import java.net.MalformedURLException;
+
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -33,4 +36,18 @@ public interface ExecutionService {
 	 */
 	Page<ExecutionDTO> listExecutions(Long mappingId, Pageable pageable);
 
+	/**
+	 * Gets the file for the given execution
+	 *
+	 * @param id
+	 * 	the execution id
+	 * @param filename
+	 * 	the file name
+	 *
+	 * @return the file
+	 *
+	 * @throws MalformedURLException
+	 * 	if the URL is malformed
+	 */
+	Resource getFile(Long id, String filename) throws MalformedURLException;
 }
