@@ -75,25 +75,31 @@ class ExecutionServiceImplTest {
 
 	@Test
 	void testGetFileThrowsException() {
-		assertThrows(SecurityException.class, () -> testGetFile(null));
+		assertThrows(SecurityException.class, () -> mockFile(null));
 	}
 
 	@Test
 	void testGetMappingFile() throws MalformedURLException {
-		testGetFile(Constants.MAPPING_FILE_NAME);
+		String mappingFileName = Constants.MAPPING_FILE_NAME;
+		Resource resource = mockFile(mappingFileName);
+		assertEquals(mappingFileName, resource.getFilename());
 	}
 
 	@Test
 	void testGetLogFile() throws MalformedURLException {
-		testGetFile(Constants.GRAPH_ENGINE_LOG_FILE_NAME);
+		String mappingFileName = Constants.GRAPH_ENGINE_LOG_FILE_NAME;
+		Resource resource = mockFile(mappingFileName);
+		assertEquals(mappingFileName, resource.getFilename());
 	}
 
 	@Test
 	void testGetKnowledgeGraphFile() throws MalformedURLException {
-		testGetFile(Constants.KG_OUTPUT_FILE_NAME);
+		String mappingFileName = Constants.KG_OUTPUT_FILE_NAME;
+		Resource resource = mockFile(mappingFileName);
+		assertEquals(mappingFileName, resource.getFilename());
 	}
 
-	private void testGetFile(String mappingFileName) throws MalformedURLException {
+	private Resource mockFile(String mappingFileName) throws MalformedURLException {
 		Execution execution = new Execution();
 		execution.setExecutionDate(OffsetDateTime.now());
 
@@ -105,7 +111,7 @@ class ExecutionServiceImplTest {
 
 		Resource resource = this.executionService.getFile(1L, mappingFileName);
 
-		assertEquals(mappingFileName, resource.getFilename());
+		return resource;
 	}
 
 }
