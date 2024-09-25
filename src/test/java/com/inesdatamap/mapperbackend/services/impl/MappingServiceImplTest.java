@@ -97,6 +97,7 @@ class MappingServiceImplTest {
 		// Mock data
 		Long id = 1L;
 		Mapping mapping = new Mapping();
+		mapping.setId(id);
 
 		// Mock behavior
 		when(this.mappingRepo.findById(id)).thenReturn(Optional.of(mapping));
