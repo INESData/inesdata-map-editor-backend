@@ -1,21 +1,9 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -43,6 +31,17 @@ import com.inesdatamap.mapperbackend.utils.FileUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 /**
  * Unit tests for the {@link FileSourceServiceImpl}
  *
@@ -50,7 +49,7 @@ import jakarta.persistence.EntityNotFoundException;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { AppProperties.class, FileSourceServiceImpl.class,
-		FileSourceMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
+	FileSourceMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
 class FileSourceServiceImplTest {
 
 	@MockBean
@@ -90,7 +89,7 @@ class FileSourceServiceImplTest {
 		// Assert
 		assertNotNull(result);
 		assertEquals(1L, result.getId());
-		verify(file, times(1)).getInputStream();
+		verify(file, times(2)).getInputStream();
 	}
 
 	@Test
@@ -110,7 +109,7 @@ class FileSourceServiceImplTest {
 		when(this.fileSourceRepository.save(any())).thenReturn(savedFileSourceEntity);
 		when(FileUtils.processFileHeaders(file)).thenThrow(new IOException());
 
-		assertThrows(UncheckedIOException.class, () -> this.fileSourceService.createFileSource(inputDto, file));
+		assertThrows(FileCreationException.class, () -> this.fileSourceService.createFileSource(inputDto, file));
 
 	}
 

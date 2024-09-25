@@ -11,8 +11,6 @@ import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.TikaInputStream;
@@ -32,8 +30,6 @@ import com.inesdatamap.mapperbackend.model.jpa.Ontology;
  * @author gmv
  */
 public final class FileUtils {
-
-	private static final Log logger = LogFactory.getLog(FileUtils.class);
 
 	// Private constructor to prevent instantiation
 	private FileUtils() {
