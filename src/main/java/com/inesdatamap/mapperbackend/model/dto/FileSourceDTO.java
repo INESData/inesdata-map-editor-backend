@@ -13,8 +13,6 @@ import lombok.Setter;
 @Setter
 public class FileSourceDTO extends DataSourceDTO {
 
-	private String fileName;
-
 	@NotNull
 	private DataFileTypeEnum fileType;
 

@@ -30,9 +30,9 @@ public enum DataFileTypeEnum {
 	 * Constructor for DataFileTypeEnum.
 	 *
 	 * @param code
-	 *            the code representing the file type.
+	 * 	the code representing the file type.
 	 * @param mimeType
-	 *            the MIME type representing the file type.
+	 * 	the MIME type representing the file type.
 	 */
 	private DataFileTypeEnum(String code, String mimeType) {
 		this.code = code;
@@ -54,15 +54,16 @@ public enum DataFileTypeEnum {
 	}
 
 	/**
-	 * Validate if the file extension is valid according to the enum.
+	 * Validate if the file mimeType is valid according to the enum.
 	 *
-	 * @param extension
-	 *            The file extension to validate.
-	 * @return true if the extension is valid, false otherwise.
+	 * @param mimeType
+	 * 	The file mimeType to validate.
+	 *
+	 * @return true if the mimeType is valid, false otherwise.
 	 */
-	public static boolean isValidExtension(String extension) {
+	public static boolean isValidFile(String mimeType) {
 		for (DataFileTypeEnum type : values()) {
-			if (type.getMimeType().equalsIgnoreCase(extension)) {
+			if (type.getMimeType().equalsIgnoreCase(mimeType)) {
 				return true;
 			}
 		}

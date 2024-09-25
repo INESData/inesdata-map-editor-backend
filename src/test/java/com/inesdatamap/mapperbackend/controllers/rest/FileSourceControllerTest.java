@@ -1,8 +1,5 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,6 +17,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.dto.FileSourceDTO;
 import com.inesdatamap.mapperbackend.services.FileSourceService;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link FileSourceController}
@@ -79,11 +79,9 @@ class FileSourceControllerTest {
 		String fileType = "CSV";
 		FileSourceDTO fileSourceDTO1 = new FileSourceDTO();
 		fileSourceDTO1.setId(1L);
-		fileSourceDTO1.setFileName("file1.csv");
 
 		FileSourceDTO fileSourceDTO2 = new FileSourceDTO();
 		fileSourceDTO2.setId(2L);
-		fileSourceDTO2.setFileName("file2.csv");
 
 		List<FileSourceDTO> fileSourceDTOList = Arrays.asList(fileSourceDTO1, fileSourceDTO2);
 
