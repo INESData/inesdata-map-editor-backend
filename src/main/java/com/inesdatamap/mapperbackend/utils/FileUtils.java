@@ -10,7 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.TikaInputStream;
@@ -127,19 +129,22 @@ public final class FileUtils {
 	 *
 	 * @param file
 	 * 	the MultipartFile to save
-	 * @param fileName
-	 * 	the name of the file
 	 * @param path
 	 * 	the path where the file will be saved
+	 *
+	 * @return the file name
 	 */
-	public static void saveFile(MultipartFile file, String fileName, String path) {
+	public static String saveFile(MultipartFile file, String path) {
 
 		try {
+			String fileName = UUID.randomUUID() + FilenameUtils.getName(file.getOriginalFilename());
 
 			Files.createDirectories(Paths.get(path));
 
 			File newFile = new File(path, Objects.requireNonNull(fileName));
 			file.transferTo(newFile);
+
+			return newFile.getName();
 
 		} catch (IOException e) {
 			throw new FileCreationException("Failed to save file", e);

@@ -3,9 +3,7 @@ package com.inesdatamap.mapperbackend.services.impl;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,15 +76,13 @@ public class FileSourceServiceImpl implements FileSourceService {
 			String filePath = String.join(File.separator, this.appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME,
 				savedFileSource.getId().toString());
 
-			String fileName = UUID.randomUUID() + FilenameUtils.getName(file.getOriginalFilename());
-
 			// Set values in FileSource
 			savedFileSource.setFields(headers);
-			savedFileSource.setFileName(fileName);
 			savedFileSource.setFilePath(filePath);
 
 			// Save file
-			FileUtils.saveFile(file, fileName, filePath);
+			String fileName = FileUtils.saveFile(file, filePath);
+			savedFileSource.setFileName(fileName);
 
 			savedFileSource = this.fileSourceRepository.save(savedFileSource);
 		}
