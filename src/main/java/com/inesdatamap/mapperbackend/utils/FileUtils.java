@@ -11,7 +11,14 @@ import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 
-import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.tika.config.TikaConfig;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.metadata.TikaCoreProperties;
+import org.apache.tika.mime.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.exceptions.FileCreationException;
@@ -26,24 +33,48 @@ import com.inesdatamap.mapperbackend.model.jpa.Ontology;
  */
 public final class FileUtils {
 
+	private static final Log logger = LogFactory.getLog(FileUtils.class);
+
 	// Private constructor to prevent instantiation
 	private FileUtils() {
 
 	}
 
 	/**
-	 * Validates the file extension against the supported extensions defined in the DataFileTypeEnum.
+	 * Validates the file mimeType against the supported defined in the DataFileTypeEnum.
 	 *
-	 * @param fileExtension
+	 * @param mimeType
 	 * 	the MIME type to validate
 	 *
 	 * @throws IllegalArgumentException
-	 * 	if the provided file extension is not supported
+	 * 	if the provided mimetype is not supported
 	 */
-	public static void validateFileExtension(String fileExtension) {
-		if (!DataFileTypeEnum.isValidExtension(fileExtension)) {
-			throw new IllegalArgumentException("Unsupported file extension: " + fileExtension);
+	public static void validateFileExtension(String mimeType) {
+		if (!DataFileTypeEnum.isValidFile(mimeType)) {
+			throw new IllegalArgumentException("Unsupported file extension: " + mimeType);
 		}
+	}
+
+	/**
+	 * Validates if the file content matches its MIME type.
+	 *
+	 * @param file
+	 * 	the file
+	 */
+	public static void validateFile(MultipartFile file) {
+
+		try (TikaInputStream tikaInputStream = TikaInputStream.get(file.getInputStream())) {
+
+			TikaConfig tika = new TikaConfig();
+			Metadata metadata = new Metadata();
+			metadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, file.getOriginalFilename());
+
+			MediaType mimetype = tika.getDetector().detect(tikaInputStream, metadata);
+			validateFileExtension(mimetype.toString());
+		} catch (IOException | TikaException e) {
+			throw new FileCreationException("File validation error", e);
+		}
+
 	}
 
 	/**
@@ -100,18 +131,22 @@ public final class FileUtils {
 	 *
 	 * @param file
 	 * 	the MultipartFile to save
+	 * @param fileName
+	 * 	the name of the file
 	 * @param path
 	 * 	the path where the file will be saved
 	 */
-	public static void saveFile(MultipartFile file, String path) {
+	public static void saveFile(MultipartFile file, String fileName, String path) {
 
 		try {
 
 			Files.createDirectories(Paths.get(path));
-			file.transferTo(new File(path, Objects.requireNonNull(FilenameUtils.getName(file.getOriginalFilename()))));
+
+			File newFile = new File(path, Objects.requireNonNull(fileName));
+			file.transferTo(newFile);
 
 		} catch (IOException e) {
-			throw new FileCreationException("Failed to save file: " + path, e);
+			throw new FileCreationException("Failed to save file", e);
 		}
 	}
 

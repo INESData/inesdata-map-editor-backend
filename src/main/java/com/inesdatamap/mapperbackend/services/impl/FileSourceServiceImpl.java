@@ -3,6 +3,7 @@ package com.inesdatamap.mapperbackend.services.impl;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +47,9 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Saves a data source
 	 *
 	 * @param fileSourceDTO
-	 *            the FileSourceDTO
+	 * 	the FileSourceDTO
 	 * @param file
-	 *            file content to save
+	 * 	file content to save
 	 *
 	 * @return the saved data source
 	 */
@@ -67,23 +68,25 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 		if (file != null && !file.isEmpty()) {
 
-			// Validate the file extension
-			FileUtils.validateFileExtension(file.getContentType());
+			// Validate the file content
+			FileUtils.validateFile(file);
 
 			// Read file headers
 			String headers = FileUtils.processFileHeaders(file);
 
 			// Build file path
 			String filePath = String.join(File.separator, this.appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME,
-					savedFileSource.getId().toString());
+				savedFileSource.getId().toString());
+
+			String fileName = UUID.randomUUID() + FilenameUtils.getName(file.getOriginalFilename());
 
 			// Set values in FileSource
 			savedFileSource.setFields(headers);
-			savedFileSource.setFileName(FilenameUtils.getName(file.getOriginalFilename()));
+			savedFileSource.setFileName(fileName);
 			savedFileSource.setFilePath(filePath);
 
 			// Save file
-			FileUtils.saveFile(file, filePath);
+			FileUtils.saveFile(file, fileName, filePath);
 
 			savedFileSource = this.fileSourceRepository.save(savedFileSource);
 		}
@@ -95,9 +98,9 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Updates an existing file source
 	 *
 	 * @param id
-	 *            The identifier of the file source to be updated
+	 * 	The identifier of the file source to be updated
 	 * @param fileSourceDTO
-	 *            The FileSourceDTO
+	 * 	The FileSourceDTO
 	 *
 	 * @return the updated file source.
 	 */
@@ -121,7 +124,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a file source entity by its ID.
 	 *
 	 * @param id
-	 *            the ID of the file source to retrieve
+	 * 	the ID of the file source to retrieve
 	 *
 	 * @return the file source entity corresponding to the given ID
 	 */
@@ -134,7 +137,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a FileSourceDTO by its identifier.
 	 *
 	 * @param id
-	 *            the unique identifier of the file source entity
+	 * 	the unique identifier of the file source entity
 	 *
 	 * @return the file source dto corresponding to the given ID
 	 */
@@ -148,7 +151,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a list of FileSourceDTO objects filtered by the specified file type.
 	 *
 	 * @param fileType
-	 *            The type of the file sources to retrieve
+	 * 	The type of the file sources to retrieve
 	 *
 	 * @return A list of FileSourceDTO objects representing the file sources of the specified type.
 	 */
@@ -165,10 +168,9 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves the fields of a file source as a list of strings, based on the given source ID.
 	 *
 	 * @param id
-	 *            The ID of the file source whose fields are to be retrieved.
+	 * 	The ID of the file source whose fields are to be retrieved.
 	 *
 	 * @return A list of field names extracted from the fields property of the FileSource entity
-	 *
 	 */
 	@Override
 	public List<String> getFileFields(Long id) {
