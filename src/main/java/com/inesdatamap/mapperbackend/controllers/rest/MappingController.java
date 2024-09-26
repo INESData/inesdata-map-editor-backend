@@ -2,6 +2,7 @@ package com.inesdatamap.mapperbackend.controllers.rest;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.services.ExecutionService;
 import com.inesdatamap.mapperbackend.services.MappingService;
+import com.inesdatamap.mapperbackend.utils.Constants;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -136,9 +138,10 @@ public class MappingController {
 	@GetMapping(path = "/{id}/executions")
 	@Operation(summary = "List all executions for a mapping")
 	public ResponseEntity<PagedModel<ExecutionDTO>> listExecutions(
-		@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier", required = true) Long id,
-		@RequestParam int page, @RequestParam int size) {
-		Page<ExecutionDTO> executions = this.executionService.listExecutions(id, PageRequest.of(page, size));
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier", required = true) Long id,
+			@RequestParam int page, @RequestParam int size) {
+		Page<ExecutionDTO> executions = this.executionService.listExecutions(id,
+				PageRequest.of(page, size, Sort.by(Constants.SORT_BY_DATE).descending()));
 		return ResponseEntity.ok(new PagedModel<>(executions));
 	}
 }

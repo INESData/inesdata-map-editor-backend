@@ -53,12 +53,17 @@ public final class Constants {
 	 */
 	public static final String SORT_BY_NAME = "name";
 
+	/**
+	 * Constant representing the sort by date
+	 */
+	public static final String SORT_BY_DATE = "executionDate";
+
 	// Regex
 
 	/**
 	 * Constant for field delimiter regex
 	 */
-	public static final String FIELD_DELIMITER_REGEX = "[;]";
+	public static final String FIELD_DELIMITER_REGEX = "[,]";
 
 	private Constants() {
 		// Empty constructor to avoid initialization
