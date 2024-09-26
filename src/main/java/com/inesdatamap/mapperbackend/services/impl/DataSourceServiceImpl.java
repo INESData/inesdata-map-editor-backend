@@ -1,5 +1,8 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import java.io.File;
+import java.nio.file.Paths;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,8 +15,11 @@ import com.inesdatamap.mapperbackend.model.jpa.DataBaseSource;
 import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 import com.inesdatamap.mapperbackend.model.mappers.DataSourceMapper;
 import com.inesdatamap.mapperbackend.model.routing.ClientDataSourceRouter;
+import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
 import com.inesdatamap.mapperbackend.services.DataSourceService;
+import com.inesdatamap.mapperbackend.utils.Constants;
+import com.inesdatamap.mapperbackend.utils.FileUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -37,6 +43,9 @@ public class DataSourceServiceImpl implements DataSourceService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private AppProperties appProperties;
 
 	@Override
 	public DataBaseSource findById(Long dataSourceId) {
@@ -69,13 +78,16 @@ public class DataSourceServiceImpl implements DataSourceService {
 	 * Deletes a data source by its id.
 	 *
 	 * @param id
-	 *            the ID of the data source to delete
+	 * 	the ID of the data source to delete
 	 */
 	@Override
 	public void deleteDataSource(Long id) {
 
 		// Get entity if exists
 		this.getEntity(id);
+
+		// Delete files related to the data source
+		this.deleteDataSourceFiles(id);
 
 		this.dataSourceRepository.deleteById(id);
 
@@ -85,13 +97,29 @@ public class DataSourceServiceImpl implements DataSourceService {
 	 * Retrieves a data source entity by its ID.
 	 *
 	 * @param id
-	 *            the ID of the data source to retrieve
+	 * 	the ID of the data source to retrieve
+	 *
 	 * @return the data source entity corresponding to the given ID
 	 */
 	@Override
 	public DataSource getEntity(Long id) {
-		return this.dataSourceRepository.findById(id)
-				.orElseThrow(() -> new EntityNotFoundException("Entity not found with id: " + id.toString()));
+		return this.dataSourceRepository.findById(id).orElseThrow(
+			() -> new EntityNotFoundException("Entity not found with id: " + id.toString()));
+	}
+
+	/**
+	 * Deletes files related to the data source.
+	 *
+	 * @param id
+	 * 	the ID of the data source
+	 */
+	private void deleteDataSourceFiles(Long id) {
+
+		String dataSourceFolderPath = String.join(File.separator, appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME,
+			id.toString());
+
+		FileUtils.deleteDirectory(Paths.get(dataSourceFolderPath));
+
 	}
 
 }
