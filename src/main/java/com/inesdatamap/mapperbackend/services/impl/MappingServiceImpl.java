@@ -352,9 +352,9 @@ public class MappingServiceImpl implements MappingService {
 		// Create mapping file
 		File mappingFile = FileUtils.createFile(mapping.getRml(), mappingFilePath);
 
-		results = this.graphEngineService.run(mappingFile.getAbsolutePath(), knowledgeGraphOutputFilePath, logFilePath);
-
 		saveExecution(mapping, now, mappingFilePath, knowledgeGraphOutputFilePath, logFilePath);
+
+		results = this.graphEngineService.run(mappingFile.getAbsolutePath(), knowledgeGraphOutputFilePath, logFilePath);
 
 		return results;
 	}
