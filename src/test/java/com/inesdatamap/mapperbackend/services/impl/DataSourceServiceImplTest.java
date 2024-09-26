@@ -20,6 +20,7 @@ import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.DataBaseSource;
 import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 import com.inesdatamap.mapperbackend.model.mappers.DataSourceMapper;
+import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -44,6 +45,9 @@ class DataSourceServiceImplTest {
 
 	@Mock
 	private PasswordEncoder passwordEncoder;
+
+	@Mock
+	private AppProperties appProperties;
 
 	@InjectMocks
 	private DataSourceServiceImpl dataSourceService;
