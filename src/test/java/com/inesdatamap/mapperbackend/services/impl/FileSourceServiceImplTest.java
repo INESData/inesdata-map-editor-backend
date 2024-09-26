@@ -1,5 +1,16 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -31,17 +42,6 @@ import com.inesdatamap.mapperbackend.utils.FileUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * Unit tests for the {@link FileSourceServiceImpl}
  *
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { AppProperties.class, FileSourceServiceImpl.class,
-	FileSourceMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
+		FileSourceMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
 class FileSourceServiceImplTest {
 
 	@MockBean
@@ -191,9 +191,9 @@ class FileSourceServiceImplTest {
 	@Test
 	void testGetFileFields() {
 
-		// Valid fields and delimited by ;
+		// Valid fields and delimited by ,
 		Long idWithValidFields = 1L;
-		String fieldsWithValid = "field1;field2;field3";
+		String fieldsWithValid = "field1,field2,field3";
 		FileSource fileSourceWithValidFields = new FileSource();
 		fileSourceWithValidFields.setFields(fieldsWithValid);
 		when(this.fileSourceRepository.findById(idWithValidFields)).thenReturn(Optional.of(fileSourceWithValidFields));

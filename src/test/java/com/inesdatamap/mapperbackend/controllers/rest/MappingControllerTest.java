@@ -1,5 +1,10 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -10,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +26,7 @@ import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
 import com.inesdatamap.mapperbackend.services.ExecutionService;
 import com.inesdatamap.mapperbackend.services.MappingService;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import com.inesdatamap.mapperbackend.utils.Constants;
 
 /**
  * Unit tests for the {@link MappingController}
@@ -65,9 +68,9 @@ class MappingControllerTest {
 		int size = 10;
 		Page<SearchMappingDTO> expectedMappings = new PageImpl<>(List.of(new SearchMappingDTO()));
 
-		when(mappingService.listMappings(PageRequest.of(page, size))).thenReturn(expectedMappings);
+		when(this.mappingService.listMappings(PageRequest.of(page, size))).thenReturn(expectedMappings);
 
-		ResponseEntity<Page<SearchMappingDTO>> response = mappingController.listMappings(page, size);
+		ResponseEntity<Page<SearchMappingDTO>> response = this.mappingController.listMappings(page, size);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(expectedMappings, response.getBody());
@@ -78,9 +81,9 @@ class MappingControllerTest {
 		MappingDTO mappingDTO = new MappingDTO();
 		MappingDTO createdMapping = new MappingDTO();
 
-		when(mappingService.save(any())).thenReturn(createdMapping);
+		when(this.mappingService.save(any())).thenReturn(createdMapping);
 
-		ResponseEntity<MappingDTO> response = mappingController.create(mappingDTO);
+		ResponseEntity<MappingDTO> response = this.mappingController.create(mappingDTO);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertEquals(createdMapping, response.getBody());
@@ -91,9 +94,9 @@ class MappingControllerTest {
 		Long id = 1L;
 		List<String> expectedResults = List.of("result1", "result2");
 
-		when(mappingService.materialize(id)).thenReturn(expectedResults);
+		when(this.mappingService.materialize(id)).thenReturn(expectedResults);
 
-		ResponseEntity<Void> response = mappingController.materializeMapping(id);
+		ResponseEntity<Void> response = this.mappingController.materializeMapping(id);
 
 		assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 
@@ -107,10 +110,14 @@ class MappingControllerTest {
 		int size = 10;
 		Page<ExecutionDTO> expectedExecutions = new PageImpl<>(List.of(new ExecutionDTO()));
 
-		when(executionService.listExecutions(mappingId, PageRequest.of(page, size))).thenReturn(expectedExecutions);
+		PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Constants.SORT_BY_DATE).descending());
 
-		ResponseEntity<PagedModel<ExecutionDTO>> response = mappingController.listExecutions(mappingId, page, size);
+		when(this.executionService.listExecutions(mappingId, pageRequest)).thenReturn(expectedExecutions);
+
+		ResponseEntity<PagedModel<ExecutionDTO>> response = this.mappingController.listExecutions(mappingId, page, size);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
+
+		verify(this.executionService).listExecutions(mappingId, pageRequest);
 	}
 }
