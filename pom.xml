@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.inesdata-map</groupId>
 	<artifactId>mapper-backend</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>mapper-backend</name>
 	<description>Service responsible for saving a data source mapping and generating the corresponding R2RML / RML mapping file</description>
 	<properties>
