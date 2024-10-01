@@ -1,8 +1,20 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,15 +81,23 @@ public class FileSourceServiceImpl implements FileSourceService {
 			// Validate the file content
 			FileUtils.validateFile(file);
 
-			// Read file headers
-			String headers = FileUtils.processFileHeaders(file);
+			if (fileSource.getFileType().equals(DataFileTypeEnum.CSV)) {
+
+				// Read CSV file headers
+				String headers = FileUtils.processFileHeaders(file);
+				savedFileSource.setFields(headers);
+
+			} else if (fileSource.getFileType().equals(DataFileTypeEnum.XML)) {
+
+				// Check if XML is a valid file
+				FileUtils.isValidXML(file);
+			}
 
 			// Build file path
 			String filePath = String.join(File.separator, this.appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME,
-				savedFileSource.getId().toString());
+					savedFileSource.getId().toString());
 
 			// Set values in FileSource
-			savedFileSource.setFields(headers);
 			savedFileSource.setFilePath(filePath);
 
 			// Save file
@@ -180,6 +200,72 @@ public class FileSourceServiceImpl implements FileSourceService {
 			return Arrays.asList();
 		}
 
+	}
+
+	@Override
+	public List<String> getFileAttributes(Long id) {
+
+		// Get entity and construct file path
+		FileSource fileSource = this.getEntity(id);
+		File file = new File(Paths.get(fileSource.getFilePath(), fileSource.getFileName()).toString());
+
+		// Check if file exists and is not a directory
+		if (!file.exists() || file.isDirectory()) {
+			throw new IllegalArgumentException("File does not exist: " + file.getPath());
+		}
+
+		// Set to store unique attributes
+		Set<String> attributes = new HashSet<>();
+
+		// Process XML file and extract attributes
+		try (InputStream inputStream = new FileInputStream(file)) {
+
+			XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+			extractAttributes(reader, attributes);
+
+		} catch (IOException | XMLStreamException e) {
+			throw new FileCreationException("Error processing XML file", e);
+		}
+
+		return new ArrayList<>(attributes);
+	}
+
+	private static void extractAttributes(XMLStreamReader reader, Set<String> attributes) throws XMLStreamException {
+		StringBuilder currentPath = new StringBuilder();
+
+		// Loop through XML events
+		while (reader.hasNext()) {
+			int event = reader.next();
+
+			if (event == XMLStreamConstants.START_ELEMENT) {
+				processStartElement(reader, currentPath, attributes);
+
+			} else if (event == XMLStreamConstants.END_ELEMENT) {
+				removeLastPathElement(currentPath);
+			}
+		}
+	}
+
+	private static void processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
+		// Update the path with the current element
+		if (currentPath.length() > 0) {
+			currentPath.append("/");
+		}
+		currentPath.append(reader.getLocalName());
+
+		// Add each attribute's XPath to the set
+		for (int i = 0; i < reader.getAttributeCount(); i++) {
+			attributes.add(currentPath + "/@" + reader.getAttributeLocalName(i));
+		}
+	}
+
+	private static void removeLastPathElement(StringBuilder currentPath) {
+		int lastSlashIndex = currentPath.lastIndexOf("/");
+		if (lastSlashIndex >= 0) {
+			currentPath.setLength(lastSlashIndex);
+		} else {
+			currentPath.setLength(0);
+		}
 	}
 
 }

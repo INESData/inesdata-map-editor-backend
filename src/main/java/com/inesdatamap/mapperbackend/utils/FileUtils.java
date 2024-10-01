@@ -12,6 +12,10 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
@@ -20,6 +24,7 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.mime.MediaType;
 import org.springframework.web.multipart.MultipartFile;
+import org.xml.sax.SAXException;
 
 import com.inesdatamap.mapperbackend.exceptions.FileCreationException;
 import com.inesdatamap.mapperbackend.exceptions.FileDeleteException;
@@ -222,8 +227,29 @@ public final class FileUtils {
 	 * @return the file path from the output directory
 	 */
 	public static String getFilePathFromOutputDirectory(String dataProcessingPath, Long mappingId, OffsetDateTime executionTime,
-		String fileName) {
+			String fileName) {
 		return String.join(File.separator, dataProcessingPath, Constants.DATA_OUTPUT_FOLDER_NAME, mappingId.toString(),
-			String.valueOf(executionTime.toEpochSecond()), fileName);
+				String.valueOf(executionTime.toEpochSecond()), fileName);
 	}
+
+	/**
+	 * Validates if the provided MultipartFile contains a valid XML structure.
+	 *
+	 * @param file
+	 *            the MultipartFile representing the file to be validated
+	 * @throws FileCreationException
+	 *             if the file is not a valid XML or if an error occurs during parsing
+	 */
+	public static void isValidXML(MultipartFile file) {
+		try {
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			DocumentBuilder builder = factory.newDocumentBuilder();
+
+			builder.parse(file.getInputStream());
+
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			throw new FileCreationException("File is not a valid XML", e);
+		}
+	}
+
 }

@@ -129,4 +129,19 @@ public class FileSourceController {
 		return ResponseEntity.ok(this.fileSourceService.getFileFields(id));
 	}
 
+	/**
+	 * Get all XML file attributes
+	 *
+	 * @param id
+	 *            identifier
+	 *
+	 * @return List of attributes
+	 */
+	@GetMapping("/{id}/attributes")
+	@Operation(summary = "Gets all XML file attributes")
+	public ResponseEntity<List<String>> getFileAttributes(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
+		return ResponseEntity.ok(this.fileSourceService.getFileAttributes(id));
+	}
+
 }

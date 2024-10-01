@@ -74,4 +74,14 @@ public interface FileSourceService {
 	 */
 	List<String> getFileFields(Long id);
 
+	/**
+	 * Get all XML file attributes
+	 *
+	 * @param id
+	 *            identifier
+	 *
+	 * @return List of attributes
+	 */
+	List<String> getFileAttributes(Long id);
+
 }
