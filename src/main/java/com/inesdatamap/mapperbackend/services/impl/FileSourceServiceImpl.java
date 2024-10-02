@@ -228,7 +228,12 @@ public class FileSourceServiceImpl implements FileSourceService {
 			throw new FileParserException("Error processing XML file", e);
 		}
 
-		return new ArrayList<>(attributes);
+		// Convert set to list and sort it lexicographically
+		List<String> sortedAttributes = new ArrayList<>(attributes);
+		Collections.sort(sortedAttributes);
+
+		return sortedAttributes;
+
 	}
 
 	private static void extractAttributes(XMLStreamReader reader, Set<String> attributes) throws XMLStreamException {
