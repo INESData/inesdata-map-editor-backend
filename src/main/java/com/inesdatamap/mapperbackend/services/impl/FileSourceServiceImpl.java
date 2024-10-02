@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.exceptions.FileCreationException;
+import com.inesdatamap.mapperbackend.exceptions.FileParserException;
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.dto.FileSourceDTO;
 import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
@@ -224,15 +225,16 @@ public class FileSourceServiceImpl implements FileSourceService {
 			extractAttributes(reader, attributes);
 
 		} catch (IOException | XMLStreamException e) {
-			throw new FileCreationException("Error processing XML file", e);
+			throw new FileParserException("Error processing XML file", e);
 		}
 
 		return new ArrayList<>(attributes);
 	}
 
 	private static void extractAttributes(XMLStreamReader reader, Set<String> attributes) throws XMLStreamException {
+
 		StringBuilder currentPath = new StringBuilder();
-		boolean isLeafCandidate = false;
+		boolean isLeafNode = false;
 
 		// Loop through XML events
 		while (reader.hasNext()) {
@@ -240,20 +242,21 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 			if (event == XMLStreamConstants.START_ELEMENT) {
 				// Process the start element and check for attributes
-				isLeafCandidate = processStartElement(reader, currentPath, attributes);
+				isLeafNode = processStartElement(reader, currentPath, attributes);
 
 			} else if (event == XMLStreamConstants.CHARACTERS) {
 				// Process character data for leaf nodes
-				processCharacters(reader, currentPath, attributes, isLeafCandidate);
+				processCharacters(reader, currentPath, attributes, isLeafNode);
 
 			} else if (event == XMLStreamConstants.END_ELEMENT) {
 				// Remove the last element from the current XPath
-				removeLastPathElement(currentPath);
+				removeLastElementFromXPath(currentPath);
 			}
 		}
 	}
 
 	private static boolean processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
+
 		// Update the path with the current element
 		if (currentPath.length() > 0) {
 			currentPath.append("/");
@@ -265,29 +268,30 @@ public class FileSourceServiceImpl implements FileSourceService {
 			attributes.add(currentPath + "/@" + reader.getAttributeLocalName(i));
 		}
 
-		// If the element has attributes, it is not a leaf candidate
-		return reader.getAttributeCount() == 0;
+		return true;
 	}
 
-	private static void processCharacters(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes,
-			boolean isLeafCandidate) {
+	private static void processCharacters(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes, boolean isLeafNode) {
 
 		// Get the text from the node
 		String text = reader.getText().trim();
 
-		// If the text is not empty and the current element was a leaf candidate (no children or attributes)
-		if (!text.isEmpty() && isLeafCandidate) {
+		// If the text is not empty and the current element was a leaf node (no children)
+		if (!text.isEmpty() && isLeafNode) {
 			attributes.add(currentPath.toString());
 		}
 	}
 
-	private static void removeLastPathElement(StringBuilder currentPath) {
+	private static void removeLastElementFromXPath(StringBuilder currentPath) {
+
+		// Find the last slash in the XPath
 		int lastSlashIndex = currentPath.lastIndexOf("/");
 		if (lastSlashIndex >= 0) {
-			// Set the length to the index of the last slash to remove the last element
+			// Adjust the StringBuilder length to the index of the last slash
+			// This removes the last element from the XPath
 			currentPath.setLength(lastSlashIndex);
 		} else {
-			// If there is no slash, clear the current path
+			// If no slashes are found, clear the StringBuilder
 			currentPath.setLength(0);
 		}
 	}
