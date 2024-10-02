@@ -205,19 +205,19 @@ public class FileSourceServiceImpl implements FileSourceService {
 	@Override
 	public List<String> getFileAttributes(Long id) {
 
-		// Get entity and construct file path
+		// Get entity and construct the file path
 		FileSource fileSource = this.getEntity(id);
 		File file = new File(Paths.get(fileSource.getFilePath(), fileSource.getFileName()).toString());
 
-		// Check if file exists and is not a directory
+		// Check if the file exists and is not a directory
 		if (!file.exists() || file.isDirectory()) {
 			throw new IllegalArgumentException("File does not exist: " + file.getPath());
 		}
 
-		// Set to store unique attributes
+		// Set to store unique attributes and leaf node XPaths
 		Set<String> attributes = new HashSet<>();
 
-		// Process XML file and extract attributes
+		// Process the XML file and extract attributes and leaf node XPaths
 		try (InputStream inputStream = new FileInputStream(file)) {
 
 			XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
@@ -239,39 +239,43 @@ public class FileSourceServiceImpl implements FileSourceService {
 			int event = reader.next();
 
 			if (event == XMLStreamConstants.START_ELEMENT) {
+				// Process the start element and check for attributes
 				isLeafCandidate = processStartElement(reader, currentPath, attributes);
 
 			} else if (event == XMLStreamConstants.CHARACTERS) {
+				// Process character data for leaf nodes
 				processCharacters(reader, currentPath, attributes, isLeafCandidate);
 
 			} else if (event == XMLStreamConstants.END_ELEMENT) {
+				// Remove the last element from the current XPath
 				removeLastPathElement(currentPath);
 			}
 		}
 	}
 
 	private static boolean processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
-		// Actualizar la ruta con el elemento actual
+		// Update the path with the current element
 		if (currentPath.length() > 0) {
 			currentPath.append("/");
 		}
 		currentPath.append(reader.getLocalName());
 
-		// Añadir cada atributo de ese elemento al conjunto con su XPath completo
+		// Add each attribute of the current element to the set with its full XPath
 		for (int i = 0; i < reader.getAttributeCount(); i++) {
 			attributes.add(currentPath + "/@" + reader.getAttributeLocalName(i));
 		}
 
-		// Si el elemento tiene atributos, no es un candidato a ser hoja
+		// If the element has attributes, it is not a leaf candidate
 		return reader.getAttributeCount() == 0;
 	}
 
 	private static void processCharacters(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes,
 			boolean isLeafCandidate) {
-		// Obtener el texto del nodo
+
+		// Get the text from the node
 		String text = reader.getText().trim();
 
-		// Si el texto no es vacío y el elemento actual era un candidato a nodo hoja (sin hijos ni atributos)
+		// If the text is not empty and the current element was a leaf candidate (no children or attributes)
 		if (!text.isEmpty() && isLeafCandidate) {
 			attributes.add(currentPath.toString());
 		}
@@ -280,8 +284,10 @@ public class FileSourceServiceImpl implements FileSourceService {
 	private static void removeLastPathElement(StringBuilder currentPath) {
 		int lastSlashIndex = currentPath.lastIndexOf("/");
 		if (lastSlashIndex >= 0) {
+			// Set the length to the index of the last slash to remove the last element
 			currentPath.setLength(lastSlashIndex);
 		} else {
+			// If there is no slash, clear the current path
 			currentPath.setLength(0);
 		}
 	}
