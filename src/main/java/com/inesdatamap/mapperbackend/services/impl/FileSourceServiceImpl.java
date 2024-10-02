@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -203,6 +204,17 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 	}
 
+	/**
+	 * Retrieves a list of attributes and leaf node XPaths from an XML file based on the given file source ID.
+	 *
+	 * @param id
+	 *            the ID of the file source entity
+	 * @return a sorted list of unique attributes and leaf node XPaths found in the XML file
+	 * @throws IllegalArgumentException
+	 *             if the file does not exist or is a directory.
+	 * @throws FileParserException
+	 *             if an error occurs while processing the XML file.
+	 */
 	@Override
 	public List<String> getFileAttributes(Long id) {
 
@@ -236,6 +248,16 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 	}
 
+	/**
+	 * Extracts attributes and leaf node XPaths from an XML stream and stores them in the provided set
+	 *
+	 * @param reader
+	 *            the XMLStreamReader to read the XML content from
+	 * @param attributes
+	 *            a Set to store the unique attributes and leaf node XPaths extracted from the XML
+	 * @throws XMLStreamException
+	 *             if an error occurs during XML parsing.
+	 */
 	private static void extractAttributes(XMLStreamReader reader, Set<String> attributes) throws XMLStreamException {
 
 		StringBuilder currentPath = new StringBuilder();
@@ -260,6 +282,17 @@ public class FileSourceServiceImpl implements FileSourceService {
 		}
 	}
 
+	/**
+	 * Processes the start element of the XML and updates the current XPath.
+	 *
+	 * @param reader
+	 *            the XMLStreamReader positioned at the start element in the XML stream
+	 * @param currentPath
+	 *            a StringBuilder representing the current XPath of the element
+	 * @param attributes
+	 *            a Set to store the unique attributes with their full XPath
+	 * @return true to indicate that the current element could potentially be a leaf node.
+	 */
 	private static boolean processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
 
 		// Update the path with the current element
@@ -276,6 +309,18 @@ public class FileSourceServiceImpl implements FileSourceService {
 		return true;
 	}
 
+	/**
+	 * Processes character data within an XML element and updates the attributes set if the element is a leaf node
+	 *
+	 * @param reader
+	 *            the XMLStreamReader positioned at the character data in the XML stream
+	 * @param currentPath
+	 *            a StringBuilder representing the current XPath of the element
+	 * @param attributes
+	 *            a Set to store unique leaf node XPaths
+	 * @param isLeafNode
+	 *            a boolean indicating whether the current element is a leaf node
+	 */
 	private static void processCharacters(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes, boolean isLeafNode) {
 
 		// Get the text from the node
@@ -287,13 +332,23 @@ public class FileSourceServiceImpl implements FileSourceService {
 		}
 	}
 
+	/**
+	 * Removes the last element from the current XPath
+	 *
+	 * This method modifies the {@code currentPath} by finding the last slash ("/") and truncating the {@code StringBuilder} to remove the
+	 * last element in the XPath. If no slash is found, the entire {@code currentPath} is cleared, indicating that the root has been
+	 * reached.
+	 *
+	 * @param currentPath
+	 *            a StringBuilder representing the current XPath to be modified
+	 */
 	private static void removeLastElementFromXPath(StringBuilder currentPath) {
 
 		// Find the last slash in the XPath
 		int lastSlashIndex = currentPath.lastIndexOf("/");
 		if (lastSlashIndex >= 0) {
 			// Adjust the StringBuilder length to the index of the last slash
-			// This removes the last element from the XPath
+			// Removes the last element from the XPath
 			currentPath.setLength(lastSlashIndex);
 		} else {
 			// If no slashes are found, clear the StringBuilder
