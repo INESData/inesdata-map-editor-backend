@@ -232,13 +232,17 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 	private static void extractAttributes(XMLStreamReader reader, Set<String> attributes) throws XMLStreamException {
 		StringBuilder currentPath = new StringBuilder();
+		boolean isLeafCandidate = false;
 
 		// Loop through XML events
 		while (reader.hasNext()) {
 			int event = reader.next();
 
 			if (event == XMLStreamConstants.START_ELEMENT) {
-				processStartElement(reader, currentPath, attributes);
+				isLeafCandidate = processStartElement(reader, currentPath, attributes);
+
+			} else if (event == XMLStreamConstants.CHARACTERS) {
+				processCharacters(reader, currentPath, attributes, isLeafCandidate);
 
 			} else if (event == XMLStreamConstants.END_ELEMENT) {
 				removeLastPathElement(currentPath);
@@ -246,16 +250,30 @@ public class FileSourceServiceImpl implements FileSourceService {
 		}
 	}
 
-	private static void processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
-		// Update the path with the current element
+	private static boolean processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
+		// Actualizar la ruta con el elemento actual
 		if (currentPath.length() > 0) {
 			currentPath.append("/");
 		}
 		currentPath.append(reader.getLocalName());
 
-		// Add each attribute's XPath to the set
+		// Añadir cada atributo de ese elemento al conjunto con su XPath completo
 		for (int i = 0; i < reader.getAttributeCount(); i++) {
 			attributes.add(currentPath + "/@" + reader.getAttributeLocalName(i));
+		}
+
+		// Si el elemento tiene atributos, no es un candidato a ser hoja
+		return reader.getAttributeCount() == 0;
+	}
+
+	private static void processCharacters(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes,
+			boolean isLeafCandidate) {
+		// Obtener el texto del nodo
+		String text = reader.getText().trim();
+
+		// Si el texto no es vacío y el elemento actual era un candidato a nodo hoja (sin hijos ni atributos)
+		if (!text.isEmpty() && isLeafCandidate) {
+			attributes.add(currentPath.toString());
 		}
 	}
 
