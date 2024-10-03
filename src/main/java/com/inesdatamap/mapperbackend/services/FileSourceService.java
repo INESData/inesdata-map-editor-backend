@@ -65,7 +65,7 @@ public interface FileSourceService {
 	List<FileSourceDTO> getFileSourceByType(String fileType);
 
 	/**
-	 * Get all file fields
+	 * Get all CSV file fields
 	 *
 	 * @param id
 	 *            identifier

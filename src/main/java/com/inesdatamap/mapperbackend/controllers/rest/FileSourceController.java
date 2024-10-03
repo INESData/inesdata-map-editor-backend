@@ -115,7 +115,7 @@ public class FileSourceController {
 	}
 
 	/**
-	 * Get all file fields
+	 * Get all CSV file fields
 	 *
 	 * @param id
 	 *            identifier
@@ -123,7 +123,7 @@ public class FileSourceController {
 	 * @return List of file fields
 	 */
 	@GetMapping("/{id}/fields")
-	@Operation(summary = "Gets all file fields")
+	@Operation(summary = "Gets all CSV file fields")
 	public ResponseEntity<List<String>> getFileFields(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
 		return ResponseEntity.ok(this.fileSourceService.getFileFields(id));
