@@ -65,6 +65,20 @@ public final class Constants {
 	 */
 	public static final String FIELD_DELIMITER_REGEX = "[,]";
 
+	// URLs
+	/**
+	 * Constant for general entities
+	 */
+	public static final String GENERAL_ENTITIES = "http://xml.org/sax/features/external-general-entities";
+	/**
+	 * Constant for parameter entities
+	 */
+	public static final String PARAMETER_ENTITIES = "http://xml.org/sax/features/external-parameter-entities";
+	/**
+	 * Constant for doctype-decl
+	 */
+	public static final String DOCTYPE_DECL = "http://apache.org/xml/features/disallow-doctype-decl";
+
 	private Constants() {
 		// Empty constructor to avoid initialization
 	}

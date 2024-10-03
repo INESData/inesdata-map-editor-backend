@@ -12,6 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -47,10 +48,10 @@ public final class FileUtils {
 	 * Validates the file mimeType against the supported defined in the DataFileTypeEnum.
 	 *
 	 * @param mimeType
-	 * 	the MIME type to validate
+	 *            the MIME type to validate
 	 *
 	 * @throws IllegalArgumentException
-	 * 	if the provided mimetype is not supported
+	 *             if the provided mimetype is not supported
 	 */
 	public static void validateFileExtension(String mimeType) {
 		if (!DataFileTypeEnum.isValidFile(mimeType)) {
@@ -62,7 +63,7 @@ public final class FileUtils {
 	 * Validates if the file content matches its MIME type.
 	 *
 	 * @param file
-	 * 	the file
+	 *            the file
 	 */
 	public static void validateFile(MultipartFile file) {
 
@@ -84,12 +85,12 @@ public final class FileUtils {
 	 * Processes the content of the MultipartFile and sets it as the content of the specified Ontology.
 	 *
 	 * @param file
-	 * 	the MultipartFile containing the content to be processed
+	 *            the MultipartFile containing the content to be processed
 	 * @param ontology
-	 * 	the Ontology entity where the file content will be stored
+	 *            the Ontology entity where the file content will be stored
 	 *
 	 * @throws UncheckedIOException
-	 * 	if an error occurs while reading the file content.
+	 *             if an error occurs while reading the file content.
 	 */
 	public static void processFileContent(MultipartFile file, Ontology ontology) {
 
@@ -109,12 +110,12 @@ public final class FileUtils {
 	 * Reads the first line of the given MultipartFile to extract headers and sets them in the provided FileSource object.
 	 *
 	 * @param file
-	 * 	the MultipartFile from which to read the headers
+	 *            the MultipartFile from which to read the headers
 	 *
 	 * @return the headers read from the file
 	 *
 	 * @throws UncheckedIOException
-	 * 	if an error occurs while reading the file content
+	 *             if an error occurs while reading the file content
 	 */
 	public static String processFileHeaders(MultipartFile file) {
 		try {
@@ -133,9 +134,9 @@ public final class FileUtils {
 	 * Saves the given MultipartFile to the specified path.
 	 *
 	 * @param file
-	 * 	the MultipartFile to save
+	 *            the MultipartFile to save
 	 * @param path
-	 * 	the path where the file will be saved
+	 *            the path where the file will be saved
 	 *
 	 * @return the file name
 	 */
@@ -160,9 +161,9 @@ public final class FileUtils {
 	 * Creates a file with the specified content.
 	 *
 	 * @param content
-	 * 	the content of the file
+	 *            the content of the file
 	 * @param path
-	 * 	the path where the file will be created
+	 *            the path where the file will be created
 	 *
 	 * @return the file
 	 */
@@ -185,7 +186,7 @@ public final class FileUtils {
 	 * Deletes the directory at the specified path.
 	 *
 	 * @param path
-	 * 	the path of the file to delete
+	 *            the path of the file to delete
 	 */
 	public static void deleteDirectory(Path path) {
 
@@ -201,7 +202,7 @@ public final class FileUtils {
 	 * Creates the directories at the specified path.
 	 *
 	 * @param path
-	 * 	the path
+	 *            the path
 	 */
 	public static void createDirectories(Path path) {
 
@@ -216,13 +217,13 @@ public final class FileUtils {
 	 * Gets the file path from the output directory.
 	 *
 	 * @param dataProcessingPath
-	 * 	the data processing path
+	 *            the data processing path
 	 * @param mappingId
-	 * 	the mapping id
+	 *            the mapping id
 	 * @param executionTime
-	 * 	the execution time
+	 *            the execution time
 	 * @param fileName
-	 * 	the file name
+	 *            the file name
 	 *
 	 * @return the file path from the output directory
 	 */
@@ -242,14 +243,50 @@ public final class FileUtils {
 	 */
 	public static void isValidXML(MultipartFile file) {
 		try {
-			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder = factory.newDocumentBuilder();
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			disableExternalEntities(dbf);
 
-			builder.parse(file.getInputStream());
+			// Parse the XML file using the secured DocumentBuilderFactory
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			db.parse(file.getInputStream());
 
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new FileCreationException("File is not a valid XML", e);
 		}
+	}
+
+	/**
+	 * Configures a DocumentBuilderFactory to prevent XXE (XML External Entity) attacks, remote file inclusion, and denial of service
+	 * attacks by disabling certain features.
+	 *
+	 * @param dbf
+	 *            the DocumentBuilderFactory to configure
+	 * @return the configured DocumentBuilderFactory with the applied security features
+	 * @throws ParserConfigurationException
+	 *             if a parser feature cannot be set
+	 */
+	public static DocumentBuilderFactory disableExternalEntities(DocumentBuilderFactory dbf) throws ParserConfigurationException {
+
+		// Disable external general entities to prevent inclusion of external resources
+		dbf.setFeature(Constants.GENERAL_ENTITIES, false);
+
+		// Disable external parameter entities to prevent XXE via external parameter references
+		dbf.setFeature(Constants.PARAMETER_ENTITIES, false);
+
+		// Completely disable DOCTYPE declaration to prevent XXE attacks
+		dbf.setFeature(Constants.DOCTYPE_DECL, true);
+
+		// Protects against Denial of Service attack and remote file access
+		dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+		// Restrict access to external DTD and schema files to prevent remote file inclusion
+		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
+		// Disable expansion of entity references to protect against cyclic entity attacks
+		dbf.setExpandEntityReferences(false);
+
+		return dbf;
 	}
 
 }

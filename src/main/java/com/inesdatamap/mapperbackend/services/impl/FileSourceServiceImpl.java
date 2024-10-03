@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,9 +60,9 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Saves a data source
 	 *
 	 * @param fileSourceDTO
-	 * 	the FileSourceDTO
+	 *            the FileSourceDTO
 	 * @param file
-	 * 	file content to save
+	 *            file content to save
 	 *
 	 * @return the saved data source
 	 */
@@ -116,9 +117,9 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Updates an existing file source
 	 *
 	 * @param id
-	 * 	The identifier of the file source to be updated
+	 *            The identifier of the file source to be updated
 	 * @param fileSourceDTO
-	 * 	The FileSourceDTO
+	 *            The FileSourceDTO
 	 *
 	 * @return the updated file source.
 	 */
@@ -142,7 +143,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a file source entity by its ID.
 	 *
 	 * @param id
-	 * 	the ID of the file source to retrieve
+	 *            the ID of the file source to retrieve
 	 *
 	 * @return the file source entity corresponding to the given ID
 	 */
@@ -155,7 +156,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a FileSourceDTO by its identifier.
 	 *
 	 * @param id
-	 * 	the unique identifier of the file source entity
+	 *            the unique identifier of the file source entity
 	 *
 	 * @return the file source dto corresponding to the given ID
 	 */
@@ -169,7 +170,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a list of FileSourceDTO objects filtered by the specified file type.
 	 *
 	 * @param fileType
-	 * 	The type of the file sources to retrieve
+	 *            The type of the file sources to retrieve
 	 *
 	 * @return A list of FileSourceDTO objects representing the file sources of the specified type.
 	 */
@@ -186,7 +187,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves the fields of a file source as a list of strings, based on the given source ID.
 	 *
 	 * @param id
-	 * 	The ID of the file source whose fields are to be retrieved.
+	 *            The ID of the file source whose fields are to be retrieved.
 	 *
 	 * @return A list of field names extracted from the fields property of the FileSource entity
 	 */
@@ -220,7 +221,23 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 		// Get entity and construct the file path
 		FileSource fileSource = this.getEntity(id);
-		File file = new File(Paths.get(fileSource.getFilePath(), fileSource.getFileName()).toString());
+
+		// Validate filePath and fileName
+		if (fileSource.getFilePath() == null || fileSource.getFileName() == null) {
+			throw new IllegalArgumentException("Invalid file path or name");
+		}
+
+		// Build file full path
+		Path basePath = Paths.get(this.appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME);
+		Path filePath = basePath.resolve(fileSource.getFilePath()).normalize();
+		Path fullFilePath = filePath.resolve(fileSource.getFileName()).normalize();
+
+		// Check full path is in allowed base directory
+		if (!fullFilePath.startsWith(basePath)) {
+			throw new SecurityException("Potential path traversal attack detected: " + fullFilePath);
+		}
+
+		File file = fullFilePath.toFile();
 
 		// Check if the file exists and is not a directory
 		if (!file.exists() || file.isDirectory()) {

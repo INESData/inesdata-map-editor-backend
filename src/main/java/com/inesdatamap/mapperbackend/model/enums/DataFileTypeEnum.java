@@ -55,7 +55,7 @@ public enum DataFileTypeEnum {
 	 * @return the MIME type representing the file type.
 	 */
 	public String[] getMimeTypes() {
-		return this.mimeTypes;
+		return this.mimeTypes.clone();
 	}
 
 	/**
