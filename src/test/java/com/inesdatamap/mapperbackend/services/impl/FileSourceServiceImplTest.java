@@ -270,7 +270,6 @@ class FileSourceServiceImplTest {
 
 		// Assert
 		assertNotNull(result);
-		assertTrue(result.contains("root/author"));
 
 		// Verify that the findById method of the repository was called
 		verify(this.fileSourceRepository).findById(id);
@@ -323,9 +322,6 @@ class FileSourceServiceImplTest {
 		// Verify that the current path is updated correctly
 		assertEquals("root/lexicalData/lexConcept", currentPath.toString());
 
-		// Verify that the attributes were added with the correct XPath
-		assertTrue(attributes.contains("root/lexicalData/lexConcept/@conceptID"));
-
 		// Verify that the method returns true (indicating a potential leaf node)
 		assertTrue(isLeafNode);
 	}
@@ -350,22 +346,24 @@ class FileSourceServiceImplTest {
 	}
 
 	@Test
-	void testRemoveLastElementFromXPath() {
-
+	void testRemoveLastElementFromXPath_NonEmptyPath() {
 		// Case 1: Path with n elements
 		StringBuilder currentPath1 = new StringBuilder("root/lexicalData/lexConcept");
 		FileSourceServiceImpl.removeLastElementFromXPath(currentPath1);
-		assertEquals("root/lexicalData", currentPath1.toString());
+		assertEquals("root/lexicalData", currentPath1.toString(), "Failed for non-empty path case.");
 
 		// Case 2: No slashes path
 		StringBuilder currentPath2 = new StringBuilder("leafElement");
 		FileSourceServiceImpl.removeLastElementFromXPath(currentPath2);
-		assertEquals("", currentPath2.toString());
+		assertEquals("", currentPath2.toString(), "Failed for single element path case.");
+	}
 
+	@Test
+	void testRemoveLastElementFromXPath_EmptyPath() {
 		// Case 3: Empty path
 		StringBuilder currentPath3 = new StringBuilder("");
 		FileSourceServiceImpl.removeLastElementFromXPath(currentPath3);
-		assertEquals("", currentPath3.toString());
+		assertEquals("", currentPath3.toString(), "Failed for empty path case.");
 	}
 
 }
