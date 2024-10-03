@@ -244,7 +244,8 @@ public final class FileUtils {
 	public static void isValidXML(MultipartFile file) {
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			disableExternalEntities(dbf);
+			dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			dbf.setFeature(Constants.DOCTYPE_DECL, true);
 
 			// Parse the XML file using the secured DocumentBuilderFactory
 			DocumentBuilder db = dbf.newDocumentBuilder();
@@ -253,37 +254,6 @@ public final class FileUtils {
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new FileCreationException("File is not a valid XML", e);
 		}
-	}
-
-	/**
-	 * Configures a DocumentBuilderFactory to prevent XXE (XML External Entity) attacks, remote file inclusion, and denial of service
-	 * attacks by disabling certain features.
-	 *
-	 * @param dbf
-	 *            the DocumentBuilderFactory to configure
-	 * @return the configured DocumentBuilderFactory with the applied security features
-	 * @throws ParserConfigurationException
-	 *             if a parser feature cannot be set
-	 */
-	public static DocumentBuilderFactory disableExternalEntities(DocumentBuilderFactory dbf) throws ParserConfigurationException {
-
-		// Disable external general entities
-		dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-		dbf.setFeature(Constants.DOCTYPE_DECL, false);
-
-		// Prevent XXE attacks by disabling external entities
-		dbf.setFeature(Constants.GENERAL_ENTITIES, false);
-		dbf.setFeature(Constants.PARAMETER_ENTITIES, false);
-
-		// Restrict access to external DTD and schema files to prevent remote file inclusion
-		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-
-		// Disable expansion of entity references
-		dbf.setExpandEntityReferences(false);
-		dbf.setNamespaceAware(true);
-
-		return dbf;
 	}
 
 }

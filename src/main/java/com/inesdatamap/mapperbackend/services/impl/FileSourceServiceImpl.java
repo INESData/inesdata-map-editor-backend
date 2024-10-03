@@ -18,6 +18,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -227,10 +228,13 @@ public class FileSourceServiceImpl implements FileSourceService {
 			throw new IllegalArgumentException("Invalid file path or name");
 		}
 
+		// Sanitize file name to prevent path traversal
+		String sanitizedFileName = FilenameUtils.getName(fileSource.getFileName());
+
 		// Build file full path
 		Path basePath = Paths.get(this.appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME);
 		Path filePath = basePath.resolve(fileSource.getFilePath()).normalize();
-		Path fullFilePath = filePath.resolve(fileSource.getFileName()).normalize();
+		Path fullFilePath = filePath.resolve(sanitizedFileName).normalize();
 
 		// Check full path is in allowed base directory
 		if (!fullFilePath.startsWith(basePath)) {
