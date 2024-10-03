@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -228,20 +226,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 			throw new IllegalArgumentException("Invalid file path or name");
 		}
 
-		// Sanitize file name to prevent path traversal
-		String sanitizedFileName = FilenameUtils.getName(fileSource.getFileName());
-
-		// Build file full path
-		Path basePath = Paths.get(this.appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME);
-		Path filePath = basePath.resolve(fileSource.getFilePath()).normalize();
-		Path fullFilePath = filePath.resolve(sanitizedFileName).normalize();
-
-		// Check full path is in allowed base directory
-		if (!fullFilePath.startsWith(basePath)) {
-			throw new SecurityException("Potential path traversal attack detected: " + fullFilePath);
-		}
-
-		File file = fullFilePath.toFile();
+		File file = new File(fileSource.getFilePath(), FilenameUtils.getName(fileSource.getFileName()));
 
 		// Check if the file exists and is not a directory
 		if (!file.exists() || file.isDirectory()) {
