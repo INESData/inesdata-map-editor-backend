@@ -270,7 +270,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * @throws XMLStreamException
 	 *             if an error occurs during XML parsing.
 	 */
-	private static void extractAttributes(XMLStreamReader reader, Set<String> attributes) throws XMLStreamException {
+	public static void extractAttributes(XMLStreamReader reader, Set<String> attributes) throws XMLStreamException {
 
 		StringBuilder currentPath = new StringBuilder();
 		boolean isLeafNode = false;
@@ -305,7 +305,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 *            a Set to store the unique attributes with their full XPath
 	 * @return true to indicate that the current element could potentially be a leaf node.
 	 */
-	private static boolean processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
+	public static boolean processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
 
 		// Update the path with the current element
 		if (currentPath.length() > 0) {
@@ -333,7 +333,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * @param isLeafNode
 	 *            a boolean indicating whether the current element is a leaf node
 	 */
-	private static void processCharacters(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes, boolean isLeafNode) {
+	public static void processCharacters(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes, boolean isLeafNode) {
 
 		// Get the text from the node
 		String text = reader.getText().trim();
@@ -354,7 +354,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * @param currentPath
 	 *            a StringBuilder representing the current XPath to be modified
 	 */
-	private static void removeLastElementFromXPath(StringBuilder currentPath) {
+	public static void removeLastElementFromXPath(StringBuilder currentPath) {
 
 		// Find the last slash in the XPath
 		int lastSlashIndex = currentPath.lastIndexOf("/");

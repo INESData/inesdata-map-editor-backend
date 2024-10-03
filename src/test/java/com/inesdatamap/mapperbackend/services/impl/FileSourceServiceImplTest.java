@@ -13,11 +13,18 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -227,6 +234,138 @@ class FileSourceServiceImplTest {
 		// Act and Assert for null fields
 		List<String> resultWithNullFields = this.fileSourceService.getFileFields(idWithNullFields);
 		assertTrue(resultWithNullFields.isEmpty());
+	}
+
+	@Test
+	void testGetFileAttributes() throws Exception {
+
+		// Arrange
+		Long id = 1L;
+		FileSource fileSource = new FileSource();
+		fileSource.setFilePath("src/test/resources/xml");
+		fileSource.setFileName("oli_doliva_en_textures_clean.xml");
+
+		// Mock the repository to return the FileSource
+		when(this.fileSourceRepository.findById(id)).thenReturn(Optional.of(fileSource));
+
+		// Create a real test file (make sure the file exists in your resources)
+		File file = new File(this.getClass().getClassLoader().getResource("xml/oli_doliva_en_textures_clean.xml").getFile());
+		assertTrue(file.exists(), "Test file should exist");
+
+		// Create the mock XMLStreamReader
+		XMLStreamReader xmlStreamReader = mock(XMLStreamReader.class);
+
+		// Simulate the behavior of the XMLStreamReader
+		when(xmlStreamReader.hasNext()).thenReturn(true, true, false);
+		when(xmlStreamReader.next()).thenReturn(XMLStreamReader.START_ELEMENT, XMLStreamReader.END_ELEMENT);
+		when(xmlStreamReader.getAttributeCount()).thenReturn(1);
+		when(xmlStreamReader.getAttributeLocalName(0)).thenReturn("attributeName");
+
+		// Mock the XMLInputFactory to return the mock XMLStreamReader
+		XMLInputFactory xmlInputFactory = mock(XMLInputFactory.class);
+		when(xmlInputFactory.createXMLStreamReader(new FileInputStream(file))).thenReturn(xmlStreamReader);
+
+		// Act
+		List<String> result = this.fileSourceService.getFileAttributes(id);
+
+		// Assert
+		assertNotNull(result);
+		assertTrue(result.contains("root/author"));
+
+		// Verify that the findById method of the repository was called
+		verify(this.fileSourceRepository).findById(id);
+	}
+
+	@Test
+	void testExtractAttributes() throws Exception {
+
+		// Arrange
+		XMLStreamReader reader = mock(XMLStreamReader.class);
+		Set<String> attributes = new HashSet<>();
+
+		// Simulate the behavior of the XMLStreamReader
+		when(reader.hasNext()).thenReturn(true, true, true, false);
+		when(reader.next()).thenReturn(XMLStreamConstants.START_ELEMENT, XMLStreamConstants.CHARACTERS, XMLStreamConstants.END_ELEMENT);
+
+		// Simulate the start of an element with an attribute
+		when(reader.getLocalName()).thenReturn("root/lexicalData/lexConcept");
+		when(reader.getAttributeCount()).thenReturn(1);
+		when(reader.getAttributeLocalName(0)).thenReturn("conceptID");
+		when(reader.getAttributeValue(0)).thenReturn("attributeValue");
+
+		// Simulate the character node text content
+		when(reader.getText()).thenReturn("someValue");
+
+		// Act
+		FileSourceServiceImpl.extractAttributes(reader, attributes);
+
+		// Assert
+		assertTrue(attributes.contains("root/lexicalData/lexConcept/@conceptID"));
+	}
+
+	@Test
+	void testProcessStartElement() throws Exception {
+		// Arrange
+		XMLStreamReader reader = mock(XMLStreamReader.class);
+		StringBuilder currentPath = new StringBuilder();
+		Set<String> attributes = new HashSet<>();
+
+		// Simulate the behavior of the XMLStreamReader
+		when(reader.getLocalName()).thenReturn("root/lexicalData/lexConcept");
+		when(reader.getAttributeCount()).thenReturn(2);
+		when(reader.getAttributeLocalName(0)).thenReturn("conceptID");
+		when(reader.getAttributeValue(0)).thenReturn("attributeValue");
+
+		// Act
+		boolean isLeafNode = FileSourceServiceImpl.processStartElement(reader, currentPath, attributes);
+
+		// Assert
+		// Verify that the current path is updated correctly
+		assertEquals("root/lexicalData/lexConcept", currentPath.toString());
+
+		// Verify that the attributes were added with the correct XPath
+		assertTrue(attributes.contains("root/lexicalData/lexConcept/@conceptID"));
+
+		// Verify that the method returns true (indicating a potential leaf node)
+		assertTrue(isLeafNode);
+	}
+
+	@Test
+	void testProcessCharacters() throws Exception {
+		// Arrange
+		XMLStreamReader reader = mock(XMLStreamReader.class);
+		StringBuilder currentPath = new StringBuilder("root/leafElement");
+		Set<String> attributes = new HashSet<>();
+		boolean isLeafNode = true;
+
+		// Simulate the behavior of the XMLStreamReader
+		when(reader.getText()).thenReturn("leafValue");
+
+		// Act
+		FileSourceServiceImpl.processCharacters(reader, currentPath, attributes, isLeafNode);
+
+		// Assert
+		// Verify that the leaf node's path is added to the attributes set
+		assertTrue(attributes.contains("root/leafElement"));
+	}
+
+	@Test
+	void testRemoveLastElementFromXPath() {
+
+		// Case 1: Path with n elements
+		StringBuilder currentPath1 = new StringBuilder("root/lexicalData/lexConcept");
+		FileSourceServiceImpl.removeLastElementFromXPath(currentPath1);
+		assertEquals("root/lexicalData", currentPath1.toString());
+
+		// Case 2: No slashes path
+		StringBuilder currentPath2 = new StringBuilder("leafElement");
+		FileSourceServiceImpl.removeLastElementFromXPath(currentPath2);
+		assertEquals("", currentPath2.toString());
+
+		// Case 3: Empty path
+		StringBuilder currentPath3 = new StringBuilder("");
+		FileSourceServiceImpl.removeLastElementFromXPath(currentPath3);
+		assertEquals("", currentPath3.toString());
 	}
 
 }
