@@ -250,7 +250,13 @@ public class FileSourceServiceImpl implements FileSourceService {
 		// Process the XML file and extract attributes and leaf node XPaths
 		try (InputStream inputStream = new FileInputStream(file)) {
 
-			XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+			// Create XMLInputFactory and configure to prevent XXE
+			XMLInputFactory factory = XMLInputFactory.newInstance();
+			factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+			factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+
+			// Create XMLStreamReader with the configured factory
+			XMLStreamReader reader = factory.createXMLStreamReader(inputStream);
 			extractAttributes(reader, attributes);
 
 		} catch (IOException | XMLStreamException e) {

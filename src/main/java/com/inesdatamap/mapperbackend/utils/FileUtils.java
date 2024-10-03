@@ -267,24 +267,21 @@ public final class FileUtils {
 	 */
 	public static DocumentBuilderFactory disableExternalEntities(DocumentBuilderFactory dbf) throws ParserConfigurationException {
 
-		// Disable external general entities to prevent inclusion of external resources
-		dbf.setFeature(Constants.GENERAL_ENTITIES, false);
-
-		// Disable external parameter entities to prevent XXE via external parameter references
-		dbf.setFeature(Constants.PARAMETER_ENTITIES, false);
-
-		// Completely disable DOCTYPE declaration to prevent XXE attacks
-		dbf.setFeature(Constants.DOCTYPE_DECL, true);
-
-		// Protects against Denial of Service attack and remote file access
+		// Disable external general entities
 		dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+		dbf.setFeature(Constants.DOCTYPE_DECL, false);
+
+		// Prevent XXE attacks by disabling external entities
+		dbf.setFeature(Constants.GENERAL_ENTITIES, false);
+		dbf.setFeature(Constants.PARAMETER_ENTITIES, false);
 
 		// Restrict access to external DTD and schema files to prevent remote file inclusion
 		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
 		dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
 
-		// Disable expansion of entity references to protect against cyclic entity attacks
+		// Disable expansion of entity references
 		dbf.setExpandEntityReferences(false);
+		dbf.setNamespaceAware(true);
 
 		return dbf;
 	}
