@@ -69,6 +69,8 @@ class FileSourceServiceImplTest {
 
 		// Arrange
 		FileSourceDTO inputDto = new FileSourceDTO();
+		inputDto.setFileType(DataFileTypeEnum.CSV);
+
 		MultipartFile file = mock(MultipartFile.class);
 		FileSource savedFileSourceEntity = new FileSource();
 		savedFileSourceEntity.setId(1L);
@@ -119,9 +121,11 @@ class FileSourceServiceImplTest {
 		MultipartFile file = mock(MultipartFile.class);
 		FileSource savedFileSourceEntity = new FileSource();
 		savedFileSourceEntity.setId(1L);
-		FileSourceDTO inputDto = new FileSourceDTO();
 
 		// Config InputStream simulated for file
+		FileSourceDTO inputDto = new FileSourceDTO();
+		inputDto.setFileType(DataFileTypeEnum.CSV);
+
 		InputStream inputStream = new ByteArrayInputStream("data".getBytes());
 		when(file.getInputStream()).thenReturn(inputStream);
 		when(file.isEmpty()).thenReturn(false);
