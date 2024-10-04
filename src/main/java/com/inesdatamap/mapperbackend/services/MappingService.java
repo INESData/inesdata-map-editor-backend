@@ -72,4 +72,13 @@ public interface MappingService {
 	 */
 	List<String> materialize(Long id);
 
+	/**
+	 * Get mapping by id
+	 *
+	 * @param id
+	 *            Id
+	 * @return The mapping
+	 */
+	MappingDTO getMappingById(Long id);
+
 }

@@ -144,4 +144,18 @@ public class MappingController {
 				PageRequest.of(page, size, Sort.by(Constants.SORT_BY_DATE).descending()));
 		return ResponseEntity.ok(new PagedModel<>(executions));
 	}
+
+	/**
+	 * Get the given mapping
+	 *
+	 * @param id
+	 *            identifier
+	 * @return The mapping
+	 */
+	@GetMapping("/{id}")
+	@Operation(summary = "Gets given mapping")
+	public ResponseEntity<MappingDTO> getMapping(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier", required = true) Long id) {
+		return ResponseEntity.ok(this.mappingService.getMappingById(id));
+	}
 }

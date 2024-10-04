@@ -449,4 +449,16 @@ public class MappingServiceImpl implements MappingService {
 
 	}
 
+	/**
+	 * Retrieves a MappingDTO by its identifier
+	 *
+	 * @param id
+	 *            the unique identifier of the mapping entity
+	 * @return the mapping dto corresponding to the given ID
+	 */
+	@Override
+	public MappingDTO getMappingById(Long id) {
+		return this.mappingMapper.entityToDto(this.getEntity(id));
+	}
+
 }
