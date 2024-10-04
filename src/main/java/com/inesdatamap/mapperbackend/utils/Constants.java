@@ -65,15 +65,16 @@ public final class Constants {
 	 */
 	public static final String FIELD_DELIMITER_REGEX = "[,]";
 
+	/**
+	 * Constant for path separator
+	 */
+	public static final String PATH_SEPARATOR = "/";
+	/**
+	 * Constant for path attribute selector
+	 */
+	public static final String ATTRIBUTE_SELECTOR = "/@";
+
 	// URLs
-	/**
-	 * Constant for general entities
-	 */
-	public static final String GENERAL_ENTITIES = "http://xml.org/sax/features/external-general-entities";
-	/**
-	 * Constant for parameter entities
-	 */
-	public static final String PARAMETER_ENTITIES = "http://xml.org/sax/features/external-parameter-entities";
 	/**
 	 * Constant for doctype-decl
 	 */

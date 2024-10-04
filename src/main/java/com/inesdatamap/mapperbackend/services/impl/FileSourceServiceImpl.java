@@ -218,7 +218,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	@Override
 	public List<String> getFileAttributes(Long id) {
 
-		// Get entity and construct the file path
+		// Get entity
 		FileSource fileSource = this.getEntity(id);
 
 		// Validate filePath and fileName
@@ -230,7 +230,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 		// Check if the file exists and is not a directory
 		if (!file.exists() || file.isDirectory()) {
-			throw new IllegalArgumentException("File does not exist: " + file.getPath());
+			throw new IllegalArgumentException("File does not exist or is a directory: " + file.getPath());
 		}
 
 		// Set to store unique attributes and leaf node XPaths
@@ -309,13 +309,13 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 		// Update the path with the current element
 		if (currentPath.length() > 0) {
-			currentPath.append("/");
+			currentPath.append(Constants.PATH_SEPARATOR);
 		}
 		currentPath.append(reader.getLocalName());
 
 		// Add each attribute of the current element to the set with its full XPath
 		for (int i = 0; i < reader.getAttributeCount(); i++) {
-			attributes.add(currentPath + "/@" + reader.getAttributeLocalName(i));
+			attributes.add(currentPath + Constants.ATTRIBUTE_SELECTOR + reader.getAttributeLocalName(i));
 		}
 
 		return true;
@@ -347,9 +347,8 @@ public class FileSourceServiceImpl implements FileSourceService {
 	/**
 	 * Removes the last element from the current XPath
 	 *
-	 * This method modifies the {@code currentPath} by finding the last slash ("/") and truncating the {@code StringBuilder} to remove the
-	 * last element in the XPath. If no slash is found, the entire {@code currentPath} is cleared, indicating that the root has been
-	 * reached.
+	 * This method modifies the currentPath by finding the last slash ("/") and truncating the StringBuilder to remove the last element in
+	 * the XPath. If no slash is found, the entire currentPath is cleared, indicating that the root has been reached.
 	 *
 	 * @param currentPath
 	 *            a StringBuilder representing the current XPath to be modified
@@ -357,7 +356,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	public static void removeLastElementFromXPath(StringBuilder currentPath) {
 
 		// Find the last slash in the XPath
-		int lastSlashIndex = currentPath.lastIndexOf("/");
+		int lastSlashIndex = currentPath.lastIndexOf(Constants.PATH_SEPARATOR);
 		if (lastSlashIndex >= 0) {
 			// Adjust the StringBuilder length to the index of the last slash
 			// Removes the last element from the XPath
