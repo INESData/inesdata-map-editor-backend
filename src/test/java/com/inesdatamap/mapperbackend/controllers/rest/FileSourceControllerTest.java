@@ -1,5 +1,8 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,9 +20,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.inesdatamap.mapperbackend.model.dto.DataSourceDTO;
 import com.inesdatamap.mapperbackend.model.dto.FileSourceDTO;
 import com.inesdatamap.mapperbackend.services.FileSourceService;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link FileSourceController}
@@ -94,6 +94,40 @@ class FileSourceControllerTest {
 		// Assert
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals(fileSourceDTOList, result.getBody());
+	}
+
+	@Test
+	void testGetFileFields() {
+		// Arrange
+		Long id = 1L;
+		List<String> expectedFields = Arrays.asList("field1", "field2", "field3");
+
+		// Mock the service call
+		when(this.fileSourceService.getFileFields(id)).thenReturn(expectedFields);
+
+		// Act
+		ResponseEntity<List<String>> result = this.fileSourceController.getFileFields(id);
+
+		// Assert
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals(expectedFields, result.getBody());
+	}
+
+	@Test
+	void testGetFileAttributes() {
+		// Arrange
+		Long id = 1L;
+		List<String> expectedAttributes = Arrays.asList("attribute1", "attribute2", "attribute3");
+
+		// Mock the service call
+		when(this.fileSourceService.getFileAttributes(id)).thenReturn(expectedAttributes);
+
+		// Act
+		ResponseEntity<List<String>> result = this.fileSourceController.getFileAttributes(id);
+
+		// Assert
+		assertEquals(HttpStatus.OK, result.getStatusCode());
+		assertEquals(expectedAttributes, result.getBody());
 	}
 
 }
