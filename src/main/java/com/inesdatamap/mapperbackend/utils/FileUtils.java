@@ -246,6 +246,7 @@ public final class FileUtils {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 			dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
 			dbf.setFeature(Constants.DOCTYPE_DECL, true);
+			dbf.setXIncludeAware(false);
 
 			// Parse the XML file using the secured DocumentBuilderFactory
 			DocumentBuilder db = dbf.newDocumentBuilder();
