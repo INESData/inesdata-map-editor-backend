@@ -81,4 +81,16 @@ public interface MappingService {
 	 */
 	MappingDTO getMappingById(Long id);
 
+	/**
+	 * Updates a mapping identified by its ID.
+	 *
+	 * @param id
+	 *            the ID of the mapping to update
+	 * @param mappingDto
+	 *            the MappingDTO
+	 *
+	 * @return the updated mapping
+	 */
+	MappingDTO updateMapping(Long id, MappingDTO mappingDto);
+
 }

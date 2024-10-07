@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -157,5 +158,22 @@ public class MappingController {
 	public ResponseEntity<MappingDTO> getMapping(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier", required = true) Long id) {
 		return ResponseEntity.ok(this.mappingService.getMappingById(id));
+	}
+
+	/**
+	 * Updates the given mapping
+	 *
+	 * @param id
+	 *            mapping identifier
+	 * @param mappingDto
+	 *            to update
+	 * @return updated mapping
+	 */
+	@PutMapping("/{id}")
+	@Operation(summary = "Update given mapping")
+	public ResponseEntity<MappingDTO> updateMapping(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to update", required = true) Long id,
+			@RequestBody @Parameter(name = "mapping", description = "The mapping to update", required = true) MappingDTO mappingDto) {
+		return ResponseEntity.ok(this.mappingService.updateMapping(id, mappingDto));
 	}
 }

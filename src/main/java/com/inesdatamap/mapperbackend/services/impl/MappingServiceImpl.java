@@ -461,4 +461,23 @@ public class MappingServiceImpl implements MappingService {
 		return this.mappingMapper.entityToDto(this.getEntity(id));
 	}
 
+	@Override
+	public MappingDTO updateMapping(Long id, MappingDTO mappingDto) {
+
+		if (mappingDto == null) {
+			throw new IllegalArgumentException("The mapping has no data to update");
+		}
+
+		// Get DB entity
+		Mapping mappingDB = this.getEntity(id);
+
+		// New mapping to save
+		Mapping mappingSource = this.mappingMapper.dtoToEntity(mappingDto);
+
+		// Updated mapping
+		Mapping updatedMapping = this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB));
+
+		return this.mappingMapper.entityToDto(updatedMapping);
+	}
+
 }
