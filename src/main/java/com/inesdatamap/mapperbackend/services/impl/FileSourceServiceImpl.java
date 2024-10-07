@@ -239,10 +239,9 @@ public class FileSourceServiceImpl implements FileSourceService {
 		// Process the XML file and extract attributes and leaf node XPaths
 		try (InputStream inputStream = new FileInputStream(file)) {
 
-			// Create XMLInputFactory and configure to prevent XXE
+			// Create XMLInputFactory and disable DTDs entirely for that factory
 			XMLInputFactory factory = XMLInputFactory.newInstance();
-			factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
-			factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, false);
+			factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 
 			// Create XMLStreamReader with the configured factory
 			XMLStreamReader reader = factory.createXMLStreamReader(inputStream);
@@ -270,10 +269,9 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * @throws XMLStreamException
 	 *             if an error occurs during XML parsing.
 	 */
-	public static void extractAttributes(XMLStreamReader reader, Set<String> attributes) throws XMLStreamException {
+	private static void extractAttributes(XMLStreamReader reader, Set<String> attributes) throws XMLStreamException {
 
 		StringBuilder currentPath = new StringBuilder();
-		boolean isLeafNode = false;
 
 		// Loop through XML events
 		while (reader.hasNext()) {
@@ -281,11 +279,11 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 			if (event == XMLStreamConstants.START_ELEMENT) {
 				// Process the start element and check for attributes
-				isLeafNode = processStartElement(reader, currentPath, attributes);
+				processStartElement(reader, currentPath, attributes);
 
 			} else if (event == XMLStreamConstants.CHARACTERS) {
 				// Process character data for leaf nodes
-				processCharacters(reader, currentPath, attributes, isLeafNode);
+				processCharacters(reader, currentPath, attributes);
 
 			} else if (event == XMLStreamConstants.END_ELEMENT) {
 				// Remove the last element from the current XPath
@@ -305,7 +303,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 *            a Set to store the unique attributes with their full XPath
 	 * @return true to indicate that the current element could potentially be a leaf node.
 	 */
-	public static boolean processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
+	private static boolean processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
 
 		// Update the path with the current element
 		if (currentPath.length() > 0) {
@@ -333,13 +331,13 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * @param isLeafNode
 	 *            a boolean indicating whether the current element is a leaf node
 	 */
-	public static void processCharacters(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes, boolean isLeafNode) {
+	private static void processCharacters(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
 
 		// Get the text from the node
 		String text = reader.getText().trim();
 
 		// If the text is not empty and the current element was a leaf node (no children)
-		if (!text.isEmpty() && isLeafNode) {
+		if (!text.isEmpty()) {
 			attributes.add(currentPath.toString());
 		}
 	}
@@ -353,7 +351,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * @param currentPath
 	 *            a StringBuilder representing the current XPath to be modified
 	 */
-	public static void removeLastElementFromXPath(StringBuilder currentPath) {
+	private static void removeLastElementFromXPath(StringBuilder currentPath) {
 
 		// Find the last slash in the XPath
 		int lastSlashIndex = currentPath.lastIndexOf(Constants.PATH_SEPARATOR);
