@@ -253,8 +253,7 @@ class FileSourceServiceImplTest {
 				"root/lexicalData/lexConcept/lexEntry/lexForm/@formID");
 
 		// Assert
-		assertNotNull(result);
-		assertTrue(result.containsAll(expectedAttributes));
+		assertEquals(expectedAttributes, result);
 	}
 
 }
