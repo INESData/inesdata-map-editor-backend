@@ -471,8 +471,8 @@ public class MappingServiceImpl implements MappingService {
 		// Get DB entity
 		Mapping mappingDB = this.getEntity(id);
 
-		// New mapping to save
-		Mapping mappingSource = this.mappingMapper.dtoToEntity(mappingDto);
+		// Set relationships on the DTO
+		Mapping mappingSource = this.setRelationships(mappingDto);
 
 		// Updated mapping
 		Mapping updatedMapping = this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB));
