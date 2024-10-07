@@ -7,6 +7,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
   # Base de datos (valores por defecto para el entorno de desarrollo local)
   datasource:
     url: jdbc:postgresql://localhost:5432/inesdata_map_db

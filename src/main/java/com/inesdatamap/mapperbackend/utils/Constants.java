@@ -65,6 +65,21 @@ public final class Constants {
 	 */
 	public static final String FIELD_DELIMITER_REGEX = "[,]";
 
+	/**
+	 * Constant for path separator
+	 */
+	public static final String PATH_SEPARATOR = "/";
+	/**
+	 * Constant for path attribute selector
+	 */
+	public static final String ATTRIBUTE_SELECTOR = "/@";
+
+	// URLs
+	/**
+	 * Constant for doctype-decl
+	 */
+	public static final String DOCTYPE_DECL = "http://apache.org/xml/features/disallow-doctype-decl";
+
 	private Constants() {
 		// Empty constructor to avoid initialization
 	}

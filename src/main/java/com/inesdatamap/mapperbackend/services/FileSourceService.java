@@ -65,7 +65,7 @@ public interface FileSourceService {
 	List<FileSourceDTO> getFileSourceByType(String fileType);
 
 	/**
-	 * Get all file fields
+	 * Get all CSV file fields
 	 *
 	 * @param id
 	 *            identifier
@@ -73,5 +73,15 @@ public interface FileSourceService {
 	 * @return List of file fields
 	 */
 	List<String> getFileFields(Long id);
+
+	/**
+	 * Get all XML file attributes
+	 *
+	 * @param id
+	 *            identifier
+	 *
+	 * @return List of attributes
+	 */
+	List<String> getFileAttributes(Long id);
 
 }

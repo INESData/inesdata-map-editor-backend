@@ -115,7 +115,7 @@ public class FileSourceController {
 	}
 
 	/**
-	 * Get all file fields
+	 * Get all CSV file fields
 	 *
 	 * @param id
 	 *            identifier
@@ -123,10 +123,25 @@ public class FileSourceController {
 	 * @return List of file fields
 	 */
 	@GetMapping("/{id}/fields")
-	@Operation(summary = "Gets all file fields")
+	@Operation(summary = "Gets all CSV file fields")
 	public ResponseEntity<List<String>> getFileFields(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
 		return ResponseEntity.ok(this.fileSourceService.getFileFields(id));
+	}
+
+	/**
+	 * Get all XML file attributes
+	 *
+	 * @param id
+	 *            identifier
+	 *
+	 * @return List of attributes
+	 */
+	@GetMapping("/{id}/attributes")
+	@Operation(summary = "Gets all XML file attributes")
+	public ResponseEntity<List<String>> getFileAttributes(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "File source identifier", required = true) Long id) {
+		return ResponseEntity.ok(this.fileSourceService.getFileAttributes(id));
 	}
 
 }
