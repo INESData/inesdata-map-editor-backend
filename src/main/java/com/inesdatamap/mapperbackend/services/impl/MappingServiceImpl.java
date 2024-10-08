@@ -461,6 +461,17 @@ public class MappingServiceImpl implements MappingService {
 		return this.mappingMapper.entityToDto(this.getEntity(id));
 	}
 
+	/**
+	 * Updates an existing mapping in the database.
+	 * 
+	 * @param id
+	 *            The ID of the mapping to be updated
+	 * @param mappingDto
+	 *            The MappingDTO
+	 * @return The updated MappingDTO
+	 * @throws IllegalArgumentException
+	 *             If the provided mappingDto is null.
+	 */
 	@Override
 	public MappingDTO updateMapping(Long id, MappingDTO mappingDto) {
 
