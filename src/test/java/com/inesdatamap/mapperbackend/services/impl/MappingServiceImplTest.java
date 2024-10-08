@@ -161,7 +161,6 @@ class MappingServiceImplTest {
 		assertEquals(id, resultDto.getId());
 		assertEquals("Test mapping", resultDto.getName());
 
-		// Verify that the getEntity method is called
 		Mockito.verify(this.mappingRepo, Mockito.times(1)).findById(id);
 	}
 
@@ -190,7 +189,7 @@ class MappingServiceImplTest {
 
 	@Test
 	void testUpdateMapping() {
-		// Mapping DTO
+
 		Long id = 1L;
 		MappingDTO mappingDto = new MappingDTO();
 		mappingDto.setName("Mapping DTO");
@@ -203,7 +202,6 @@ class MappingServiceImplTest {
 		when(this.mappingRepo.findById(id)).thenReturn(Optional.of(mappingDB));
 		when(this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB))).thenReturn(updatedMapping);
 
-		// ontologyDto is valid
 		MappingDTO result = this.mappingService.updateMapping(id, mappingDto);
 
 		assertNotNull(result);
