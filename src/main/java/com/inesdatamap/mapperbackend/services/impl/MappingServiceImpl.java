@@ -449,4 +449,46 @@ public class MappingServiceImpl implements MappingService {
 
 	}
 
+	/**
+	 * Retrieves a MappingDTO by its identifier
+	 *
+	 * @param id
+	 *            the unique identifier of the mapping entity
+	 * @return the mapping dto corresponding to the given ID
+	 */
+	@Override
+	public MappingDTO getMappingById(Long id) {
+		return this.mappingMapper.entityToDto(this.getEntity(id));
+	}
+
+	/**
+	 * Updates an existing mapping in the database.
+	 *
+	 * @param id
+	 *            The ID of the mapping to be updated
+	 * @param mappingDto
+	 *            The MappingDTO
+	 * @return The updated MappingDTO
+	 * @throws IllegalArgumentException
+	 *             If the provided mappingDto is null.
+	 */
+	@Override
+	public MappingDTO updateMapping(Long id, MappingDTO mappingDto) {
+
+		if (mappingDto == null) {
+			throw new IllegalArgumentException("The mapping has no data to update");
+		}
+
+		// Get DB entity
+		Mapping mappingDB = this.getEntity(id);
+
+		// Set relationships on the DTO
+		Mapping mappingSource = this.setRelationships(mappingDto);
+
+		// Updated mapping
+		Mapping updatedMapping = this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB));
+
+		return this.mappingMapper.entityToDto(updatedMapping);
+	}
+
 }

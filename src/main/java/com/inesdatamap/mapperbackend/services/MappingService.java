@@ -72,4 +72,25 @@ public interface MappingService {
 	 */
 	List<String> materialize(Long id);
 
+	/**
+	 * Get mapping by id
+	 *
+	 * @param id
+	 *            Id
+	 * @return The mapping
+	 */
+	MappingDTO getMappingById(Long id);
+
+	/**
+	 * Updates a mapping identified by its ID.
+	 *
+	 * @param id
+	 *            the ID of the mapping to update
+	 * @param mappingDto
+	 *            the MappingDTO
+	 *
+	 * @return the updated mapping
+	 */
+	MappingDTO updateMapping(Long id, MappingDTO mappingDto);
+
 }

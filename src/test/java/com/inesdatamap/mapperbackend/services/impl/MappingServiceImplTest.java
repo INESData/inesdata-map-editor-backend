@@ -1,5 +1,16 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -48,15 +59,6 @@ import com.inesdatamap.mapperbackend.services.ExecutionService;
 import com.inesdatamap.mapperbackend.services.GraphEngineService;
 
 import jakarta.persistence.EntityNotFoundException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for the {@link MappingServiceImpl}
@@ -146,6 +148,23 @@ class MappingServiceImplTest {
 	}
 
 	@Test
+	void testGetMappingById() {
+		Long id = 1L;
+		Mapping mapping = new Mapping();
+		mapping.setId(id);
+		mapping.setName("Test mapping");
+
+		when(this.mappingRepo.findById(id)).thenReturn(Optional.of(mapping));
+
+		MappingDTO resultDto = this.mappingService.getMappingById(id);
+
+		assertEquals(id, resultDto.getId());
+		assertEquals("Test mapping", resultDto.getName());
+
+		Mockito.verify(this.mappingRepo, Mockito.times(1)).findById(id);
+	}
+
+	@Test
 	void materializeMappingTest() {
 
 		Mapping mapping = buildMapping();
@@ -166,6 +185,29 @@ class MappingServiceImplTest {
 			mockFiles.verify(() -> Files.createDirectories(any()));
 			mockFiles.verify(() -> Files.write(any(), any(byte[].class)));
 		}
+	}
+
+	@Test
+	void testUpdateMapping() {
+
+		Long id = 1L;
+		MappingDTO mappingDto = new MappingDTO();
+		mappingDto.setName("Mapping DTO");
+
+		Mapping mappingDB = new Mapping();
+		Mapping mappingSource = new Mapping();
+		Mapping updatedMapping = new Mapping();
+		updatedMapping.setName("Mapping DTO");
+
+		when(this.mappingRepo.findById(id)).thenReturn(Optional.of(mappingDB));
+		when(this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB))).thenReturn(updatedMapping);
+
+		MappingDTO result = this.mappingService.updateMapping(id, mappingDto);
+
+		assertNotNull(result);
+		assertEquals(mappingDto.getName(), result.getName());
+
+		verify(this.mappingRepo).saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB));
 	}
 
 	@Test
