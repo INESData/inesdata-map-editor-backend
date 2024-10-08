@@ -463,7 +463,7 @@ public class MappingServiceImpl implements MappingService {
 
 	/**
 	 * Updates an existing mapping in the database.
-	 * 
+	 *
 	 * @param id
 	 *            The ID of the mapping to be updated
 	 * @param mappingDto
