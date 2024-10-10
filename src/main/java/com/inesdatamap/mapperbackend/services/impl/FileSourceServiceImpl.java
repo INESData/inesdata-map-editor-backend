@@ -59,9 +59,9 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Saves a data source
 	 *
 	 * @param fileSourceDTO
-	 *            the FileSourceDTO
+	 * 	the FileSourceDTO
 	 * @param file
-	 *            file content to save
+	 * 	file content to save
 	 *
 	 * @return the saved data source
 	 */
@@ -89,15 +89,11 @@ public class FileSourceServiceImpl implements FileSourceService {
 				String headers = FileUtils.processFileHeaders(file);
 				savedFileSource.setFields(headers);
 
-			} else if (fileSource.getFileType().equals(DataFileTypeEnum.XML)) {
-
-				// Check if XML is a valid file
-				FileUtils.isValidXML(file);
 			}
 
 			// Build file path
 			String filePath = String.join(File.separator, this.appProperties.getDataProcessingPath(), Constants.DATA_INPUT_FOLDER_NAME,
-					savedFileSource.getId().toString());
+				savedFileSource.getId().toString());
 
 			// Set values in FileSource
 			savedFileSource.setFilePath(filePath);
@@ -116,9 +112,9 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Updates an existing file source
 	 *
 	 * @param id
-	 *            The identifier of the file source to be updated
+	 * 	The identifier of the file source to be updated
 	 * @param fileSourceDTO
-	 *            The FileSourceDTO
+	 * 	The FileSourceDTO
 	 *
 	 * @return the updated file source.
 	 */
@@ -142,7 +138,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a file source entity by its ID.
 	 *
 	 * @param id
-	 *            the ID of the file source to retrieve
+	 * 	the ID of the file source to retrieve
 	 *
 	 * @return the file source entity corresponding to the given ID
 	 */
@@ -155,7 +151,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a FileSourceDTO by its identifier.
 	 *
 	 * @param id
-	 *            the unique identifier of the file source entity
+	 * 	the unique identifier of the file source entity
 	 *
 	 * @return the file source dto corresponding to the given ID
 	 */
@@ -169,7 +165,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a list of FileSourceDTO objects filtered by the specified file type.
 	 *
 	 * @param fileType
-	 *            The type of the file sources to retrieve
+	 * 	The type of the file sources to retrieve
 	 *
 	 * @return A list of FileSourceDTO objects representing the file sources of the specified type.
 	 */
@@ -186,7 +182,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves the fields of a file source as a list of strings, based on the given source ID.
 	 *
 	 * @param id
-	 *            The ID of the file source whose fields are to be retrieved.
+	 * 	The ID of the file source whose fields are to be retrieved.
 	 *
 	 * @return A list of field names extracted from the fields property of the FileSource entity
 	 */
@@ -208,12 +204,14 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Retrieves a list of attributes and leaf node XPaths from an XML file based on the given file source ID.
 	 *
 	 * @param id
-	 *            the ID of the file source entity
+	 * 	the ID of the file source entity
+	 *
 	 * @return a sorted list of unique attributes and leaf node XPaths found in the XML file
+	 *
 	 * @throws IllegalArgumentException
-	 *             if the file does not exist or is a directory.
+	 * 	if the file does not exist or is a directory.
 	 * @throws FileParserException
-	 *             if an error occurs while processing the XML file.
+	 * 	if an error occurs while processing the XML file.
 	 */
 	@Override
 	public List<String> getFileAttributes(Long id) {
@@ -263,11 +261,12 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Extracts attributes and leaf node XPaths from an XML stream and stores them in the provided set
 	 *
 	 * @param reader
-	 *            the XMLStreamReader to read the XML content from
+	 * 	the XMLStreamReader to read the XML content from
 	 * @param attributes
-	 *            a Set to store the unique attributes and leaf node XPaths extracted from the XML
+	 * 	a Set to store the unique attributes and leaf node XPaths extracted from the XML
+	 *
 	 * @throws XMLStreamException
-	 *             if an error occurs during XML parsing.
+	 * 	if an error occurs during XML parsing.
 	 */
 	private static void extractAttributes(XMLStreamReader reader, Set<String> attributes) throws XMLStreamException {
 
@@ -296,11 +295,12 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Processes the start element of the XML and updates the current XPath.
 	 *
 	 * @param reader
-	 *            the XMLStreamReader positioned at the start element in the XML stream
+	 * 	the XMLStreamReader positioned at the start element in the XML stream
 	 * @param currentPath
-	 *            a StringBuilder representing the current XPath of the element
+	 * 	a StringBuilder representing the current XPath of the element
 	 * @param attributes
-	 *            a Set to store the unique attributes with their full XPath
+	 * 	a Set to store the unique attributes with their full XPath
+	 *
 	 * @return true to indicate that the current element could potentially be a leaf node.
 	 */
 	private static void processStartElement(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
@@ -321,11 +321,11 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * Processes character data within an XML element and updates the attributes set if the element is a leaf node
 	 *
 	 * @param reader
-	 *            the XMLStreamReader positioned at the character data in the XML stream
+	 * 	the XMLStreamReader positioned at the character data in the XML stream
 	 * @param currentPath
-	 *            a StringBuilder representing the current XPath of the element
+	 * 	a StringBuilder representing the current XPath of the element
 	 * @param attributes
-	 *            a Set to store unique leaf node XPaths
+	 * 	a Set to store unique leaf node XPaths
 	 */
 	private static void processCharacters(XMLStreamReader reader, StringBuilder currentPath, Set<String> attributes) {
 
@@ -345,7 +345,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 	 * the XPath. If no slash is found, the entire currentPath is cleared, indicating that the root has been reached.
 	 *
 	 * @param currentPath
-	 *            a StringBuilder representing the current XPath to be modified
+	 * 	a StringBuilder representing the current XPath to be modified
 	 */
 	private static void removeLastElementFromXPath(StringBuilder currentPath) {
 
