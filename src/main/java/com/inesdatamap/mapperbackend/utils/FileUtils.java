@@ -48,10 +48,10 @@ public final class FileUtils {
 	 * Validates the file mimeType against the supported defined in the DataFileTypeEnum.
 	 *
 	 * @param mimeType
-	 *            the MIME type to validate
+	 * 	the MIME type to validate
 	 *
 	 * @throws IllegalArgumentException
-	 *             if the provided mimetype is not supported
+	 * 	if the provided mimetype is not supported
 	 */
 	public static void validateFileExtension(String mimeType) {
 		if (!DataFileTypeEnum.isValidFile(mimeType)) {
@@ -63,7 +63,7 @@ public final class FileUtils {
 	 * Validates if the file content matches its MIME type.
 	 *
 	 * @param file
-	 *            the file
+	 * 	the file
 	 */
 	public static void validateFile(MultipartFile file) {
 
@@ -74,6 +74,19 @@ public final class FileUtils {
 			metadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, file.getOriginalFilename());
 
 			MediaType mimetype = tika.getDetector().detect(tikaInputStream, metadata);
+
+			if (mimetype.equals(MediaType.APPLICATION_XML) || mimetype.equals(MediaType.text("xml")) || mimetype.equals(
+				MediaType.TEXT_HTML)) {
+
+				// Check if XML is a valid file
+				FileUtils.isValidXML(file);
+
+				if (mimetype.equals(MediaType.TEXT_HTML)) {
+					// Tika detects XML files as text/html if they contain HTML characters such as '<' or '>' codified
+					mimetype = MediaType.APPLICATION_XML;
+				}
+			}
+
 			validateFileExtension(mimetype.toString());
 		} catch (IOException | TikaException e) {
 			throw new FileCreationException("File validation error", e);
@@ -85,12 +98,12 @@ public final class FileUtils {
 	 * Processes the content of the MultipartFile and sets it as the content of the specified Ontology.
 	 *
 	 * @param file
-	 *            the MultipartFile containing the content to be processed
+	 * 	the MultipartFile containing the content to be processed
 	 * @param ontology
-	 *            the Ontology entity where the file content will be stored
+	 * 	the Ontology entity where the file content will be stored
 	 *
 	 * @throws UncheckedIOException
-	 *             if an error occurs while reading the file content.
+	 * 	if an error occurs while reading the file content.
 	 */
 	public static void processFileContent(MultipartFile file, Ontology ontology) {
 
@@ -110,12 +123,12 @@ public final class FileUtils {
 	 * Reads the first line of the given MultipartFile to extract headers and sets them in the provided FileSource object.
 	 *
 	 * @param file
-	 *            the MultipartFile from which to read the headers
+	 * 	the MultipartFile from which to read the headers
 	 *
 	 * @return the headers read from the file
 	 *
 	 * @throws UncheckedIOException
-	 *             if an error occurs while reading the file content
+	 * 	if an error occurs while reading the file content
 	 */
 	public static String processFileHeaders(MultipartFile file) {
 		try {
@@ -134,9 +147,9 @@ public final class FileUtils {
 	 * Saves the given MultipartFile to the specified path.
 	 *
 	 * @param file
-	 *            the MultipartFile to save
+	 * 	the MultipartFile to save
 	 * @param path
-	 *            the path where the file will be saved
+	 * 	the path where the file will be saved
 	 *
 	 * @return the file name
 	 */
@@ -161,9 +174,9 @@ public final class FileUtils {
 	 * Creates a file with the specified content.
 	 *
 	 * @param content
-	 *            the content of the file
+	 * 	the content of the file
 	 * @param path
-	 *            the path where the file will be created
+	 * 	the path where the file will be created
 	 *
 	 * @return the file
 	 */
@@ -186,7 +199,7 @@ public final class FileUtils {
 	 * Deletes the directory at the specified path.
 	 *
 	 * @param path
-	 *            the path of the file to delete
+	 * 	the path of the file to delete
 	 */
 	public static void deleteDirectory(Path path) {
 
@@ -202,7 +215,7 @@ public final class FileUtils {
 	 * Creates the directories at the specified path.
 	 *
 	 * @param path
-	 *            the path
+	 * 	the path
 	 */
 	public static void createDirectories(Path path) {
 
@@ -217,29 +230,30 @@ public final class FileUtils {
 	 * Gets the file path from the output directory.
 	 *
 	 * @param dataProcessingPath
-	 *            the data processing path
+	 * 	the data processing path
 	 * @param mappingId
-	 *            the mapping id
+	 * 	the mapping id
 	 * @param executionTime
-	 *            the execution time
+	 * 	the execution time
 	 * @param fileName
-	 *            the file name
+	 * 	the file name
 	 *
 	 * @return the file path from the output directory
 	 */
 	public static String getFilePathFromOutputDirectory(String dataProcessingPath, Long mappingId, OffsetDateTime executionTime,
-			String fileName) {
+		String fileName) {
 		return String.join(File.separator, dataProcessingPath, Constants.DATA_OUTPUT_FOLDER_NAME, mappingId.toString(),
-				String.valueOf(executionTime.toEpochSecond()), fileName);
+			String.valueOf(executionTime.toEpochSecond()), fileName);
 	}
 
 	/**
 	 * Validates if the provided MultipartFile contains a valid XML structure.
 	 *
 	 * @param file
-	 *            the MultipartFile representing the file to be validated
+	 * 	the MultipartFile representing the file to be validated
+	 *
 	 * @throws FileCreationException
-	 *             if the file is not a valid XML or if an error occurs during parsing
+	 * 	if the file is not a valid XML or if an error occurs during parsing
 	 */
 	public static void isValidXML(MultipartFile file) {
 		try {
