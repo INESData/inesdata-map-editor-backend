@@ -244,7 +244,7 @@ public class MappingServiceImpl implements MappingService {
 		byte[] rmlContent;
 
 		// TODO: ¿En función de qué va?
-		String baseUri = "http://example.org/";
+		String baseUri = "http://w3id.org/termcat-ld/";
 		setNamespaces(builder, baseUri);
 
 		mapping.getFields().forEach(field -> {
@@ -298,13 +298,25 @@ public class MappingServiceImpl implements MappingService {
 		// Define namespaces and base IRI
 		builder.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
 
-			.setNamespace("rml", "http://semweb.mmlab.be/ns/rml#")
+				.setNamespace("rml", "http://semweb.mmlab.be/ns/rml#")
 
-			.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
+				.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
 
-			.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#")
+				.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#")
 
-			.setNamespace("ex", baseUri);
+				.setNamespace("rdf", "https://www.w3.org/1999/02/22-rdf-syntax-ns#").setNamespace("tc", "http://w3id.org/termcat-ld/")
+				.setNamespace("ontolex", "https://www.w3.org/2016/05/ontolex#")
+				.setNamespace("lexinfo", "http://www.lexinfo.net/ontology/3.0/lexinfo#")
+				.setNamespace("lime", "http://www.w3.org/ns/lemon/lime#")
+				.setNamespace("termlex", "https://drive.google.com/file/d/1FSyCf89q4iNeiqBSa4zjgL3fbxxWZdxU/view?usp=drive_link")
+				.setNamespace("skos", "http://www.w3.org/2004/02/skos/core#")
+				.setNamespace("vartrans", "http://www.w3.org/ns/lemon/vartrans#").setNamespace("olia", "http://purl.org/olia/olia.owl#")
+				.setNamespace("etv", "https://w3id.org/def/easytv#").setNamespace("dct", "http://purl.org/dc/terms/")
+				.setNamespace("dbo", "http://dbpedia.org/ontology/").setNamespace("prov", "http://www.w3.org/ns/prov#")
+				.setNamespace("wdt", "https://www.wikidata.org/wiki/Property:")
+
+				.setNamespace("ex", baseUri);
+		// De momento, añadir listado
 
 	}
 
@@ -312,19 +324,23 @@ public class MappingServiceImpl implements MappingService {
 	 * Creates a logical source node.
 	 *
 	 * @param builder
-	 * 	the model builder
+	 *            the model builder
 	 * @param mappingNode
-	 * 	the parent mapping node
+	 *            the parent mapping node
 	 * @param source
-	 * 	the source
+	 *            the source
 	 */
 	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, FileSource source) {
-
+		String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
+		String referenceFormulation;
 		if (source.getFileType().equals(DataFileTypeEnum.CSV)) {
-			String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
-			RmlUtils.createCsvLogicalSourceNode(builder, mappingNode, sourcePath);
+			referenceFormulation = "ql:CSV";
+		} else if (source.getFileType().equals(DataFileTypeEnum.XML)) {
+			referenceFormulation = "ql:XPath";
+		} else {
+			throw new IllegalArgumentException("Unsupported file type: " + source.getFileType());
 		}
-
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, sourcePath, referenceFormulation, source.getFileType());
 	}
 
 	/**
