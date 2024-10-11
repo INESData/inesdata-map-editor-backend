@@ -316,7 +316,6 @@ public class MappingServiceImpl implements MappingService {
 				.setNamespace("wdt", "https://www.wikidata.org/wiki/Property:")
 
 				.setNamespace("ex", baseUri);
-		// De momento, añadir listado
 
 	}
 
