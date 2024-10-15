@@ -1,5 +1,7 @@
 package com.inesdatamap.mapperbackend.utils;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -14,8 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.inesdatamap.mapperbackend.model.dto.ObjectMapDTO;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 
 @ExtendWith(SpringExtension.class)
 class RmlUtilsTest {
@@ -100,7 +101,7 @@ class RmlUtilsTest {
 		BNode mappingNode = vf.createBNode();
 
 		// Create logical source
-		RmlUtils.createCsvLogicalSourceNode(builder, mappingNode, "people.csv");
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, "people.csv", "ql:CSV", DataFileTypeEnum.CSV);
 
 		// Create subject map
 		RmlUtils.createSubjectMapNode(builder, mappingNode, baseUri + "person/{id}", baseUri + "Person");
@@ -138,6 +139,69 @@ class RmlUtilsTest {
 		assertTrue(out.toString().contains("rml:reference \"name\""));
 		assertTrue(out.toString().contains("rr:predicate ex:hasAge"));
 		assertTrue(out.toString().contains("rml:reference \"age\""));
+
+	}
+
+	@Test
+	void testCreateRmlWithXML() throws URISyntaxException {
+		ModelBuilder builder = new ModelBuilder();
+		SimpleValueFactory vf = SimpleValueFactory.getInstance();
+
+		// Define base URI
+		String baseUri = "http://example.org/";
+
+		// Define namespaces and base IRI
+		builder.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
+
+				.setNamespace("rml", "http://semweb.mmlab.be/ns/rml#")
+
+				.setNamespace("ex", baseUri)
+
+				.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
+
+				.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
+
+		BNode mappingNode = vf.createBNode();
+
+		// Create logical source
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, "people.xml", "ql:XPath", DataFileTypeEnum.XML);
+
+		// Create subject map
+		RmlUtils.createSubjectMapNode(builder, mappingNode, baseUri + "person/{id}", baseUri + "Person");
+
+		// Create object map for name
+		ObjectMapDTO objectMapDTO = new ObjectMapDTO();
+		objectMapDTO.setKey("rml:reference");
+		objectMapDTO.setLiteralValue("people/person/name");
+
+		List<ObjectMapDTO> objectMap = List.of(objectMapDTO);
+
+		// Create name predicate-object map
+		RmlUtils.createPredicateObjectMapNode(builder, mappingNode, baseUri + "hasName", objectMap);
+
+		ObjectMapDTO objectMapAgeDTO = new ObjectMapDTO();
+		objectMapAgeDTO.setKey("rml:reference");
+		objectMapAgeDTO.setLiteralValue("people/person/age");
+
+		ObjectMapDTO objectMapTypeAgeDTO = new ObjectMapDTO();
+		objectMapTypeAgeDTO.setKey("rr:datatype");
+		objectMapTypeAgeDTO.setLiteralValue("xsd:integer");
+
+		List<ObjectMapDTO> objectMapAge = List.of(objectMapAgeDTO, objectMapTypeAgeDTO);
+
+		// Create age predicate-object map
+		RmlUtils.createPredicateObjectMapNode(builder, mappingNode, baseUri + "hasAge", objectMapAge);
+
+		StringWriter out = new StringWriter();
+		Rio.write(builder.build(), out, baseUri, RDFFormat.TURTLE);
+
+		System.out.println(out);
+
+		assertTrue(out.toString().contains("rml:source \"people.xml\""));
+		assertTrue(out.toString().contains("rr:predicate ex:hasName"));
+		assertTrue(out.toString().contains("rml:reference \"people/person/name\""));
+		assertTrue(out.toString().contains("rr:predicate ex:hasAge"));
+		assertTrue(out.toString().contains("rml:reference \"people/person/age\""));
 
 	}
 
