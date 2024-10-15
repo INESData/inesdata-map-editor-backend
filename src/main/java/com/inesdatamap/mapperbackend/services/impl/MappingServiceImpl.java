@@ -244,7 +244,7 @@ public class MappingServiceImpl implements MappingService {
 		byte[] rmlContent;
 
 		// TODO: ¿En función de qué va?
-		String baseUri = "http://w3id.org/termcat-ld/";
+		String baseUri = "http://example.org/";
 		setNamespaces(builder, baseUri);
 
 		mapping.getFields().forEach(field -> {
@@ -303,17 +303,6 @@ public class MappingServiceImpl implements MappingService {
 				.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
 
 				.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#")
-
-				.setNamespace("rdf", "https://www.w3.org/1999/02/22-rdf-syntax-ns#").setNamespace("tc", "http://w3id.org/termcat-ld/")
-				.setNamespace("ontolex", "https://www.w3.org/2016/05/ontolex#")
-				.setNamespace("lexinfo", "http://www.lexinfo.net/ontology/3.0/lexinfo#")
-				.setNamespace("lime", "http://www.w3.org/ns/lemon/lime#")
-				.setNamespace("termlex", "https://drive.google.com/file/d/1FSyCf89q4iNeiqBSa4zjgL3fbxxWZdxU/view?usp=drive_link")
-				.setNamespace("skos", "http://www.w3.org/2004/02/skos/core#")
-				.setNamespace("vartrans", "http://www.w3.org/ns/lemon/vartrans#").setNamespace("olia", "http://purl.org/olia/olia.owl#")
-				.setNamespace("etv", "https://w3id.org/def/easytv#").setNamespace("dct", "http://purl.org/dc/terms/")
-				.setNamespace("dbo", "http://dbpedia.org/ontology/").setNamespace("prov", "http://www.w3.org/ns/prov#")
-				.setNamespace("wdt", "https://www.wikidata.org/wiki/Property:")
 
 				.setNamespace("ex", baseUri);
 
