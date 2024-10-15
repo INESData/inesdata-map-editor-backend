@@ -191,6 +191,13 @@ class MappingServiceImplTest {
 	void testUpdateMapping() {
 
 		Long id = 1L;
+
+		// Check if dto is null
+		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+			this.mappingService.updateMapping(id, null);
+		});
+		assertEquals("The mapping has no data to update", exception.getMessage());
+
 		MappingDTO mappingDto = new MappingDTO();
 		mappingDto.setName("Mapping DTO");
 
