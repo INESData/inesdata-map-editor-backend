@@ -523,6 +523,10 @@ public class MappingServiceImpl implements MappingService {
 		// Set relationships on the DTO
 		Mapping mappingSource = this.setRelationships(mappingDto);
 
+		// Create new rml
+		byte[] rml = this.buildRml(mappingSource);
+		mappingSource.setRml(rml);
+
 		// Updated mapping
 		Mapping updatedMapping = this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB));
 
