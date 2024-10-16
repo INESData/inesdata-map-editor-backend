@@ -9,6 +9,7 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.rdf4j.model.BNode;
@@ -271,7 +272,8 @@ public class MappingServiceImpl implements MappingService {
 			field.getPredicates().forEach(predicate -> {
 				predicate.getObjectMap().forEach(objectMap -> {
 					// Iterate through objectMaps and set literal value last part of path
-					String newLiteralValue = Paths.get(objectMap.getLiteralValue()).getFileName().toString();
+					String literalValue = FilenameUtils.getName(objectMap.getLiteralValue());
+					String newLiteralValue = Paths.get(literalValue).getFileName().toString();
 					objectMap.setLiteralValue(newLiteralValue);
 				});
 				PredicateObjectMapDTO predicateObjectMapDTO = this.predicateObjectMapMapper.entityToDto(predicate);
