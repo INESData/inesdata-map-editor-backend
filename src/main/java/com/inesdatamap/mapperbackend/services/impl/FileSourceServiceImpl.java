@@ -313,7 +313,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 		// Add each attribute of the current element to the set with its full XPath
 		for (int i = 0; i < reader.getAttributeCount(); i++) {
-			attributes.add(currentPath + Constants.ATTRIBUTE_SELECTOR + reader.getAttributeLocalName(i));
+			attributes.add("/" + currentPath + Constants.ATTRIBUTE_SELECTOR + reader.getAttributeLocalName(i));
 		}
 	}
 
@@ -334,7 +334,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 		// If the text is not empty
 		if (!text.isEmpty()) {
-			attributes.add(currentPath.toString());
+			attributes.add("/" + currentPath.toString());
 		}
 	}
 

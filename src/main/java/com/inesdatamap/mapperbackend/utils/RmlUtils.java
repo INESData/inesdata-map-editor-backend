@@ -23,27 +23,37 @@ public final class RmlUtils {
 	}
 
 	/**
-	 * Create a CSV logical source node.
+	 * Create a logical source node.
 	 *
 	 * @param builder
-	 * 	the model builder
+	 *            the model builder
 	 * @param mappingNode
-	 * 	the parent mapping node
-	 * @param source
-	 * 	the path to the CSV file
+	 *            the parent mapping node
+	 * @param sourcePath
+	 *            the path to the source file
+	 * @param referenceFormulation
+	 *            the reference formulation IRI ("ql:CSV" or "ql:XPath")
+	 * @param iterator
+	 *            the rml iterator
 	 */
-	public static void createCsvLogicalSourceNode(ModelBuilder builder, Resource mappingNode, String source) {
+	public static void createLogicalSourceNode(ModelBuilder builder, Resource mappingNode, String sourcePath, String referenceFormulation,
+			String iterator) {
 		SimpleValueFactory vf = SimpleValueFactory.getInstance();
 
 		BNode logicalSourceNode = vf.createBNode();
 		builder.subject(mappingNode)
-			// rml:logicalSource
-			.add("rml:logicalSource", logicalSourceNode);
+				// rml:logicalSource
+				.add("rml:logicalSource", logicalSourceNode);
 		builder.subject(logicalSourceNode)
-			// rml:source
-			.add("rml:source", vf.createLiteral(source))
-			// rml:referenceFormulation
-			.add("rml:referenceFormulation", vf.createIRI("ql:CSV"));
+				// rml:source
+				.add("rml:source", vf.createLiteral(sourcePath))
+				// rml:referenceFormulation
+				.add("rml:referenceFormulation", vf.createIRI(referenceFormulation));
+		if (iterator != null) {
+			builder.subject(logicalSourceNode)
+					// rml:iterator
+					.add("rml:iterator", vf.createLiteral(iterator));
+		}
 	}
 
 	/**

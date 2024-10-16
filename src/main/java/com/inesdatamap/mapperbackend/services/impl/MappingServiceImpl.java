@@ -34,7 +34,9 @@ import com.inesdatamap.mapperbackend.model.jpa.Execution;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
+import com.inesdatamap.mapperbackend.model.jpa.ObjectMap;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
+import com.inesdatamap.mapperbackend.model.jpa.PredicateObjectMap;
 import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
 import com.inesdatamap.mapperbackend.model.mappers.PredicateObjectMapMapper;
 import com.inesdatamap.mapperbackend.properties.AppProperties;
@@ -255,8 +257,8 @@ public class MappingServiceImpl implements MappingService {
 
 			// Logical source or logical table
 			if (field.getSource().getType().equals(DataSourceTypeEnum.FILE)) {
-				FileSource fileSource = fileSourceRepository.getReferenceById(field.getSource().getId());
-				createLogicalSource(builder, mappingNode, fileSource);
+				FileSource fileSource = this.fileSourceRepository.getReferenceById(field.getSource().getId());
+				createLogicalSource(builder, mappingNode, fileSource, field);
 			}
 
 			// Subject map
@@ -264,7 +266,13 @@ public class MappingServiceImpl implements MappingService {
 
 			// Predicate-object maps
 			field.getPredicates().forEach(predicate -> {
-				PredicateObjectMapDTO predicateObjectMapDTO = predicateObjectMapMapper.entityToDto(predicate);
+				predicate.getObjectMap().forEach(objectMap -> {
+					// Iterate through objectMaps and set literal value last part of path
+					String literalValue = objectMap.getLiteralValue();
+					int lastSlashIndex = literalValue.lastIndexOf('/');
+					objectMap.setLiteralValue(lastSlashIndex != -1 ? literalValue.substring(lastSlashIndex + 1) : literalValue);
+				});
+				PredicateObjectMapDTO predicateObjectMapDTO = this.predicateObjectMapMapper.entityToDto(predicate);
 				RmlUtils.createPredicateObjectMapNode(builder, mappingNode, predicate.getPredicate(), predicateObjectMapDTO.getObjectMap());
 			});
 
@@ -298,13 +306,13 @@ public class MappingServiceImpl implements MappingService {
 		// Define namespaces and base IRI
 		builder.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
 
-			.setNamespace("rml", "http://semweb.mmlab.be/ns/rml#")
+				.setNamespace("rml", "http://semweb.mmlab.be/ns/rml#")
 
-			.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
+				.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
 
-			.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#")
+				.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#")
 
-			.setNamespace("ex", baseUri);
+				.setNamespace("ex", baseUri);
 
 	}
 
@@ -312,19 +320,49 @@ public class MappingServiceImpl implements MappingService {
 	 * Creates a logical source node.
 	 *
 	 * @param builder
-	 * 	the model builder
+	 *            the model builder
 	 * @param mappingNode
-	 * 	the parent mapping node
+	 *            the parent mapping node
 	 * @param source
-	 * 	the source
+	 *            the source
+	 * @param field
+	 *            the mapping field
 	 */
-	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, FileSource source) {
-
+	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, FileSource source, MappingField field) {
+		String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
+		String referenceFormulation;
 		if (source.getFileType().equals(DataFileTypeEnum.CSV)) {
-			String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
-			RmlUtils.createCsvLogicalSourceNode(builder, mappingNode, sourcePath);
+			referenceFormulation = "ql:CSV";
+		} else if (source.getFileType().equals(DataFileTypeEnum.XML)) {
+			referenceFormulation = "ql:XPath";
+		} else {
+			throw new IllegalArgumentException("Unsupported file type: " + source.getFileType());
 		}
+		String iterator = findIterator(field);
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, sourcePath, referenceFormulation, iterator);
+	}
 
+	/**
+	 * Finds and returns the first iterator value from the predicates in field
+	 *
+	 * @param field
+	 *            The MappingField
+	 * @return The part of the literal value
+	 */
+	private static String findIterator(MappingField field) {
+		// Iterate over each predicate
+		for (PredicateObjectMap predicate : field.getPredicates()) {
+			// Iterate over ObjectMap
+			for (ObjectMap objectMap : predicate.getObjectMap()) {
+				String literalValue = objectMap.getLiteralValue();
+				int lastSlashIndex = literalValue.lastIndexOf('/');
+				// Extract the part before the last separator
+				if (lastSlashIndex != -1) {
+					return literalValue.substring(0, lastSlashIndex);
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -484,6 +522,10 @@ public class MappingServiceImpl implements MappingService {
 
 		// Set relationships on the DTO
 		Mapping mappingSource = this.setRelationships(mappingDto);
+
+		// Create new rml
+		byte[] rml = this.buildRml(mappingSource);
+		mappingSource.setRml(rml);
 
 		// Updated mapping
 		Mapping updatedMapping = this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB));

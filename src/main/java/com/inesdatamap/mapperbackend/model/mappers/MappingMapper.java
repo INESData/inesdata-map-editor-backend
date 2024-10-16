@@ -16,7 +16,7 @@ public interface MappingMapper extends BaseEntityMapper<MappingDTO, Mapping> {
 	@Override
 	@org.mapstruct.Mapping(target = "id", ignore = true)
 	@org.mapstruct.Mapping(target = "version", ignore = true)
-	@org.mapstruct.Mapping(target = "rml", ignore = true)
+	@org.mapstruct.Mapping(target = "executions", ignore = true)
 	Mapping merge(Mapping source, @MappingTarget Mapping target);
 
 }
