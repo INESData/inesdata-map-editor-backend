@@ -198,7 +198,18 @@ class MappingServiceImplTest {
 		});
 		assertEquals("The mapping has no data to update", exception.getMessage());
 
-		MappingDTO mappingDto = new MappingDTO();
+		String fileName = "file.csv";
+		String filePath = String.join(File.separator, "path", "to");
+
+		FileSource source = buildFileSource(filePath, fileName, DataFileTypeEnum.CSV, DataSourceTypeEnum.FILE);
+		SubjectMap subjectMap = buildSubjectMap("http://example.org/Person", "http://example.org/person/{id}");
+		ObjectMap objectMap = buildObjectMap("rml:reference", "name");
+		PredicateObjectMap predicateObjectMap = buildPredicateObjectMap("http://example.org/hasName", List.of(objectMap));
+		MappingField field1 = buildMappingField(source, subjectMap, List.of(predicateObjectMap));
+
+		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
+		MappingDTO mappingDto = this.mappingMapper.entityToDto(mapping);
+
 		mappingDto.setName("Mapping DTO");
 
 		Mapping mappingDB = new Mapping();
