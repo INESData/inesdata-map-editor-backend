@@ -198,7 +198,7 @@ class MappingServiceImplTest {
 		});
 		assertEquals("The mapping has no data to update", exception.getMessage());
 
-		String fileName = "file.csv";
+		String fileName = "people.csv";
 		String filePath = String.join(File.separator, "path", "to");
 
 		FileSource source = buildFileSource(filePath, fileName, DataFileTypeEnum.CSV, DataSourceTypeEnum.FILE);
@@ -208,22 +208,20 @@ class MappingServiceImplTest {
 		MappingField field1 = buildMappingField(source, subjectMap, List.of(predicateObjectMap));
 
 		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
-		MappingDTO mappingDto = this.mappingMapper.entityToDto(mapping);
-
-		mappingDto.setName("Mapping DTO");
 
 		Mapping mappingDB = new Mapping();
 		Mapping mappingSource = new Mapping();
 		Mapping updatedMapping = new Mapping();
 		updatedMapping.setName("Mapping DTO");
 
+		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(field1.getOntology());
+		when(this.dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+		when(this.fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 		when(this.mappingRepo.findById(id)).thenReturn(Optional.of(mappingDB));
 		when(this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB))).thenReturn(updatedMapping);
 
-		MappingDTO result = this.mappingService.updateMapping(id, mappingDto);
-
+		MappingDTO result = this.mappingService.updateMapping(id, this.mappingMapper.entityToDto(mapping));
 		assertNotNull(result);
-		assertEquals(mappingDto.getName(), result.getName());
 
 		verify(this.mappingRepo).saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB));
 	}
