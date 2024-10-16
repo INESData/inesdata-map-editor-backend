@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.rdf4j.model.BNode;
@@ -259,10 +258,7 @@ public class MappingServiceImpl implements MappingService {
 			// Logical source or logical table
 			if (field.getSource().getType().equals(DataSourceTypeEnum.FILE)) {
 				FileSource fileSource = this.fileSourceRepository.getReferenceById(field.getSource().getId());
-
-				// Get field iterator
-				String iterator = findIterator(field);
-				createLogicalSource(builder, mappingNode, fileSource, iterator);
+				createLogicalSource(builder, mappingNode, fileSource, field);
 			}
 
 			// Subject map
@@ -272,9 +268,9 @@ public class MappingServiceImpl implements MappingService {
 			field.getPredicates().forEach(predicate -> {
 				predicate.getObjectMap().forEach(objectMap -> {
 					// Iterate through objectMaps and set literal value last part of path
-					String literalValue = FilenameUtils.getName(objectMap.getLiteralValue());
-					String newLiteralValue = Paths.get(literalValue).getFileName().toString();
-					objectMap.setLiteralValue(newLiteralValue);
+					String literalValue = objectMap.getLiteralValue();
+					int lastSlashIndex = literalValue.lastIndexOf('/');
+					objectMap.setLiteralValue(lastSlashIndex != -1 ? literalValue.substring(lastSlashIndex + 1) : literalValue);
 				});
 				PredicateObjectMapDTO predicateObjectMapDTO = this.predicateObjectMapMapper.entityToDto(predicate);
 				RmlUtils.createPredicateObjectMapNode(builder, mappingNode, predicate.getPredicate(), predicateObjectMapDTO.getObjectMap());
@@ -329,8 +325,10 @@ public class MappingServiceImpl implements MappingService {
 	 *            the parent mapping node
 	 * @param source
 	 *            the source
+	 * @param field
+	 *            the mapping field
 	 */
-	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, FileSource source, String iterator) {
+	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, FileSource source, MappingField field) {
 		String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
 		String referenceFormulation;
 		if (source.getFileType().equals(DataFileTypeEnum.CSV)) {
@@ -340,7 +338,8 @@ public class MappingServiceImpl implements MappingService {
 		} else {
 			throw new IllegalArgumentException("Unsupported file type: " + source.getFileType());
 		}
-		RmlUtils.createLogicalSourceNode(builder, mappingNode, sourcePath, referenceFormulation, source.getFileType(), iterator);
+		String iterator = findIterator(field);
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, sourcePath, referenceFormulation, iterator);
 	}
 
 	/**

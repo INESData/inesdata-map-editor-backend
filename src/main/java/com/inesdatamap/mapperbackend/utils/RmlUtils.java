@@ -9,7 +9,6 @@ import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.springframework.util.CollectionUtils;
 
 import com.inesdatamap.mapperbackend.model.dto.ObjectMapDTO;
-import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 
 /**
  * Utility class for RML.
@@ -34,13 +33,11 @@ public final class RmlUtils {
 	 *            the path to the source file
 	 * @param referenceFormulation
 	 *            the reference formulation IRI ("ql:CSV" or "ql:XPath")
-	 * @param fileType
-	 *            the file type
 	 * @param iterator
 	 *            the rml iterator
 	 */
 	public static void createLogicalSourceNode(ModelBuilder builder, Resource mappingNode, String sourcePath, String referenceFormulation,
-			DataFileTypeEnum fileType, String iterator) {
+			String iterator) {
 		SimpleValueFactory vf = SimpleValueFactory.getInstance();
 
 		BNode logicalSourceNode = vf.createBNode();
@@ -52,10 +49,10 @@ public final class RmlUtils {
 				.add("rml:source", vf.createLiteral(sourcePath))
 				// rml:referenceFormulation
 				.add("rml:referenceFormulation", vf.createIRI(referenceFormulation));
-		if (!fileType.equals(DataFileTypeEnum.CSV)) {
+		if (iterator != null) {
 			builder.subject(logicalSourceNode)
 					// rml:iterator
-					.add("rml:iterator", vf.createLiteral("/" + iterator));
+					.add("rml:iterator", vf.createLiteral(iterator));
 		}
 	}
 

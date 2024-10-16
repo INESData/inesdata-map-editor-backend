@@ -16,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.inesdatamap.mapperbackend.model.dto.ObjectMapDTO;
-import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 
 @ExtendWith(SpringExtension.class)
 class RmlUtilsTest {
@@ -101,7 +100,7 @@ class RmlUtilsTest {
 		BNode mappingNode = vf.createBNode();
 
 		// Create logical source
-		RmlUtils.createLogicalSourceNode(builder, mappingNode, "people.csv", "ql:CSV", DataFileTypeEnum.CSV, "/people/person");
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, "people.csv", "ql:CSV", "/people/person");
 
 		// Create subject map
 		RmlUtils.createSubjectMapNode(builder, mappingNode, baseUri + "person/{id}", baseUri + "Person");
@@ -164,7 +163,7 @@ class RmlUtilsTest {
 		BNode mappingNode = vf.createBNode();
 
 		// Create logical source
-		RmlUtils.createLogicalSourceNode(builder, mappingNode, "people.xml", "ql:XPath", DataFileTypeEnum.XML, null);
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, "people.xml", "ql:XPath", null);
 
 		// Create subject map
 		RmlUtils.createSubjectMapNode(builder, mappingNode, baseUri + "person/{id}", baseUri + "Person");

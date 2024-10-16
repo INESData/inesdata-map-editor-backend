@@ -249,8 +249,8 @@ class FileSourceServiceImplTest {
 		List<String> result = this.fileSourceService.getFileAttributes(id);
 
 		// Expected extracted attributes
-		List<String> expectedAttributes = Arrays.asList("root/author", "root/lexicalData/lexConcept/@conceptID",
-				"root/lexicalData/lexConcept/lexEntry/lexForm/@formID");
+		List<String> expectedAttributes = Arrays.asList("/root/author", "/root/lexicalData/lexConcept/@conceptID",
+				"/root/lexicalData/lexConcept/lexEntry/lexForm/@formID");
 
 		// Assert
 		assertTrue(result != null && result.containsAll(expectedAttributes));
