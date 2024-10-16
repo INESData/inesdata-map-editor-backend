@@ -101,7 +101,7 @@ class RmlUtilsTest {
 		BNode mappingNode = vf.createBNode();
 
 		// Create logical source
-		RmlUtils.createLogicalSourceNode(builder, mappingNode, "people.csv", "ql:CSV", DataFileTypeEnum.CSV);
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, "people.csv", "ql:CSV", DataFileTypeEnum.CSV, "/people/person");
 
 		// Create subject map
 		RmlUtils.createSubjectMapNode(builder, mappingNode, baseUri + "person/{id}", baseUri + "Person");
@@ -164,7 +164,7 @@ class RmlUtilsTest {
 		BNode mappingNode = vf.createBNode();
 
 		// Create logical source
-		RmlUtils.createLogicalSourceNode(builder, mappingNode, "people.xml", "ql:XPath", DataFileTypeEnum.XML);
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, "people.xml", "ql:XPath", DataFileTypeEnum.XML, null);
 
 		// Create subject map
 		RmlUtils.createSubjectMapNode(builder, mappingNode, baseUri + "person/{id}", baseUri + "Person");

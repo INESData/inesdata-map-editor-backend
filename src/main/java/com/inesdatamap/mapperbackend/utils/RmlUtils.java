@@ -36,9 +36,11 @@ public final class RmlUtils {
 	 *            the reference formulation IRI ("ql:CSV" or "ql:XPath")
 	 * @param fileType
 	 *            the file type
+	 * @param iterator
+	 *            the rml iterator
 	 */
 	public static void createLogicalSourceNode(ModelBuilder builder, Resource mappingNode, String sourcePath, String referenceFormulation,
-			DataFileTypeEnum fileType) {
+			DataFileTypeEnum fileType, String iterator) {
 		SimpleValueFactory vf = SimpleValueFactory.getInstance();
 
 		BNode logicalSourceNode = vf.createBNode();
@@ -53,7 +55,7 @@ public final class RmlUtils {
 		if (!fileType.equals(DataFileTypeEnum.CSV)) {
 			builder.subject(logicalSourceNode)
 					// rml:iterator
-					.add("rml:iterator", vf.createLiteral("/"));
+					.add("rml:iterator", vf.createLiteral("/" + iterator));
 		}
 	}
 

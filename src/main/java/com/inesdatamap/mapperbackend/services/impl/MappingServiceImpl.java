@@ -34,7 +34,9 @@ import com.inesdatamap.mapperbackend.model.jpa.Execution;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
+import com.inesdatamap.mapperbackend.model.jpa.ObjectMap;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
+import com.inesdatamap.mapperbackend.model.jpa.PredicateObjectMap;
 import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
 import com.inesdatamap.mapperbackend.model.mappers.PredicateObjectMapMapper;
 import com.inesdatamap.mapperbackend.properties.AppProperties;
@@ -255,8 +257,11 @@ public class MappingServiceImpl implements MappingService {
 
 			// Logical source or logical table
 			if (field.getSource().getType().equals(DataSourceTypeEnum.FILE)) {
-				FileSource fileSource = fileSourceRepository.getReferenceById(field.getSource().getId());
-				createLogicalSource(builder, mappingNode, fileSource);
+				FileSource fileSource = this.fileSourceRepository.getReferenceById(field.getSource().getId());
+
+				// Get field iterator
+				String iterator = findIterator(field);
+				createLogicalSource(builder, mappingNode, fileSource, iterator);
 			}
 
 			// Subject map
@@ -264,7 +269,12 @@ public class MappingServiceImpl implements MappingService {
 
 			// Predicate-object maps
 			field.getPredicates().forEach(predicate -> {
-				PredicateObjectMapDTO predicateObjectMapDTO = predicateObjectMapMapper.entityToDto(predicate);
+				predicate.getObjectMap().forEach(objectMap -> {
+					// Iterate through objectMaps and set literal value last part of path
+					String newLiteralValue = Paths.get(objectMap.getLiteralValue()).getFileName().toString();
+					objectMap.setLiteralValue(newLiteralValue);
+				});
+				PredicateObjectMapDTO predicateObjectMapDTO = this.predicateObjectMapMapper.entityToDto(predicate);
 				RmlUtils.createPredicateObjectMapNode(builder, mappingNode, predicate.getPredicate(), predicateObjectMapDTO.getObjectMap());
 			});
 
@@ -318,7 +328,7 @@ public class MappingServiceImpl implements MappingService {
 	 * @param source
 	 *            the source
 	 */
-	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, FileSource source) {
+	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, FileSource source, String iterator) {
 		String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
 		String referenceFormulation;
 		if (source.getFileType().equals(DataFileTypeEnum.CSV)) {
@@ -328,7 +338,30 @@ public class MappingServiceImpl implements MappingService {
 		} else {
 			throw new IllegalArgumentException("Unsupported file type: " + source.getFileType());
 		}
-		RmlUtils.createLogicalSourceNode(builder, mappingNode, sourcePath, referenceFormulation, source.getFileType());
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, sourcePath, referenceFormulation, source.getFileType(), iterator);
+	}
+
+	/**
+	 * Finds and returns the first iterator value from the predicates in field
+	 *
+	 * @param field
+	 *            The MappingField
+	 * @return The part of the literal value
+	 */
+	private static String findIterator(MappingField field) {
+		// Iterate over each predicate
+		for (PredicateObjectMap predicate : field.getPredicates()) {
+			// Iterate over ObjectMap
+			for (ObjectMap objectMap : predicate.getObjectMap()) {
+				String literalValue = objectMap.getLiteralValue();
+				int lastSlashIndex = literalValue.lastIndexOf('/');
+				// Extract the part before the last separator
+				if (lastSlashIndex != -1) {
+					return literalValue.substring(0, lastSlashIndex);
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
