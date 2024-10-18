@@ -32,6 +32,7 @@ import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 import com.inesdatamap.mapperbackend.model.jpa.Execution;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
+import com.inesdatamap.mapperbackend.model.jpa.LogicalSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
 import com.inesdatamap.mapperbackend.model.jpa.ObjectMap;
@@ -95,7 +96,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Retrieves a list of all mappings and maps them to their corresponding DTOs.
 	 *
 	 * @param pageable
-	 * 	pageable
+	 *            pageable
 	 *
 	 * @return List of MappingsDTOs
 	 */
@@ -142,7 +143,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Deletes a mapping by its id.
 	 *
 	 * @param id
-	 * 	the ID of the mapping to delete
+	 *            the ID of the mapping to delete
 	 */
 	@Override
 	public void deleteMapping(Long id) {
@@ -162,7 +163,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Retrieves a MappingField entity by its ID.
 	 *
 	 * @param id
-	 * 	the ID of the MappingField to retrieve
+	 *            the ID of the MappingField to retrieve
 	 *
 	 * @return the MappingField entity corresponding to the given ID
 	 */
@@ -175,26 +176,21 @@ public class MappingServiceImpl implements MappingService {
 	 * Creates a new mapping.
 	 *
 	 * @param mappingDTO
-	 * 	the mapping to create
+	 *            the mapping to create
 	 *
 	 * @return the created mapping
 	 */
 	@Override
 	public Mapping create(MappingDTO mappingDTO) {
 
-		Mapping mapping = setRelationships(mappingDTO);
-
-		byte[] rml = buildRml(mapping);
-		mapping.setRml(rml);
-
-		return mapping;
+		return this.setRelationships(mappingDTO);
 	}
 
 	/**
 	 * Saves a mapping.
 	 *
 	 * @param mapping
-	 * 	the mapping to save
+	 *            the mapping to save
 	 *
 	 * @return the saved mapping
 	 */
@@ -207,7 +203,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Sets the relationships of a mapping.
 	 *
 	 * @param mappingDTO
-	 * 	the mapping dto
+	 *            the mapping dto
 	 *
 	 * @return the mapping with the relationships set
 	 */
@@ -235,7 +231,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Builds the RML for a mapping.
 	 *
 	 * @param mapping
-	 * 	the mapping to build the RML for
+	 *            the mapping to build the RML for
 	 *
 	 * @return the RML for the mapping
 	 */
@@ -267,13 +263,19 @@ public class MappingServiceImpl implements MappingService {
 			// Predicate-object maps
 			field.getPredicates().forEach(predicate -> {
 				predicate.getObjectMap().forEach(objectMap -> {
-					// Iterate through objectMaps and set literal value last part of path
+					// Iterate through objectMaps and get new literal value
 					String literalValue = objectMap.getLiteralValue();
 					int lastSlashIndex = literalValue.lastIndexOf('/');
-					objectMap.setLiteralValue(lastSlashIndex != -1 ? literalValue.substring(lastSlashIndex + 1) : literalValue);
+					String modifiedLiteralValue = lastSlashIndex != -1 ? literalValue.substring(lastSlashIndex + 1) : literalValue;
+
+					// Keep value in mapping and change it in predicateObjectMapDTO to use it in rml
+					PredicateObjectMapDTO predicateObjectMapDTO = this.predicateObjectMapMapper.entityToDto(predicate);
+					predicateObjectMapDTO.getObjectMap().forEach(tempObjectMap -> {
+						tempObjectMap.setLiteralValue(modifiedLiteralValue);
+					});
+					RmlUtils.createPredicateObjectMapNode(builder, mappingNode, predicate.getPredicate(),
+							predicateObjectMapDTO.getObjectMap());
 				});
-				PredicateObjectMapDTO predicateObjectMapDTO = this.predicateObjectMapMapper.entityToDto(predicate);
-				RmlUtils.createPredicateObjectMapNode(builder, mappingNode, predicate.getPredicate(), predicateObjectMapDTO.getObjectMap());
 			});
 
 		});
@@ -297,9 +299,9 @@ public class MappingServiceImpl implements MappingService {
 	 * Sets the namespaces for the RML.
 	 *
 	 * @param builder
-	 * 	the model builder
+	 *            the model builder
 	 * @param baseUri
-	 * 	the base URI
+	 *            the base URI
 	 */
 	private static void setNamespaces(ModelBuilder builder, String baseUri) {
 
@@ -339,6 +341,7 @@ public class MappingServiceImpl implements MappingService {
 			throw new IllegalArgumentException("Unsupported file type: " + source.getFileType());
 		}
 		String iterator = findIterator(field);
+		addLogicalSource(field, sourcePath, referenceFormulation, iterator);
 		RmlUtils.createLogicalSourceNode(builder, mappingNode, sourcePath, referenceFormulation, iterator);
 	}
 
@@ -369,7 +372,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Materializes a mapping by its id.
 	 *
 	 * @param id
-	 * 	the ID of the mapping to materialize
+	 *            the ID of the mapping to materialize
 	 *
 	 * @return the results of the materialization
 	 */
@@ -401,9 +404,9 @@ public class MappingServiceImpl implements MappingService {
 	 * Gets the mapping file path.
 	 *
 	 * @param mappingId
-	 * 	the mapping id
+	 *            the mapping id
 	 * @param executionTime
-	 * 	the execution time
+	 *            the execution time
 	 *
 	 * @return the mapping file path
 	 */
@@ -416,9 +419,9 @@ public class MappingServiceImpl implements MappingService {
 	 * Gets the knowledge graph output file path.
 	 *
 	 * @param mappingId
-	 * 	the mapping id
+	 *            the mapping id
 	 * @param executionTime
-	 * 	the execution time
+	 *            the execution time
 	 *
 	 * @return the knowledge graph output file path
 	 */
@@ -431,9 +434,9 @@ public class MappingServiceImpl implements MappingService {
 	 * Gets the log file path.
 	 *
 	 * @param mappingId
-	 * 	the mapping id
+	 *            the mapping id
 	 * @param executionTime
-	 * 	the execution time
+	 *            the execution time
 	 *
 	 * @return the log file path
 	 */
@@ -446,18 +449,18 @@ public class MappingServiceImpl implements MappingService {
 	 * Saves an execution.
 	 *
 	 * @param mapping
-	 * 	the mapping
+	 *            the mapping
 	 * @param executionDateTime
-	 * 	the execution date time
+	 *            the execution date time
 	 * @param mappingFilePath
-	 * 	the mapping file path
+	 *            the mapping file path
 	 * @param knowledgeGraphOutputFilePath
-	 * 	the knowledge graph output file path
+	 *            the knowledge graph output file path
 	 * @param logFilePath
-	 * 	the log file path
+	 *            the log file path
 	 */
 	private void saveExecution(Mapping mapping, OffsetDateTime executionDateTime, String mappingFilePath,
-		String knowledgeGraphOutputFilePath, String logFilePath) {
+			String knowledgeGraphOutputFilePath, String logFilePath) {
 
 		Execution execution = new Execution();
 
@@ -531,6 +534,41 @@ public class MappingServiceImpl implements MappingService {
 		Mapping updatedMapping = this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB));
 
 		return this.mappingMapper.entityToDto(updatedMapping);
+	}
+
+	/**
+	 * Processes the Mapping object by generating its corresponding RML and saves it to the mapping
+	 *
+	 * @param mapping
+	 *            the Mapping to be processed and saved
+	 */
+	@Override
+	public void processAndSaveRML(Mapping mapping) {
+		byte[] rml = this.buildRml(mapping);
+		mapping.setRml(rml);
+
+		this.save(mapping);
+
+	}
+
+	/**
+	 * Add the logical source to a mapping field.
+	 *
+	 * @param field
+	 *            The MappingField
+	 * @param sourcePath
+	 *            The source path
+	 * @param referenceFormulation
+	 *            The reference formulation
+	 * @param iterator
+	 *            The iterator
+	 */
+	private static void addLogicalSource(MappingField field, String sourcePath, String referenceFormulation, String iterator) {
+		LogicalSource logicalSource = new LogicalSource();
+		logicalSource.setIterator(iterator);
+		logicalSource.setReferenceFormulation(referenceFormulation);
+		logicalSource.setSource(sourcePath);
+		field.setLogicalSource(logicalSource);
 	}
 
 }

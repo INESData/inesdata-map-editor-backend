@@ -48,9 +48,9 @@ public class MappingController {
 	 * This constructor initializes the controller with the provided MappingService
 	 *
 	 * @param mappingService
-	 * 	the mapping service
+	 *            the mapping service
 	 * @param executionService
-	 * 	the execution service
+	 *            the execution service
 	 */
 	public MappingController(MappingService mappingService, ExecutionService executionService) {
 		this.mappingService = mappingService;
@@ -61,9 +61,9 @@ public class MappingController {
 	 * Lists all mappings.
 	 *
 	 * @param page
-	 * 	page number
+	 *            page number
 	 * @param size
-	 * 	page size
+	 *            page size
 	 *
 	 * @return List of all mappings
 	 */
@@ -78,7 +78,7 @@ public class MappingController {
 	 * Creates a new mapping
 	 *
 	 * @param mappingDTO
-	 * 	the mapping to create
+	 *            the mapping to create
 	 *
 	 * @return the created mapping
 	 */
@@ -87,6 +87,7 @@ public class MappingController {
 	public ResponseEntity<MappingDTO> create(@RequestBody @Valid MappingDTO mappingDTO) {
 		Mapping mapping = this.mappingService.create(mappingDTO);
 		MappingDTO body = this.mappingService.save(mapping);
+		this.mappingService.processAndSaveRML(mapping);
 		return ResponseEntity.ok(body);
 	}
 
@@ -94,7 +95,7 @@ public class MappingController {
 	 * Deletes mapping
 	 *
 	 * @param id
-	 * 	mapping identifier
+	 *            mapping identifier
 	 *
 	 * @return status code response
 	 */
@@ -102,7 +103,7 @@ public class MappingController {
 	@Operation(summary = "Delete mapping")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public ResponseEntity<Void> deleteMapping(
-		@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to delete", required = true) Long id) {
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to delete", required = true) Long id) {
 		this.mappingService.deleteMapping(id);
 		return ResponseEntity.noContent().build();
 	}
@@ -111,7 +112,7 @@ public class MappingController {
 	 * Materialize a mapping
 	 *
 	 * @param id
-	 * 	the mapping identifier
+	 *            the mapping identifier
 	 *
 	 * @return the response
 	 */
@@ -119,7 +120,7 @@ public class MappingController {
 	@Operation(summary = "Materialize a mapping")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public ResponseEntity<Void> materializeMapping(
-		@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to materialize", required = true) Long id) {
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to materialize", required = true) Long id) {
 		this.mappingService.materialize(id);
 		return ResponseEntity.noContent().build();
 	}
@@ -128,11 +129,11 @@ public class MappingController {
 	 * List all executions for a mapping
 	 *
 	 * @param id
-	 * 	mapping identifier
+	 *            mapping identifier
 	 * @param page
-	 * 	page number
+	 *            page number
 	 * @param size
-	 * 	page size
+	 *            page size
 	 *
 	 * @return List of all executions
 	 */
