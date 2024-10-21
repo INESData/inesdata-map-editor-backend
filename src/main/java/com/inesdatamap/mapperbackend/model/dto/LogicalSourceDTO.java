@@ -1,7 +1,5 @@
 package com.inesdatamap.mapperbackend.model.dto;
 
-import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
-
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -19,7 +17,9 @@ public class LogicalSourceDTO extends BaseEntityDTO {
 	private String source;
 
 	@NotNull
-	private DataFileTypeEnum fileType;
+	private String referenceFormulation;
+
+	private String iterator;
 
 	@Size(min = 1, max = 255)
 	private String query;

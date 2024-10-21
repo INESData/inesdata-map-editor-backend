@@ -67,7 +67,7 @@ import jakarta.persistence.EntityNotFoundException;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { AppProperties.class, MappingServiceImpl.class, MappingMapperImpl.class, MappingFieldMapperImpl.class,
-	PredicateObjectMapMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
+		PredicateObjectMapMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
 class MappingServiceImplTest {
 
 	@MockBean
@@ -255,12 +255,39 @@ class MappingServiceImplTest {
 
 		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
 
-		when(mappingRepo.save(mapping)).thenReturn(mapping);
-		when(ontologyRepository.getReferenceById(anyLong())).thenReturn(field1.getOntology());
-		when(dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
-		when(fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+		when(this.mappingRepo.save(mapping)).thenReturn(mapping);
+		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(field1.getOntology());
+		when(this.dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+		when(this.fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 
-		Mapping result = mappingService.create(mappingMapper.entityToDto(mapping));
+		Mapping result = this.mappingService.create(this.mappingMapper.entityToDto(mapping));
+
+		assertNotNull(result);
+		assertEquals(source, result.getFields().get(0).getSource());
+		assertEquals(1, result.getFields().size());
+
+	}
+
+	@Test
+	void testbuildRml() {
+
+		String fileName = "file.csv";
+		String filePath = String.join(File.separator, "path", "to");
+
+		FileSource source = buildFileSource(filePath, fileName, DataFileTypeEnum.CSV, DataSourceTypeEnum.FILE);
+		SubjectMap subjectMap = buildSubjectMap("http://example.org/Person", "http://example.org/person/{id}");
+		ObjectMap objectMap = buildObjectMap("rml:reference", "name");
+		PredicateObjectMap predicateObjectMap = buildPredicateObjectMap("http://example.org/hasName", List.of(objectMap));
+		MappingField field1 = buildMappingField(source, subjectMap, List.of(predicateObjectMap));
+
+		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
+
+		when(this.mappingRepo.save(mapping)).thenReturn(mapping);
+		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(field1.getOntology());
+		when(this.dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+		when(this.fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+
+		Mapping result = this.mappingService.create(this.mappingMapper.entityToDto(mapping));
 
 		String rmlContent = new String(result.getRml(), StandardCharsets.UTF_8);
 
