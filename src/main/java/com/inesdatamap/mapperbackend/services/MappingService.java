@@ -93,12 +93,4 @@ public interface MappingService {
 	 */
 	MappingDTO updateMapping(Long id, MappingDTO mappingDto);
 
-	/**
-	 * Process and saves mapping
-	 *
-	 * @param mapping
-	 *            the mapping to process
-	 */
-	void processAndSaveRML(Mapping mapping);
-
 }

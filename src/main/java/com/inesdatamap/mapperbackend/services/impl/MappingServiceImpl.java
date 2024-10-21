@@ -535,21 +535,6 @@ public class MappingServiceImpl implements MappingService {
 	}
 
 	/**
-	 * Processes the Mapping object by generating its corresponding RML and saves it to the mapping
-	 *
-	 * @param mapping
-	 *            the Mapping to be processed and saved
-	 */
-	@Override
-	public void processAndSaveRML(Mapping mapping) {
-		byte[] rml = this.buildRml(mapping);
-		mapping.setRml(rml);
-
-		this.save(mapping);
-
-	}
-
-	/**
 	 * Add the logical source to each field of a mapping
 	 *
 	 * @param mapping
