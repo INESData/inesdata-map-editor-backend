@@ -269,7 +269,7 @@ class MappingServiceImplTest {
 	}
 
 	@Test
-	void testprocessAndSaveRML() {
+	void testbuildRml() {
 
 		String fileName = "file.csv";
 		String filePath = String.join(File.separator, "path", "to");
@@ -287,9 +287,9 @@ class MappingServiceImplTest {
 		when(this.dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 		when(this.fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 
-		this.mappingService.processAndSaveRML(mapping);
+		Mapping result = this.mappingService.create(this.mappingMapper.entityToDto(mapping));
 
-		String rmlContent = new String(mapping.getRml(), StandardCharsets.UTF_8);
+		String rmlContent = new String(result.getRml(), StandardCharsets.UTF_8);
 
 		assertTrue(rmlContent.contains("rr:predicate ex:hasName"));
 		assertTrue(rmlContent.contains("rml:reference \"name\""));

@@ -87,7 +87,6 @@ public class MappingController {
 	public ResponseEntity<MappingDTO> create(@RequestBody @Valid MappingDTO mappingDTO) {
 		Mapping mapping = this.mappingService.create(mappingDTO);
 		MappingDTO body = this.mappingService.save(mapping);
-		this.mappingService.processAndSaveRML(mapping);
 		return ResponseEntity.ok(body);
 	}
 

@@ -27,7 +27,6 @@ import com.inesdatamap.mapperbackend.exceptions.RmlWriteException;
 import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.PredicateObjectMapDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
-import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 import com.inesdatamap.mapperbackend.model.jpa.Execution;
@@ -183,7 +182,18 @@ public class MappingServiceImpl implements MappingService {
 	@Override
 	public Mapping create(MappingDTO mappingDTO) {
 
-		return this.setRelationships(mappingDTO);
+		// Set relationships and map DTO to entity
+		Mapping mapping = setRelationships(mappingDTO);
+
+		// Build logical source
+		buildLogicalSource(mapping);
+
+		// Build RML and set it to the mapping
+		byte[] rml = buildRml(mapping);
+		mapping.setRml(rml);
+
+		return mapping;
+
 	}
 
 	/**
@@ -253,8 +263,7 @@ public class MappingServiceImpl implements MappingService {
 
 			// Logical source or logical table
 			if (field.getSource().getType().equals(DataSourceTypeEnum.FILE)) {
-				FileSource fileSource = this.fileSourceRepository.getReferenceById(field.getSource().getId());
-				createLogicalSource(builder, mappingNode, fileSource, field);
+				createLogicalSource(builder, mappingNode, field);
 			}
 
 			// Subject map
@@ -325,24 +334,12 @@ public class MappingServiceImpl implements MappingService {
 	 *            the model builder
 	 * @param mappingNode
 	 *            the parent mapping node
-	 * @param source
-	 *            the source
 	 * @param field
 	 *            the mapping field
 	 */
-	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, FileSource source, MappingField field) {
-		String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
-		String referenceFormulation;
-		if (source.getFileType().equals(DataFileTypeEnum.CSV)) {
-			referenceFormulation = "ql:CSV";
-		} else if (source.getFileType().equals(DataFileTypeEnum.XML)) {
-			referenceFormulation = "ql:XPath";
-		} else {
-			throw new IllegalArgumentException("Unsupported file type: " + source.getFileType());
-		}
-		String iterator = findIterator(field);
-		addLogicalSource(field, sourcePath, referenceFormulation, iterator);
-		RmlUtils.createLogicalSourceNode(builder, mappingNode, sourcePath, referenceFormulation, iterator);
+	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, MappingField field) {
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, field.getLogicalSource().getSource(),
+				field.getLogicalSource().getReferenceFormulation(), field.getLogicalSource().getIterator());
 	}
 
 	/**
@@ -525,6 +522,7 @@ public class MappingServiceImpl implements MappingService {
 
 		// Set relationships on the DTO
 		Mapping mappingSource = this.setRelationships(mappingDto);
+		buildLogicalSource(mappingSource);
 
 		// Create new rml
 		byte[] rml = this.buildRml(mappingSource);
@@ -552,23 +550,42 @@ public class MappingServiceImpl implements MappingService {
 	}
 
 	/**
-	 * Add the logical source to a mapping field.
+	 * Add the logical source to each field of a mapping
 	 *
-	 * @param field
-	 *            The MappingField
-	 * @param sourcePath
-	 *            The source path
-	 * @param referenceFormulation
-	 *            The reference formulation
-	 * @param iterator
-	 *            The iterator
+	 * @param mapping
+	 *            The Mapping
 	 */
-	private static void addLogicalSource(MappingField field, String sourcePath, String referenceFormulation, String iterator) {
-		LogicalSource logicalSource = new LogicalSource();
-		logicalSource.setIterator(iterator);
-		logicalSource.setReferenceFormulation(referenceFormulation);
-		logicalSource.setSource(sourcePath);
-		field.setLogicalSource(logicalSource);
+	private void buildLogicalSource(Mapping mapping) {
+
+		// Loop through fields and process file sources
+		mapping.getFields().forEach(field -> {
+
+			if (field.getSource().getType().equals(DataSourceTypeEnum.FILE)) {
+				FileSource source = this.fileSourceRepository.getReferenceById(field.getSource().getId());
+
+				// Full file path
+				String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
+
+				// Find iterator
+				String iterator = findIterator(field);
+
+				// Set referenceFormulation according to file type
+				String referenceFormulation = switch (source.getFileType()) {
+				case CSV -> "ql:CSV";
+				case XML -> "ql:XPath";
+				default -> throw new IllegalArgumentException("Unsupported file type: " + source.getFileType());
+				};
+
+				// Create logicalSource and set values
+				LogicalSource logicalSource = new LogicalSource();
+				logicalSource.setIterator(iterator);
+				logicalSource.setReferenceFormulation(referenceFormulation);
+				logicalSource.setSource(sourcePath);
+
+				// Set logicalSource to field
+				field.setLogicalSource(logicalSource);
+			}
+		});
 	}
 
 }
