@@ -1,4 +1,4 @@
-FROM maven:3.9.7-eclipse-temurin-17-alpine AS builder
+FROM maven:3.9.7-eclipse-temurin-17 AS builder
 
 # Working directory
 WORKDIR /app
@@ -16,7 +16,7 @@ RUN mvn package -Dmaven.test.skip=true && \
     rm target/*-javadoc.jar
 
 # Python base image
-FROM python:3.10-slim-bullseye
+FROM python:3.10-slim-bookworm
 
 ENV JAVA_HOME=/opt/java/openjdk
 COPY --from=eclipse-temurin:17-jre $JAVA_HOME $JAVA_HOME
