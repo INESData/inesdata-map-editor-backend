@@ -291,7 +291,7 @@ class MappingServiceImplTest {
 
 		String rmlContent = new String(result.getRml(), StandardCharsets.UTF_8);
 
-		assertTrue(rmlContent.contains("rr:predicate ex:hasName"));
+		assertTrue(rmlContent.contains("rr:predicate ns1:hasName"));
 		assertTrue(rmlContent.contains("rml:reference \"name\""));
 
 	}
@@ -341,7 +341,7 @@ class MappingServiceImplTest {
 		Ontology ontology = new Ontology();
 		ontology.setId(1L);
 		ontology.setName("Ontology1");
-		ontology.setUrl("https://www.w3.org/2016/05/ontolex#");
+		ontology.setUrl("http://example.org/");
 
 		field.setOntology(ontology);
 		field.setSource(source);

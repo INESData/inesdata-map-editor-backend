@@ -255,7 +255,7 @@ public class MappingServiceImpl implements MappingService {
 
 		String baseUri = mapping.getBaseUrl();
 		Map<String, String> generatedPrefixes = setNamespacePrefixes(mapping);
-		setNamespaces(builder, baseUri, generatedPrefixes);
+		setNamespaces(builder, generatedPrefixes);
 
 		mapping.getFields().forEach(field -> {
 
@@ -316,7 +316,7 @@ public class MappingServiceImpl implements MappingService {
 	 * @param generatedPrefixes
 	 *            the namespaces generated prefixes
 	 */
-	private static void setNamespaces(ModelBuilder builder, String baseUri, Map<String, String> generatedPrefixes) {
+	private static void setNamespaces(ModelBuilder builder, Map<String, String> generatedPrefixes) {
 
 		// Define namespaces and base IRI
 		builder.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
