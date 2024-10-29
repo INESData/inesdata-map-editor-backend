@@ -311,8 +311,6 @@ public class MappingServiceImpl implements MappingService {
 	 *
 	 * @param builder
 	 *            the model builder
-	 * @param baseUri
-	 *            the base URI
 	 * @param generatedPrefixes
 	 *            the namespaces generated prefixes
 	 */
