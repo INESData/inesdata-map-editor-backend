@@ -67,10 +67,4 @@ public class Mapping extends BaseEntity implements Serializable {
 	@Column(name = "base_url")
 	private String baseUrl;
 
-	/**
-	 * Namespaces associated with the mapping.
-	 */
-	@OneToMany(mappedBy = "mapping", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Namespace> namespaces = new ArrayList<>();
-
 }
