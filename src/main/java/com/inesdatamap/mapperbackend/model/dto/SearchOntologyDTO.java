@@ -27,7 +27,8 @@ public class SearchOntologyDTO {
 	@PastOrPresent
 	private LocalDateTime uploadDate;
 
-	@Size(max = 255)
+	@NotNull
+	@Size(min = 1, max = 255)
 	private String url;
 
 	@NotNull

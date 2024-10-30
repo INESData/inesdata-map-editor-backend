@@ -7,7 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -251,9 +253,9 @@ public class MappingServiceImpl implements MappingService {
 		SimpleValueFactory vf = SimpleValueFactory.getInstance();
 		byte[] rmlContent;
 
-		// TODO: ¿En función de qué va?
-		String baseUri = "http://example.org/";
-		setNamespaces(builder, baseUri);
+		String baseUri = mapping.getBaseUrl();
+		Map<String, String> generatedPrefixes = setNamespacePrefixes(mapping);
+		setNamespaces(builder, generatedPrefixes);
 
 		mapping.getFields().forEach(field -> {
 
@@ -309,10 +311,10 @@ public class MappingServiceImpl implements MappingService {
 	 *
 	 * @param builder
 	 *            the model builder
-	 * @param baseUri
-	 *            the base URI
+	 * @param generatedPrefixes
+	 *            the namespaces generated prefixes
 	 */
-	private static void setNamespaces(ModelBuilder builder, String baseUri) {
+	private static void setNamespaces(ModelBuilder builder, Map<String, String> generatedPrefixes) {
 
 		// Define namespaces and base IRI
 		builder.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
@@ -321,10 +323,28 @@ public class MappingServiceImpl implements MappingService {
 
 				.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
 
-				.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#")
+				.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
 
-				.setNamespace("ex", baseUri);
+		generatedPrefixes.forEach(builder::setNamespace);
 
+	}
+
+	/**
+	 * Sets namespace prefixes for the RML
+	 *
+	 * @param mapping
+	 *            the mapping containing the fields to get the urls
+	 * @return a map with keys and ontology urls
+	 */
+	private static Map<String, String> setNamespacePrefixes(Mapping mapping) {
+
+		Map<String, String> prefixes = new LinkedHashMap<>();
+		int counter = 1;
+		for (MappingField mappingField : mapping.getFields()) {
+			prefixes.put("ns" + counter, mappingField.getOntology().getUrl());
+			counter++;
+		}
+		return prefixes;
 	}
 
 	/**

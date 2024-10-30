@@ -13,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -60,9 +61,10 @@ public class Mapping extends BaseEntity implements Serializable {
 	private byte[] rml;
 
 	/**
-	 * Namespaces associated with the mapping.
+	 * The base URL associated with the mapping
 	 */
-	@OneToMany(mappedBy = "mapping", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Namespace> namespaces = new ArrayList<>();
+	@Size(max = 255)
+	@Column(name = "base_url")
+	private String baseUrl;
 
 }

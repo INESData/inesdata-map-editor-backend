@@ -291,7 +291,7 @@ class MappingServiceImplTest {
 
 		String rmlContent = new String(result.getRml(), StandardCharsets.UTF_8);
 
-		assertTrue(rmlContent.contains("rr:predicate ex:hasName"));
+		assertTrue(rmlContent.contains("rr:predicate ns1:hasName"));
 		assertTrue(rmlContent.contains("rml:reference \"name\""));
 
 	}
@@ -330,6 +330,7 @@ class MappingServiceImplTest {
 		Mapping mapping = new Mapping();
 		mapping.setId(1L);
 		mapping.setName(name);
+		mapping.setBaseUrl("http://example.org/");
 		mapping.setFields(fields);
 		return mapping;
 	}
@@ -340,6 +341,7 @@ class MappingServiceImplTest {
 		Ontology ontology = new Ontology();
 		ontology.setId(1L);
 		ontology.setName("Ontology1");
+		ontology.setUrl("http://example.org/");
 
 		field.setOntology(ontology);
 		field.setSource(source);
