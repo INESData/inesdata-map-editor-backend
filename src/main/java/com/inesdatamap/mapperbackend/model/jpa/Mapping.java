@@ -72,7 +72,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	private String baseUrl;
 
 	/**
-	 * The ontology associated with the mapping.
+	 * The ontologies associated with the mapping.
 	 */
 	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(name = "mapping_ontology", joinColumns = @JoinColumn(name = "mapping_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "ontology_id", nullable = false))
