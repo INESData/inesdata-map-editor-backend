@@ -16,8 +16,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -206,6 +208,7 @@ class MappingServiceImplTest {
 		ObjectMap objectMap = buildObjectMap("rml:reference", "name");
 		PredicateObjectMap predicateObjectMap = buildPredicateObjectMap("http://example.org/hasName", List.of(objectMap));
 		MappingField field1 = buildMappingField(source, subjectMap, List.of(predicateObjectMap));
+		Ontology ontology = buildOntology();
 
 		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
 
@@ -214,7 +217,7 @@ class MappingServiceImplTest {
 		Mapping updatedMapping = new Mapping();
 		updatedMapping.setName("Mapping DTO");
 
-		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(field1.getOntology());
+		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(ontology);
 		when(this.dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 		when(this.fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 		when(this.mappingRepo.findById(id)).thenReturn(Optional.of(mappingDB));
@@ -252,11 +255,12 @@ class MappingServiceImplTest {
 		ObjectMap objectMap = buildObjectMap("rml:reference", "name");
 		PredicateObjectMap predicateObjectMap = buildPredicateObjectMap("http://example.org/hasName", List.of(objectMap));
 		MappingField field1 = buildMappingField(source, subjectMap, List.of(predicateObjectMap));
+		Ontology ontology = buildOntology();
 
 		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
 
 		when(this.mappingRepo.save(mapping)).thenReturn(mapping);
-		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(field1.getOntology());
+		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(ontology);
 		when(this.dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 		when(this.fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 
@@ -279,11 +283,11 @@ class MappingServiceImplTest {
 		ObjectMap objectMap = buildObjectMap("rml:reference", "name");
 		PredicateObjectMap predicateObjectMap = buildPredicateObjectMap("http://example.org/hasName", List.of(objectMap));
 		MappingField field1 = buildMappingField(source, subjectMap, List.of(predicateObjectMap));
-
+		Ontology ontology = buildOntology();
 		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
 
 		when(this.mappingRepo.save(mapping)).thenReturn(mapping);
-		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(field1.getOntology());
+		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(ontology);
 		when(this.dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 		when(this.fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 
@@ -309,14 +313,16 @@ class MappingServiceImplTest {
 
 	private static Mapping buildMapping() {
 		Mapping mapping = new Mapping();
+		Set<Ontology> ontologies = new HashSet<>();
+		Ontology ontology = buildOntology();
+		ontologies.add(ontology);
+
 		mapping.setRml("RML CONTENT".getBytes());
 		mapping.setId(1L);
 		mapping.setName("Test Mapping");
+		mapping.setOntologies(ontologies);
 
 		MappingField field1 = new MappingField();
-		Ontology ontology = new Ontology();
-		ontology.setName("Ontology1");
-		field1.setOntology(ontology);
 
 		DataSource source = new DataSource();
 		source.setName("Source1");
@@ -328,6 +334,10 @@ class MappingServiceImplTest {
 
 	private static Mapping buildMapping(String name, List<MappingField> fields) {
 		Mapping mapping = new Mapping();
+		Set<Ontology> ontologies = new HashSet<>();
+		Ontology ontology = buildOntology();
+		ontologies.add(ontology);
+		mapping.setOntologies(ontologies);
 		mapping.setId(1L);
 		mapping.setName(name);
 		mapping.setBaseUrl("http://example.org/");
@@ -338,12 +348,6 @@ class MappingServiceImplTest {
 	private static MappingField buildMappingField(FileSource source, SubjectMap subjectMap, List<PredicateObjectMap> predicates) {
 		MappingField field = new MappingField();
 
-		Ontology ontology = new Ontology();
-		ontology.setId(1L);
-		ontology.setName("Ontology1");
-		ontology.setUrl("http://example.org/");
-
-		field.setOntology(ontology);
 		field.setSource(source);
 		field.setSubject(subjectMap);
 		field.setPredicates(predicates);
@@ -379,5 +383,13 @@ class MappingServiceImplTest {
 		objectMap.setKey(key);
 		objectMap.setLiteralValue(literalValue);
 		return objectMap;
+	}
+
+	private static Ontology buildOntology() {
+		Ontology ontology = new Ontology();
+		ontology.setId(1L);
+		ontology.setName("Ontology1");
+		ontology.setUrl("http://example.org/");
+		return ontology;
 	}
 }

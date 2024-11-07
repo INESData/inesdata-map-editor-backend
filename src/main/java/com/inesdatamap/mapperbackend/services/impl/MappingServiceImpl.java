@@ -7,9 +7,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -115,14 +117,17 @@ public class MappingServiceImpl implements MappingService {
 			searchMapping.setId(mapping.getId());
 			searchMapping.setName(mapping.getName());
 
+			// Iterate mapping and set values to ontologies
 			List<String> ontologies = new ArrayList<>();
-			List<String> dataSources = new ArrayList<>();
-
-			// Iterate fields list and set values to ontologies and sources list
-			for (MappingField field : mapping.getFields()) {
-				if (field.getOntology() != null && field.getOntology().getName() != null) {
-					ontologies.add(field.getOntology().getName());
+			for (Ontology ontology : mapping.getOntologies()) {
+				if (ontology.getName() != null) {
+					ontologies.add(ontology.getName());
 				}
+			}
+
+			// Iterate fields list and set values to sources list
+			List<String> dataSources = new ArrayList<>();
+			for (MappingField field : mapping.getFields()) {
 				if (field.getSource() != null && field.getSource().getName() != null) {
 					dataSources.add(field.getSource().getName());
 				}
@@ -221,18 +226,19 @@ public class MappingServiceImpl implements MappingService {
 	 */
 	private Mapping setRelationships(MappingDTO mappingDTO) {
 
-		Mapping mapping = mappingMapper.dtoToEntity(mappingDTO);
+		Mapping mapping = this.mappingMapper.dtoToEntity(mappingDTO);
+
+		Set<Ontology> ontologies = new HashSet<>();
+		mappingDTO.getOntologyIds().forEach(ontologyId -> {
+			Ontology ontology = this.ontologyRepository.getReferenceById(ontologyId);
+			ontologies.add(ontology);
+		});
+		mapping.setOntologies(ontologies);
 
 		if (!CollectionUtils.isEmpty(mapping.getFields())) {
-
 			mapping.getFields().forEach(field -> {
-
-				Ontology ontology = this.ontologyRepository.getReferenceById(field.getOntology().getId());
 				DataSource dataSource = this.dataSourceRepository.getReferenceById(field.getSource().getId());
-
-				field.setOntology(ontology);
 				field.setSource(dataSource);
-
 			});
 		}
 
@@ -340,8 +346,8 @@ public class MappingServiceImpl implements MappingService {
 
 		Map<String, String> prefixes = new LinkedHashMap<>();
 		int counter = 1;
-		for (MappingField mappingField : mapping.getFields()) {
-			prefixes.put("ns" + counter, mappingField.getOntology().getUrl());
+		for (Ontology ontology : mapping.getOntologies()) {
+			prefixes.put("ns" + counter, ontology.getUrl());
 			counter++;
 		}
 		return prefixes;

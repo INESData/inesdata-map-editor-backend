@@ -26,4 +26,7 @@ public class MappingDTO extends BaseEntityDTO {
 	@NotEmpty
 	private List<MappingFieldDTO> fields;
 
+	@NotNull
+	private List<Long> ontologyIds;
+
 }

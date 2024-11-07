@@ -22,7 +22,4 @@ public class MappingFieldDTO extends BaseEntityDTO {
 	@NotNull
 	private Long dataSourceId;
 
-	@NotNull
-	private Long ontologyId;
-
 }

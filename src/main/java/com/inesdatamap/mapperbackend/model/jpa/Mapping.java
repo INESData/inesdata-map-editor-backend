@@ -2,7 +2,9 @@ package com.inesdatamap.mapperbackend.model.jpa;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.Basic;
 import jakarta.persistence.CascadeType;
@@ -10,7 +12,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
@@ -66,5 +70,12 @@ public class Mapping extends BaseEntity implements Serializable {
 	@Size(max = 255)
 	@Column(name = "base_url")
 	private String baseUrl;
+
+	/**
+	 * The ontology associated with the mapping.
+	 */
+	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinTable(name = "mapping_ontology", joinColumns = @JoinColumn(name = "mapping_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "ontology_id", nullable = false))
+	private Set<Ontology> ontologies = new HashSet<>();
 
 }
