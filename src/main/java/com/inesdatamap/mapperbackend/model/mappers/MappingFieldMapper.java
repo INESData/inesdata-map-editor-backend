@@ -21,8 +21,8 @@ public interface MappingFieldMapper extends BaseEntityMapper<MappingFieldDTO, Ma
 	 *
 	 * @return the entity
 	 */
+	@Override
 	@Mapping(target = "source.id", source = "dataSourceId")
-	@Mapping(target = "ontology.id", source = "ontologyId")
 	MappingField dtoToEntity(MappingFieldDTO dto);
 
 	/**
@@ -33,6 +33,7 @@ public interface MappingFieldMapper extends BaseEntityMapper<MappingFieldDTO, Ma
 	 *
 	 * @return the DTO
 	 */
+	@Override
 	@InheritInverseConfiguration(name = "dtoToEntity")
 	MappingFieldDTO entityToDto(MappingField entity);
 

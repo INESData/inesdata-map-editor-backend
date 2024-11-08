@@ -64,12 +64,4 @@ public class MappingField extends BaseEntity implements Serializable {
 	@OneToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "source_id", nullable = false)
 	private DataSource source;
-
-	/**
-	 * The ontology associated with the mapping field.
-	 */
-	@OneToOne(optional = false, fetch = FetchType.LAZY)
-	@JoinColumn(name = "ontology_id", nullable = false)
-	private Ontology ontology;
-
 }
