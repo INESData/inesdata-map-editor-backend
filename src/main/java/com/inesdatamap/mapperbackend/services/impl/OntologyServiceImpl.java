@@ -172,10 +172,10 @@ public class OntologyServiceImpl implements OntologyService {
 		try {
 
 			// Get entity from DB
-			Ontology ontologyEntity = this.getEntity(id);
+			Ontology ontology = this.getEntity(id);
 
 			// Read ontology file content
-			String ontologyContent = this.getOntologyContent(ontologyEntity);
+			String ontologyContent = this.getOntologyContent(ontology);
 
 			// Create OWLOntologyManager instance and load the ontology
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
@@ -185,7 +185,7 @@ public class OntologyServiceImpl implements OntologyService {
 			classList = this.getClasses(owl);
 
 		} catch (OWLOntologyCreationException e) {
-			throw new OntologyParserException("Failed getting classes from ontology with id: " + id, e);
+			throw new OntologyParserException("Failed getting classes from ontology: " + id, e);
 		}
 
 		return classList;
@@ -203,39 +203,35 @@ public class OntologyServiceImpl implements OntologyService {
 	 */
 	public List<String> getClasses(OWLOntology owl) throws OWLOntologyCreationException {
 
-		// Get all the classes in the ontology
-		Set<OWLClass> classes = owl.getClassesInSignature();
-
 		// List to store the classes
-		List<String> classesList = new ArrayList<>();
+		List<String> ontologyClasses = new ArrayList<>();
 
-		// Iterate over all classes
-		for (OWLClass owlClass : classes) {
+		// Iterate over all classes in the ontology
+		for (OWLClass owlClass : owl.getClassesInSignature()) {
 			// Extract the class name from its IRI fragment
 			String className = owlClass.getIRI().getFragment();
 
-			// Add the class name to the list only if it is not null or empty
+			// Add the class name to the list
 			if (className != null && !className.isEmpty()) {
-				classesList.add(className);
+				ontologyClasses.add(className);
 			}
-
 		}
 
-		return classesList;
+		return ontologyClasses;
 	}
 
 	/**
-	 * Retrieves a list of attributes for a specified class from an ontology identified by its ID.
+	 * Retrieves a list of properties for a specified class from an ontology identified by its ID.
 	 *
 	 * @param id
 	 *            The ID of the ontology entity to retrieve.
 	 * @param className
-	 *            The name of the class whose attributes are to be retrieved.
-	 * @return A list of attributes for the specified class from the ontology.
+	 *            The name of the class whose properties are to be retrieved.
+	 * @return A list of properties for the specified class from the ontology.
 	 *
 	 */
 	@Override
-	public List<String> getOntologyAttributes(Long id, String className) {
+	public List<String> getClassProperties(Long id, String className) {
 
 		// Get entity
 		Ontology ontology = this.getEntity(id);
@@ -244,9 +240,9 @@ public class OntologyServiceImpl implements OntologyService {
 		String ontologyContent = this.getOntologyContent(ontology);
 
 		try {
-			return this.getAttributes(ontologyContent, className);
+			return this.getProperties(ontologyContent, className);
 		} catch (OWLOntologyCreationException e) {
-			throw new OntologyParserException("Failed getting attributes from ontology: " + ontology.getName(), e);
+			throw new OntologyParserException("Failed getting properties from ontology class: " + className, e);
 		}
 	}
 
@@ -257,11 +253,11 @@ public class OntologyServiceImpl implements OntologyService {
 	 *            The content of the ontology as a string
 	 * @param className
 	 *            The name of the class for which the data properties are to be retrieved
-	 * @return A list of attributes associated with the specified class
+	 * @return A list of properties associated with the specified class
 	 * @throws OWLOntologyCreationException
 	 *             if there is an error during the ontology creation process
 	 */
-	public List<String> getAttributes(String ontologyContent, String className) throws OWLOntologyCreationException {
+	public List<String> getProperties(String ontologyContent, String className) throws OWLOntologyCreationException {
 
 		if (ontologyContent == null || ontologyContent.isEmpty()) {
 			throw new IllegalArgumentException("Ontology content is empty.");
