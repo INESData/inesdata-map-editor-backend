@@ -360,12 +360,12 @@ class OntologyServiceImplTest {
 	}
 
 	@Test
-	void testGetOntologyAttributes() throws Exception {
+	void testGetOntologyProperties() throws Exception {
 		// Mock data
 		Long id = 1L;
 		String className = "Class1";
 		String ontologyContent = "Ontology content";
-		List<String> expectedAttributes = List.of("Attribute1", "Attribute2");
+		List<String> expectedProperties = List.of("Attribute1", "Attribute2");
 
 		// Mock Ontology and service methods
 		Ontology ontology = mock(Ontology.class);
@@ -377,26 +377,26 @@ class OntologyServiceImplTest {
 		doReturn(ontology).when(ontologyService).getEntity(id);
 		doReturn(ontologyContent).when(ontologyService).getOntologyContent(ontology);
 
-		// Mock the getAttributes method and handle OWLOntologyCreationException
-		doReturn(expectedAttributes).when(ontologyService).getAttributes(ontologyContent, className);
+		// Mock the getProperties method and handle OWLOntologyCreationException
+		doReturn(expectedProperties).when(ontologyService).getProperties(ontologyContent, className);
 
 		// Act
-		List<String> result = ontologyService.getOntologyAttributes(id, className);
+		List<String> result = ontologyService.getClassProperties(id, className);
 
 		// Assert
-		assertEquals(expectedAttributes, result);
+		assertEquals(expectedProperties, result);
 
 		// Test exception handling
-		doThrow(new OWLOntologyCreationException("Error")).when(ontologyService).getAttributes(anyString(), anyString());
+		doThrow(new OWLOntologyCreationException("Error")).when(ontologyService).getProperties(anyString(), anyString());
 
 		OntologyParserException thrown = assertThrows(OntologyParserException.class, () -> {
-			ontologyService.getOntologyAttributes(id, className);
+			ontologyService.getClassProperties(id, className);
 		});
-		assertTrue(thrown.getMessage().contains("Failed getting attributes from ontology"));
+		assertTrue(thrown.getMessage().contains("Failed getting properties from ontology class"));
 	}
 
 	@Test
-	void testGetAttributes_validInput() throws Exception {
+	void testGetProperties_validInput() throws Exception {
 		// Arrange
 		String ontologyContent = "Ontology content";
 		String className = "Class1";
@@ -423,25 +423,25 @@ class OntologyServiceImplTest {
 			mockedOWLManager.when(OWLManager::createOWLOntologyManager).thenReturn(manager);
 
 			// Act
-			List<String> result = service.getAttributes(ontologyContent, className);
+			List<String> result = service.getProperties(ontologyContent, className);
 
 			// Assert
 			// Assuming getDataProperties returns a non-empty list for the purpose of this test
-			List<String> expectedAttributes = new ArrayList<>();
-			assertEquals(expectedAttributes, result);
+			List<String> expectedProperties = new ArrayList<>();
+			assertEquals(expectedProperties, result);
 		}
 	}
 
 	@Test
-	void testGetAttributes_invalidInput() {
+	void testGetProperties_invalidInput() {
 		// Arrange
 		OntologyServiceImpl service = new OntologyServiceImpl();
 
 		// Act & Assert
-		assertThrows(IllegalArgumentException.class, () -> service.getAttributes(null, "Class1"), "Ontology content is empty.");
-		assertThrows(IllegalArgumentException.class, () -> service.getAttributes("", "Class1"), "Ontology content is empty.");
-		assertThrows(IllegalArgumentException.class, () -> service.getAttributes("Ontology content", null), "Class name is empty.");
-		assertThrows(IllegalArgumentException.class, () -> service.getAttributes("Ontology content", ""), "Class name is empty.");
+		assertThrows(IllegalArgumentException.class, () -> service.getProperties(null, "Class1"), "Ontology content is empty.");
+		assertThrows(IllegalArgumentException.class, () -> service.getProperties("", "Class1"), "Ontology content is empty.");
+		assertThrows(IllegalArgumentException.class, () -> service.getProperties("Ontology content", null), "Class name is empty.");
+		assertThrows(IllegalArgumentException.class, () -> service.getProperties("Ontology content", ""), "Class name is empty.");
 	}
 
 	@Test
