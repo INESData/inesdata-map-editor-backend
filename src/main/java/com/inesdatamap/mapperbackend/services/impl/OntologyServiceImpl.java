@@ -3,16 +3,19 @@ package com.inesdatamap.mapperbackend.services.impl;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
+import org.semanticweb.owlapi.model.AxiomType;
 import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
+import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
+import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.search.EntitySearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -270,52 +273,95 @@ public class OntologyServiceImpl implements OntologyService {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
 
-		// Find the owlClass by className
+		// Find the owl class by class name
 		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
 
-		List<String> attributes = new ArrayList<>();
+		List<String> properties = new ArrayList<>();
 
-		// Collect data properties
-		attributes.addAll(this.getDataProperties(owlClass, owl));
+		// Collect properties and add them in order
+		List<String> dataProperties = this.getDataProperties(owlClass, owl);
+		properties.addAll(dataProperties);
+		List<String> objectProperties = this.getObjectProperties(owlClass, owl);
+		properties.addAll(objectProperties);
+		List<String> annotationProperties = this.getAnnotationProperties(owl);
+		properties.addAll(annotationProperties);
 
-		return attributes;
+
+		return properties;
 
 	}
 
 	/**
-	 * Retrieves the data properties associated with a specified OWL class in the ontology
+	 * Retrieves a list of data property names associated with a specific OWL class in a given ontology.
 	 *
 	 * @param owlClass
-	 *            The OWL class whose properties are to be retrieved
+	 *            The OWLClass representing the class for which data properties are being retrieved
 	 * @param ontology
-	 *            The OWL ontology from which to retrieve the properties
-	 * @return A list of data property names associated with the specified class
+	 *            The OWLOntology that contains the axioms and properties.
+	 * @return A list of strings containing the ata properties associated with the specified class
 	 */
 	public List<String> getDataProperties(OWLClass owlClass, OWLOntology ontology) {
 
-		List<String> properties = new ArrayList<>();
+		List<String> dataProperties = new ArrayList<>();
 
-		// Get class name from owlClass
-		String classFragment = owlClass.getIRI().getFragment();
+		// Iterate through all the data property domain axioms
+		for (OWLDataPropertyDomainAxiom domainAxiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_DOMAIN)) {
+			OWLClassExpression domainExpression = domainAxiom.getDomain();
+			OWLDataProperty property = domainAxiom.getProperty().asOWLDataProperty();
 
-		if (classFragment == null || classFragment.isEmpty()) {
-			throw new IllegalArgumentException("There is no class in the ontology.");
-		}
-
-		// Find data properties for class
-		Set<OWLDataProperty> dataProperties = ontology.getDataPropertiesInSignature();
-		for (OWLDataProperty dataProperty : dataProperties) {
-
-			// Check if the class is a domain of the data property
-			boolean isDomain = EntitySearcher.getDomains(dataProperty, ontology).anyMatch(domain -> domain.equals(owlClass));
-
-			if (isDomain) {
-				properties.add(dataProperty.getIRI().getFragment());
+			// Check if the domain of the axiom contains the class
+			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass)) {
+				dataProperties.add(property.getIRI().getFragment());
 			}
 		}
 
-		return properties;
+		return dataProperties;
+	}
+
+	/**
+	 * Retrieves a list of object properties whose domain contains the specified OWLClass.
+	 *
+	 * @param owlClass
+	 *            The OWL class for which object properties are to be retrieved
+	 * @param ontology
+	 *            The OWLOntology in which the object property axioms will be searched
+	 * @return A list of object properties
+	 */
+	public List<String> getObjectProperties(OWLClass owlClass, OWLOntology ontology) {
+
+		List<String> objectProperties = new ArrayList<>();
+
+		// Iterate through all the object property domain axioms
+		for (OWLObjectPropertyDomainAxiom domainAxiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_DOMAIN)) {
+			OWLClassExpression domainExpression = domainAxiom.getDomain();
+			OWLObjectProperty property = domainAxiom.getProperty().asOWLObjectProperty();
+
+			// Check if the domain of the axiom contains the class
+			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass)) {
+				objectProperties.add(property.getIRI().getFragment());
+			}
+		}
+		return objectProperties;
+	}
+
+	/**
+	 * Retrieves a list of annotation properties from the ontology
+	 *
+	 * @param ontology
+	 *            the OWLOntology
+	 * @return a list of annotation properties in the ontology
+	 */
+	public List<String> getAnnotationProperties(OWLOntology ontology) {
+
+		List<String> annotationProperties = new ArrayList<>();
+
+		// Get all annotation properties in the ontology
+		ontology.annotationPropertiesInSignature().forEach(annotationProperty -> {
+			annotationProperties.add(annotationProperty.getIRI().getFragment());
+		});
+
+		return annotationProperties;
 	}
 
 	/**

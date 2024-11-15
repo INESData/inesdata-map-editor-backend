@@ -369,7 +369,6 @@ class OntologyServiceImplTest {
 
 		// Mock Ontology and service methods
 		Ontology ontology = mock(Ontology.class);
-		when(ontology.getName()).thenReturn("TestOntology");
 
 		OntologyServiceImpl ontologyService = spy(new OntologyServiceImpl());
 
