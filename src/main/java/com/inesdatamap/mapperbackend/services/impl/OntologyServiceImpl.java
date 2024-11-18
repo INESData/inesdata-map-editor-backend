@@ -2,7 +2,10 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
@@ -11,8 +14,11 @@ import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLDataPropertyDomainAxiom;
+import org.semanticweb.owlapi.model.OWLDataPropertyRangeAxiom;
+import org.semanticweb.owlapi.model.OWLDataRange;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLObjectPropertyDomainAxiom;
+import org.semanticweb.owlapi.model.OWLObjectPropertyRangeAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -25,7 +31,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.exceptions.OntologyParserException;
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
+import com.inesdatamap.mapperbackend.model.enums.PropertyTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
@@ -186,6 +194,7 @@ public class OntologyServiceImpl implements OntologyService {
 
 			// Get all classes in ontology and return list
 			classList = this.getClasses(owl);
+			Collections.sort(classList);
 
 		} catch (OWLOntologyCreationException e) {
 			throw new OntologyParserException("Failed getting classes from ontology: " + id, e);
@@ -234,7 +243,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 *
 	 */
 	@Override
-	public List<String> getClassProperties(Long id, String className) {
+	public List<PropertyDTO> getClassProperties(Long id, String className) {
 
 		// Get entity
 		Ontology ontology = this.getEntity(id);
@@ -260,7 +269,7 @@ public class OntologyServiceImpl implements OntologyService {
 	 * @throws OWLOntologyCreationException
 	 *             if there is an error during the ontology creation process
 	 */
-	public List<String> getProperties(String ontologyContent, String className) throws OWLOntologyCreationException {
+	public List<PropertyDTO> getProperties(String ontologyContent, String className) throws OWLOntologyCreationException {
 
 		if (ontologyContent == null || ontologyContent.isEmpty()) {
 			throw new IllegalArgumentException("Ontology content is empty.");
@@ -277,15 +286,12 @@ public class OntologyServiceImpl implements OntologyService {
 		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
 
-		List<String> properties = new ArrayList<>();
+		List<PropertyDTO> properties = new ArrayList<>();
 
-		// Collect properties and add them in order
-		List<String> dataProperties = this.getDataProperties(owlClass, owl);
-		properties.addAll(dataProperties);
-		List<String> objectProperties = this.getObjectProperties(owlClass, owl);
-		properties.addAll(objectProperties);
-		List<String> annotationProperties = this.getAnnotationProperties(owl);
-		properties.addAll(annotationProperties);
+		// Collect properties and add them
+		properties.addAll(getDataProperties(owlClass, owl));
+		properties.addAll(getObjectProperties(owlClass, owl));
+		properties.addAll(getAnnotationProperties(owl));
 
 
 		return properties;
@@ -301,9 +307,9 @@ public class OntologyServiceImpl implements OntologyService {
 	 *            The OWLOntology that contains the axioms and properties.
 	 * @return A list of strings containing the ata properties associated with the specified class
 	 */
-	public List<String> getDataProperties(OWLClass owlClass, OWLOntology ontology) {
+	public List<PropertyDTO> getDataProperties(OWLClass owlClass, OWLOntology ontology) {
 
-		List<String> dataProperties = new ArrayList<>();
+		Set<PropertyDTO> dataProperties = new HashSet<>();
 
 		// Iterate through all the data property domain axioms
 		for (OWLDataPropertyDomainAxiom domainAxiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_DOMAIN)) {
@@ -312,11 +318,22 @@ public class OntologyServiceImpl implements OntologyService {
 
 			// Check if the domain of the axiom contains the class
 			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass)) {
-				dataProperties.add(property.getIRI().getFragment());
+				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA));
 			}
 		}
 
-		return dataProperties;
+		// Iterate through all the data property range axioms
+		for (OWLDataPropertyRangeAxiom rangeAxiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_RANGE)) {
+	        OWLDataRange rangeExpression = rangeAxiom.getRange();
+	        OWLDataProperty property = rangeAxiom.getProperty().asOWLDataProperty();
+
+			// Check if the range of the axiom contains the class
+			if (rangeExpression.getClassesInSignature().contains(owlClass)) {
+				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA));
+	        }
+	    }
+
+		return new ArrayList<>(dataProperties);
 	}
 
 	/**
@@ -328,9 +345,9 @@ public class OntologyServiceImpl implements OntologyService {
 	 *            The OWLOntology in which the object property axioms will be searched
 	 * @return A list of object properties
 	 */
-	public List<String> getObjectProperties(OWLClass owlClass, OWLOntology ontology) {
+	public List<PropertyDTO> getObjectProperties(OWLClass owlClass, OWLOntology ontology) {
 
-		List<String> objectProperties = new ArrayList<>();
+		Set<PropertyDTO> objectProperties = new HashSet<>();
 
 		// Iterate through all the object property domain axioms
 		for (OWLObjectPropertyDomainAxiom domainAxiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_DOMAIN)) {
@@ -339,10 +356,21 @@ public class OntologyServiceImpl implements OntologyService {
 
 			// Check if the domain of the axiom contains the class
 			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass)) {
-				objectProperties.add(property.getIRI().getFragment());
+				objectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT));
 			}
 		}
-		return objectProperties;
+
+		// Iterate through all the object property range axioms
+		for (OWLObjectPropertyRangeAxiom rangeAxiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_RANGE)) {
+			OWLClassExpression rangeExpression = rangeAxiom.getRange();
+			OWLObjectProperty property = rangeAxiom.getProperty().asOWLObjectProperty();
+
+			// Check if the range of the axiom contains the class
+			if (rangeExpression.equals(owlClass) || rangeExpression.getClassesInSignature().contains(owlClass)) {
+				objectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT));
+			}
+		}
+		return new ArrayList<>(objectProperties);
 	}
 
 	/**
@@ -352,13 +380,13 @@ public class OntologyServiceImpl implements OntologyService {
 	 *            the OWLOntology
 	 * @return a list of annotation properties in the ontology
 	 */
-	public List<String> getAnnotationProperties(OWLOntology ontology) {
+	public List<PropertyDTO> getAnnotationProperties(OWLOntology ontology) {
 
-		List<String> annotationProperties = new ArrayList<>();
+		List<PropertyDTO> annotationProperties = new ArrayList<>();
 
 		// Get all annotation properties in the ontology
 		ontology.annotationPropertiesInSignature().forEach(annotationProperty -> {
-			annotationProperties.add(annotationProperty.getIRI().getFragment());
+			annotationProperties.add(createPropertyDTO(annotationProperty.getIRI().getFragment(), PropertyTypeEnum.ANNOTATION));
 		});
 
 		return annotationProperties;
@@ -384,6 +412,22 @@ public class OntologyServiceImpl implements OntologyService {
 
 		// Convert bytes to String
 		return new String(contentBytes, StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * Creates a new PropertyDTO object with the specified property name and type.
+	 *
+	 * @param property
+	 *            the name
+	 * @param propertyEnum
+	 *            the type
+	 * @return a PropertyDTO
+	 */
+	public PropertyDTO createPropertyDTO(String property, PropertyTypeEnum propertyEnum) {
+		PropertyDTO propertyDTO = new PropertyDTO();
+		propertyDTO.setPropertyType(propertyEnum);
+		propertyDTO.setName(property);
+		return propertyDTO;
 	}
 
 }

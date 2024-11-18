@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,7 +27,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
+import com.inesdatamap.mapperbackend.model.enums.PropertyTypeEnum;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 import com.inesdatamap.mapperbackend.utils.Constants;
 
@@ -184,13 +187,17 @@ class OntologyControllerTest {
 		// Arrange
 		Long ontologyId = 1L;
 		String ontologyClass = "TestOntologyClass";
-		List<String> classProperties = Arrays.asList("Property1", "Property2", "Property3");
+		PropertyDTO property = new PropertyDTO();
+		property.setName("Property1");
+		property.setPropertyType(PropertyTypeEnum.OBJECT);
+		List<PropertyDTO> classProperties = new ArrayList<>();
+		classProperties.add(property);
 
 		// Configure mock for service
 		Mockito.when(this.ontologyService.getClassProperties(ontologyId, ontologyClass)).thenReturn(classProperties);
 
 		// Act: Call the controller method
-		ResponseEntity<List<String>> result = this.controller.getClassProperties(ontologyId, ontologyClass);
+		ResponseEntity<List<PropertyDTO>> result = this.controller.getClassProperties(ontologyId, ontologyClass);
 
 		// Verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());

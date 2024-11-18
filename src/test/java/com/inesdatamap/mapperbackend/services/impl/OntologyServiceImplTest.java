@@ -50,6 +50,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.exceptions.OntologyParserException;
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
@@ -380,7 +381,7 @@ class OntologyServiceImplTest {
 		doReturn(expectedProperties).when(ontologyService).getProperties(ontologyContent, className);
 
 		// Act
-		List<String> result = ontologyService.getClassProperties(id, className);
+		List<PropertyDTO> result = ontologyService.getClassProperties(id, className);
 
 		// Assert
 		assertEquals(expectedProperties, result);
@@ -422,7 +423,7 @@ class OntologyServiceImplTest {
 			mockedOWLManager.when(OWLManager::createOWLOntologyManager).thenReturn(manager);
 
 			// Act
-			List<String> result = service.getProperties(ontologyContent, className);
+			List<PropertyDTO> result = service.getProperties(ontologyContent, className);
 
 			// Assert
 			// Assuming getDataProperties returns a non-empty list for the purpose of this test
