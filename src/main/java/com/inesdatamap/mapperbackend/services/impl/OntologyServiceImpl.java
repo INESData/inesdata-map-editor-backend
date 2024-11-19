@@ -385,9 +385,8 @@ public class OntologyServiceImpl implements OntologyService {
 		List<PropertyDTO> annotationProperties = new ArrayList<>();
 
 		// Get all annotation properties in the ontology
-		ontology.annotationPropertiesInSignature().forEach(annotationProperty -> {
-			annotationProperties.add(createPropertyDTO(annotationProperty.getIRI().getFragment(), PropertyTypeEnum.ANNOTATION));
-		});
+		ontology.annotationPropertiesInSignature().forEach(annotationProperty -> annotationProperties
+				.add(createPropertyDTO(annotationProperty.getIRI().getFragment(), PropertyTypeEnum.ANNOTATION)));
 
 		return annotationProperties;
 	}

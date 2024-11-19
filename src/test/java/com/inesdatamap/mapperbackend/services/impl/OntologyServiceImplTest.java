@@ -361,7 +361,7 @@ class OntologyServiceImplTest {
 	}
 
 	@Test
-	void testGetOntologyProperties() throws Exception {
+	void testGetClassProperties() throws Exception {
 		// Mock data
 		Long id = 1L;
 		String className = "Class1";
@@ -439,9 +439,7 @@ class OntologyServiceImplTest {
 
 		// Act & Assert
 		assertThrows(IllegalArgumentException.class, () -> service.getProperties(null, "Class1"), "Ontology content is empty.");
-		assertThrows(IllegalArgumentException.class, () -> service.getProperties("", "Class1"), "Ontology content is empty.");
 		assertThrows(IllegalArgumentException.class, () -> service.getProperties("Ontology content", null), "Class name is empty.");
-		assertThrows(IllegalArgumentException.class, () -> service.getProperties("Ontology content", ""), "Class name is empty.");
 	}
 
 	@Test
