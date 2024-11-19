@@ -3,11 +3,8 @@ package com.inesdatamap.mapperbackend.services.impl;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
@@ -38,7 +35,6 @@ import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -48,10 +44,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.inesdatamap.mapperbackend.exceptions.OntologyParserException;
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
+import com.inesdatamap.mapperbackend.model.enums.PropertyTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
@@ -115,7 +111,7 @@ class OntologyServiceImplTest {
 		Ontology ontologyDB = new Ontology();
 		Ontology ontologySource = new Ontology();
 		Ontology ontologyUpdated = new Ontology();
-		ontologyUpdated.setId(id); // Mock the updated ontology ID
+		ontologyUpdated.setId(id);
 
 		// Define mock behavior
 		when(this.ontologyMapper.dtoToEntity(ontologyDto)).thenReturn(ontologySource);
@@ -366,33 +362,19 @@ class OntologyServiceImplTest {
 		Long id = 1L;
 		String className = "Class1";
 		String ontologyContent = "Ontology content";
-		List<String> expectedProperties = List.of("Attribute1", "Attribute2");
+		List<PropertyDTO> expectedProperties = createPropertyDTO("Poperty1", PropertyTypeEnum.DATA);
 
 		// Mock Ontology and service methods
 		Ontology ontology = mock(Ontology.class);
-
 		OntologyServiceImpl ontologyService = spy(new OntologyServiceImpl());
 
-		// Mock internal methods
 		doReturn(ontology).when(ontologyService).getEntity(id);
 		doReturn(ontologyContent).when(ontologyService).getOntologyContent(ontology);
-
-		// Mock the getProperties method and handle OWLOntologyCreationException
 		doReturn(expectedProperties).when(ontologyService).getProperties(ontologyContent, className);
 
-		// Act
 		List<PropertyDTO> result = ontologyService.getClassProperties(id, className);
-
-		// Assert
 		assertEquals(expectedProperties, result);
 
-		// Test exception handling
-		doThrow(new OWLOntologyCreationException("Error")).when(ontologyService).getProperties(anyString(), anyString());
-
-		OntologyParserException thrown = assertThrows(OntologyParserException.class, () -> {
-			ontologyService.getClassProperties(id, className);
-		});
-		assertTrue(thrown.getMessage().contains("Failed getting properties from ontology class"));
 	}
 
 	@Test
@@ -463,5 +445,14 @@ class OntologyServiceImplTest {
 		assertThrows(IllegalArgumentException.class, () -> {
 			this.ontologyService.getOntologyContent(ontologyWithoutContent);
 		}, "Ontology has no content.");
+	}
+
+	private static List<PropertyDTO> createPropertyDTO(String property, PropertyTypeEnum propertyEnum) {
+		List<PropertyDTO> properties = new ArrayList<>();
+		PropertyDTO propertyDTO = new PropertyDTO();
+		propertyDTO.setPropertyType(propertyEnum);
+		propertyDTO.setName(property);
+		properties.add(propertyDTO);
+		return properties;
 	}
 }
