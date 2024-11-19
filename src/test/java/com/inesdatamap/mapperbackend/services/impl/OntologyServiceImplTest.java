@@ -35,6 +35,7 @@ import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -447,6 +448,25 @@ class OntologyServiceImplTest {
 		}, "Ontology has no content.");
 	}
 
+
+	@Test
+	void testGetDataProperties() throws OWLOntologyCreationException {
+
+		String ontologyContent = buildOntologyContent();
+		String className = "Person";
+
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = manager
+				.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
+
+		List<PropertyDTO> dataProperties = this.ontologyService.getDataProperties(owlClass, owl);
+		assertEquals("hasName", dataProperties.get(0).getName());
+	}
+
+
+
 	private static List<PropertyDTO> createPropertyDTO(String property, PropertyTypeEnum propertyEnum) {
 		List<PropertyDTO> properties = new ArrayList<>();
 		PropertyDTO propertyDTO = new PropertyDTO();
@@ -454,5 +474,17 @@ class OntologyServiceImplTest {
 		propertyDTO.setName(property);
 		properties.add(propertyDTO);
 		return properties;
+	}
+
+	private static String buildOntologyContent() {
+
+		String content = "@prefix ex: <http://example.org/> .\r\n" + "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\r\n"
+				+ "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\r\n" + "\r\n" + "ex:Person a rdfs:Class .\r\n"
+				+ "ex:hasName a rdf:Property ;\r\n" + "    rdfs:domain ex:Person ;\r\n" + "    rdfs:range rdfs:Literal .";
+
+		Ontology ontology = new Ontology();
+		ontology.setContent(content.getBytes(StandardCharsets.UTF_8));
+
+		return new String(ontology.getContent(), StandardCharsets.UTF_8);
 	}
 }

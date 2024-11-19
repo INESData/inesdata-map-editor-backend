@@ -317,7 +317,7 @@ public class OntologyServiceImpl implements OntologyService {
 			OWLDataProperty property = domainAxiom.getProperty().asOWLDataProperty();
 
 			// Check if the domain of the axiom contains the class
-			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass)) {
+			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass) && property != null) {
 				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA));
 			}
 		}
@@ -328,7 +328,7 @@ public class OntologyServiceImpl implements OntologyService {
 	        OWLDataProperty property = rangeAxiom.getProperty().asOWLDataProperty();
 
 			// Check if the range of the axiom contains the class
-			if (rangeExpression.getClassesInSignature().contains(owlClass)) {
+			if (rangeExpression.getClassesInSignature().contains(owlClass) && property != null) {
 				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA));
 	        }
 	    }
