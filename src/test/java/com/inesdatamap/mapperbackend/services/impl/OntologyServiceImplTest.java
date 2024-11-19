@@ -465,6 +465,21 @@ class OntologyServiceImplTest {
 		assertEquals("hasName", dataProperties.get(0).getName());
 	}
 
+	@Test
+	void testGetObjectProperties() throws OWLOntologyCreationException {
+
+		String ontologyContent = buildOntologyContent();
+		String className = "Person";
+
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
+
+		List<PropertyDTO> objectProperties = this.ontologyService.getObjectProperties(owlClass, owl);
+		assertEquals("hasFriend", objectProperties.get(0).getName());
+	}
+
 
 
 	private static List<PropertyDTO> createPropertyDTO(String property, PropertyTypeEnum propertyEnum) {
@@ -478,9 +493,10 @@ class OntologyServiceImplTest {
 
 	private static String buildOntologyContent() {
 
-		String content = "@prefix ex: <http://example.org/> .\r\n" + "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\r\n"
-				+ "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\r\n" + "\r\n" + "ex:Person a rdfs:Class .\r\n"
-				+ "ex:hasName a rdf:Property ;\r\n" + "    rdfs:domain ex:Person ;\r\n" + "    rdfs:range rdfs:Literal .";
+		String content = "@prefix ex: <http://example.org/> .\n" + "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n"
+				+ "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" + "\n" + "ex:Person a rdfs:Class .\n"
+				+ "ex:hasName a rdf:Property ;\n" + "    rdfs:domain ex:Person ;\n" + "    rdfs:range rdfs:Literal .\n" + "\n"
+				+ "ex:hasFriend a rdf:Property, owl:ObjectProperty ;\n" + "    rdfs:domain ex:Person ;\n" + "    rdfs:range ex:Person .";
 
 		Ontology ontology = new Ontology();
 		ontology.setContent(content.getBytes(StandardCharsets.UTF_8));
