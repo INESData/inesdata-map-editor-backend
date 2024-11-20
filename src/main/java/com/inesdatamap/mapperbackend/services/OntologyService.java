@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 
@@ -88,15 +89,15 @@ public interface OntologyService {
 	List<String> getOntologyClasses(Long id);
 
 	/**
-	 * Gets all ontology class attributes.
+	 * Gets all ontology class properties.
 	 *
 	 * @param id
 	 *            ontology identifier
 	 * @param ontologyClass
-	 *            ontologyClass
+	 *            ontology class
 	 *
-	 * @return Ontology class attributes
+	 * @return Ontology class properties
 	 */
-	List<String> getOntologyAttributes(Long id, String ontologyClass);
+	List<PropertyDTO> getClassProperties(Long id, String ontologyClass);
 
 }

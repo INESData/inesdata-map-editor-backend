@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 import com.inesdatamap.mapperbackend.utils.Constants;
@@ -152,22 +153,22 @@ public class OntologyController {
 	}
 
 	/**
-	 * Gets all ontology class attributes.
+	 * Gets all properties of the class
 	 *
 	 * @param id
 	 *            ontology identifier
 	 *
 	 * @param ontologyClass
-	 *            ontologyClass
+	 *            ontology class
 	 *
-	 * @return Ontology class attributes
+	 * @return Ontology class properties
 	 */
 	@GetMapping("/{id}/{ontologyClass}")
-	@Operation(summary = "Get all ontology attributes")
-	public ResponseEntity<List<String>> getOntologyAttributes(
+	@Operation(summary = "Get all properties of the class")
+	public ResponseEntity<List<PropertyDTO>> getClassProperties(
 			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier", required = true) Long id,
 			@PathVariable(name = "ontologyClass") @Parameter(name = "ontologyClass", description = "Ontology class", required = true) String ontologyClass) {
-		List<String> classes = this.ontologyService.getOntologyAttributes(id, ontologyClass);
+		List<PropertyDTO> classes = this.ontologyService.getClassProperties(id, ontologyClass);
 		return ResponseEntity.ok(classes);
 	}
 }
