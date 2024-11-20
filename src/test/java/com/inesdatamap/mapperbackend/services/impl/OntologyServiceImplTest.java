@@ -52,6 +52,7 @@ import com.inesdatamap.mapperbackend.model.enums.PropertyTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
+import com.inesdatamap.mapperbackend.utils.OWLUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -349,7 +350,7 @@ class OntologyServiceImplTest {
 		when(owlOntology.getClassesInSignature()).thenReturn(classes);
 
 		// Act
-		List<String> result = this.ontologyService.getClasses(owlOntology);
+		List<String> result = OWLUtils.getClasses(owlOntology);
 
 		// Assert
 		// Expected result should only include the valid class name
@@ -361,9 +362,8 @@ class OntologyServiceImplTest {
 	void testGetClassProperties() throws Exception {
 		// Mock data
 		Long id = 1L;
-		String className = "Class1";
-		String ontologyContent = "Ontology content";
-		List<PropertyDTO> expectedProperties = createPropertyDTO("Poperty1", PropertyTypeEnum.DATA);
+		String className = "Person";
+		String ontologyContent = buildOntologyContent();
 
 		// Mock Ontology and service methods
 		Ontology ontology = mock(Ontology.class);
@@ -371,10 +371,10 @@ class OntologyServiceImplTest {
 
 		doReturn(ontology).when(ontologyService).getEntity(id);
 		doReturn(ontologyContent).when(ontologyService).getOntologyContent(ontology);
-		doReturn(expectedProperties).when(ontologyService).getProperties(ontologyContent, className);
 
 		List<PropertyDTO> result = ontologyService.getClassProperties(id, className);
-		assertEquals(expectedProperties, result);
+		assertEquals("hasName", result.get(0).getName());
+		assertEquals(PropertyTypeEnum.DATA, result.get(0).getPropertyType());
 
 	}
 
@@ -399,14 +399,12 @@ class OntologyServiceImplTest {
 		when(owlClass.getIRI()).thenReturn(iri);
 		when(iri.getFragment()).thenReturn(className);
 
-		// Create instance of the class under test
-		OntologyServiceImpl service = new OntologyServiceImpl();
 		// Mock OWLManager static method
 		try (MockedStatic<OWLManager> mockedOWLManager = mockStatic(OWLManager.class)) {
 			mockedOWLManager.when(OWLManager::createOWLOntologyManager).thenReturn(manager);
 
 			// Act
-			List<PropertyDTO> result = service.getProperties(ontologyContent, className);
+			List<PropertyDTO> result = OWLUtils.getProperties(ontologyContent, className);
 
 			// Assert
 			// Assuming getDataProperties returns a non-empty list for the purpose of this test
@@ -417,12 +415,10 @@ class OntologyServiceImplTest {
 
 	@Test
 	void testGetProperties_invalidInput() {
-		// Arrange
-		OntologyServiceImpl service = new OntologyServiceImpl();
 
 		// Act & Assert
-		assertThrows(IllegalArgumentException.class, () -> service.getProperties(null, "Class1"), "Ontology content is empty.");
-		assertThrows(IllegalArgumentException.class, () -> service.getProperties("Ontology content", null), "Class name is empty.");
+		assertThrows(IllegalArgumentException.class, () -> OWLUtils.getProperties(null, "Class1"), "Ontology content is empty.");
+		assertThrows(IllegalArgumentException.class, () -> OWLUtils.getProperties("Ontology content", null), "Class name is empty.");
 	}
 
 	@Test
@@ -461,7 +457,7 @@ class OntologyServiceImplTest {
 		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
 
-		List<PropertyDTO> dataProperties = this.ontologyService.getDataProperties(owlClass, owl);
+		List<PropertyDTO> dataProperties = OWLUtils.getDataProperties(owlClass, owl);
 		assertEquals("hasName", dataProperties.get(0).getName());
 	}
 
@@ -476,7 +472,7 @@ class OntologyServiceImplTest {
 		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
 
-		List<PropertyDTO> objectProperties = this.ontologyService.getObjectProperties(owlClass, owl);
+		List<PropertyDTO> objectProperties = OWLUtils.getObjectProperties(owlClass, owl);
 		assertEquals("hasFriend", objectProperties.get(0).getName());
 	}
 
