@@ -197,7 +197,7 @@ public class OntologyServiceImpl implements OntologyService {
 			Collections.sort(classList);
 
 		} catch (OWLOntologyCreationException e) {
-			throw new OntologyParserException("Failed getting classes from ontology: " + id, e);
+			throw new OntologyParserException("Failed getting classes from ontology with id: " + id, e);
 		}
 
 		return classList;
@@ -299,36 +299,37 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
-	 * Retrieves a list of data property names associated with a specific OWL class in a given ontology.
-	 *
+	 * Retrieves a list of data properties associated with a specified class in the ontology
+	 * 
 	 * @param owlClass
-	 *            The OWLClass representing the class for which data properties are being retrieved
+	 *            The OWL class
 	 * @param ontology
-	 *            The OWLOntology that contains the axioms and properties.
-	 * @return A list of strings containing the ata properties associated with the specified class
+	 *            The ontology in which to search for the data properties
+	 * 
+	 * @return A list of data properties
 	 */
 	public List<PropertyDTO> getDataProperties(OWLClass owlClass, OWLOntology ontology) {
 
 		Set<PropertyDTO> dataProperties = new HashSet<>();
 
 		// Iterate through all the data property domain axioms
-		for (OWLDataPropertyDomainAxiom domainAxiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_DOMAIN)) {
-			OWLClassExpression domainExpression = domainAxiom.getDomain();
-			OWLDataProperty property = domainAxiom.getProperty().asOWLDataProperty();
+		for (OWLDataPropertyDomainAxiom dataDomainAxiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_DOMAIN)) {
+			OWLClassExpression domain = dataDomainAxiom.getDomain();
+			OWLDataProperty property = dataDomainAxiom.getProperty().asOWLDataProperty();
 
 			// Check if the domain of the axiom contains the class
-			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass) && property != null) {
+			if (domain.equals(owlClass) || domain.getClassesInSignature().contains(owlClass) && property != null) {
 				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA));
 			}
 		}
 
 		// Iterate through all the data property range axioms
-		for (OWLDataPropertyRangeAxiom rangeAxiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_RANGE)) {
-	        OWLDataRange rangeExpression = rangeAxiom.getRange();
-	        OWLDataProperty property = rangeAxiom.getProperty().asOWLDataProperty();
+		for (OWLDataPropertyRangeAxiom dataRangeAxiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_RANGE)) {
+			OWLDataRange range = dataRangeAxiom.getRange();
+			OWLDataProperty property = dataRangeAxiom.getProperty().asOWLDataProperty();
 
 			// Check if the range of the axiom contains the class
-			if (rangeExpression.getClassesInSignature().contains(owlClass) && property != null) {
+			if (range.getClassesInSignature().contains(owlClass) && property != null) {
 				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA));
 	        }
 	    }
@@ -337,12 +338,13 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
-	 * Retrieves a list of object properties whose domain contains the specified OWLClass.
-	 *
+	 * Retrieves a list of object properties associated with a specified class in the ontology
+	 * 
 	 * @param owlClass
-	 *            The OWL class for which object properties are to be retrieved
+	 *            The OWL class
 	 * @param ontology
-	 *            The OWLOntology in which the object property axioms will be searched
+	 *            The ontology in which to search for the object properties
+	 * 
 	 * @return A list of object properties
 	 */
 	public List<PropertyDTO> getObjectProperties(OWLClass owlClass, OWLOntology ontology) {
@@ -355,7 +357,7 @@ public class OntologyServiceImpl implements OntologyService {
 			OWLObjectProperty property = domainAxiom.getProperty().asOWLObjectProperty();
 
 			// Check if the domain of the axiom contains the class
-			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass)) {
+			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass) && property != null) {
 				objectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT));
 			}
 		}
@@ -366,7 +368,7 @@ public class OntologyServiceImpl implements OntologyService {
 			OWLObjectProperty property = rangeAxiom.getProperty().asOWLObjectProperty();
 
 			// Check if the range of the axiom contains the class
-			if (rangeExpression.equals(owlClass) || rangeExpression.getClassesInSignature().contains(owlClass)) {
+			if (rangeExpression.equals(owlClass) || rangeExpression.getClassesInSignature().contains(owlClass) && property != null) {
 				objectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT));
 			}
 		}
@@ -374,11 +376,11 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
-	 * Retrieves a list of annotation properties from the ontology
+	 * Retrieves a list of annotation properties in the ontology
 	 *
 	 * @param ontology
 	 *            the OWLOntology
-	 * @return a list of annotation properties in the ontology
+	 * @return A list of annotation properties
 	 */
 	public List<PropertyDTO> getAnnotationProperties(OWLOntology ontology) {
 
