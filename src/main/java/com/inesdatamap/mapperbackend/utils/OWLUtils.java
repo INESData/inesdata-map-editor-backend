@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -98,7 +100,6 @@ public final class OWLUtils {
 		properties.addAll(getAnnotationProperties(owl));
 
 		return properties;
-
 	}
 
 	/**
@@ -122,7 +123,7 @@ public final class OWLUtils {
 
 			// Check if the domain of the axiom contains the class
 			if (domain.equals(owlClass) || domain.getClassesInSignature().contains(owlClass) && property != null) {
-				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA));
+				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA, true));
 			}
 		}
 
@@ -133,11 +134,43 @@ public final class OWLUtils {
 
 			// Check if the range of the axiom contains the class
 			if (range.getClassesInSignature().contains(owlClass) && property != null) {
-				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA));
+				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA, true));
 			}
 		}
 
+		// Get data properties not associated to a class
+		dataProperties.addAll(getUnassociatedDataProperties(ontology));
+
 		return new ArrayList<>(dataProperties);
+	}
+
+	/**
+	 * Retrieves a set of unassociated data properties from the given ontology.
+	 *
+	 * @param ontology
+	 *            The OWL ontology
+	 * @return A Set of PropertyDTO
+	 */
+	public static Set<PropertyDTO> getUnassociatedDataProperties(OWLOntology ontology) {
+		Set<PropertyDTO> unassociatedDataProperties = new HashSet<>();
+
+		// Unassociated data properties
+		for (OWLDataProperty property : ontology.dataPropertiesInSignature().collect(Collectors.toSet())) {
+			boolean isAssociated = false;
+
+			for (OWLAxiom axiom : ontology.getAxioms(property)) {
+				if (axiom.isOfType(AxiomType.DATA_PROPERTY_DOMAIN, AxiomType.DATA_PROPERTY_RANGE)) {
+					isAssociated = true;
+					break;
+				}
+			}
+
+			if (!isAssociated) {
+				unassociatedDataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA, false));
+			}
+		}
+
+		return unassociatedDataProperties;
 	}
 
 	/**
@@ -161,7 +194,7 @@ public final class OWLUtils {
 
 			// Check if the domain of the axiom contains the class
 			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass) && property != null) {
-				objectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT));
+				objectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT, true));
 			}
 		}
 
@@ -172,10 +205,43 @@ public final class OWLUtils {
 
 			// Check if the range of the axiom contains the class
 			if (rangeExpression.equals(owlClass) || rangeExpression.getClassesInSignature().contains(owlClass) && property != null) {
-				objectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT));
+				objectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT, true));
 			}
 		}
+
+		// Get object properties not associated to a class
+		objectProperties.addAll(getUnassociatedObjectProperties(ontology));
+
 		return new ArrayList<>(objectProperties);
+	}
+
+	/**
+	 * Retrieves a set of unassociated object properties from the given ontology
+	 *
+	 * @param ontology
+	 *            The OWL ontology
+	 * @return A Set of PropertyDTO
+	 */
+	public static Set<PropertyDTO> getUnassociatedObjectProperties(OWLOntology ontology) {
+		Set<PropertyDTO> unassociatedObjectProperties = new HashSet<>();
+
+		// Unassociated object properties
+		for (OWLObjectProperty property : ontology.objectPropertiesInSignature().collect(Collectors.toSet())) {
+			boolean isAssociated = false;
+
+			for (OWLAxiom axiom : ontology.getAxioms(property)) {
+				if (axiom.isOfType(AxiomType.OBJECT_PROPERTY_DOMAIN, AxiomType.OBJECT_PROPERTY_RANGE)) {
+					isAssociated = true;
+					break;
+				}
+			}
+
+			if (!isAssociated) {
+				unassociatedObjectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT, false));
+			}
+		}
+
+		return unassociatedObjectProperties;
 	}
 
 	/**
@@ -191,7 +257,7 @@ public final class OWLUtils {
 
 		// Get all annotation properties in the ontology
 		ontology.annotationPropertiesInSignature().forEach(annotationProperty -> annotationProperties
-				.add(createPropertyDTO(annotationProperty.getIRI().getFragment(), PropertyTypeEnum.ANNOTATION)));
+				.add(createPropertyDTO(annotationProperty.getIRI().getFragment(), PropertyTypeEnum.ANNOTATION, false)));
 
 		return annotationProperties;
 	}
@@ -203,12 +269,15 @@ public final class OWLUtils {
 	 *            the name
 	 * @param propertyEnum
 	 *            the type
+	 * @param isAssociated
+	 *            is associated or not with the class
 	 * @return a PropertyDTO
 	 */
-	public static PropertyDTO createPropertyDTO(String property, PropertyTypeEnum propertyEnum) {
+	public static PropertyDTO createPropertyDTO(String property, PropertyTypeEnum propertyEnum, boolean isAssociated) {
 		PropertyDTO propertyDTO = new PropertyDTO();
 		propertyDTO.setPropertyType(propertyEnum);
 		propertyDTO.setName(property);
+		propertyDTO.setAssociated(isAssociated);
 		return propertyDTO;
 	}
 
