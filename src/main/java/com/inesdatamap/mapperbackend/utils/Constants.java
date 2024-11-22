@@ -63,7 +63,7 @@ public final class Constants {
 	/**
 	 * Constant for field delimiter regex
 	 */
-	public static final String FIELD_DELIMITER_REGEX = "[,]";
+	public static final String FIELD_DELIMITER_REGEX = "[,;\t]";
 
 	/**
 	 * Constant for path separator
