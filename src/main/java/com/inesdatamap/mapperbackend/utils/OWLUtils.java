@@ -3,12 +3,14 @@ package com.inesdatamap.mapperbackend.utils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
 import org.semanticweb.owlapi.model.AxiomType;
+import org.semanticweb.owlapi.model.OWLAnnotationProperty;
 import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassExpression;
@@ -86,18 +88,21 @@ public final class OWLUtils {
 
 		// Create OWLOntologyManager instance and load the ontology
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+		OWLOntology ontology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+
 
 		// Find the owl class by class name
-		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
+		OWLClass owlClass = ontology.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
+
+		Map<String, String> namespacePrefixes = NameSpaceUtils.getPrefixNamespaceMap(ontology);
 
 		List<PropertyDTO> properties = new ArrayList<>();
 
 		// Collect properties and add them
-		properties.addAll(getDataProperties(owlClass, owl));
-		properties.addAll(getObjectProperties(owlClass, owl));
-		properties.addAll(getAnnotationProperties(owl));
+		properties.addAll(getDataProperties(owlClass, ontology, namespacePrefixes));
+		properties.addAll(getObjectProperties(owlClass, ontology, namespacePrefixes));
+		properties.addAll(getAnnotationProperties(ontology, namespacePrefixes));
 
 		return properties;
 	}
@@ -109,37 +114,44 @@ public final class OWLUtils {
 	 *            The OWL class
 	 * @param ontology
 	 *            The ontology in which to search for the data properties
-	 *
+	 * @param namespacePrefixes
+	 *            The map with prefix and namespace
 	 * @return A list of data properties
 	 */
-	public static List<PropertyDTO> getDataProperties(OWLClass owlClass, OWLOntology ontology) {
+	public static List<PropertyDTO> getDataProperties(OWLClass owlClass, OWLOntology ontology, Map<String, String> namespacePrefixes) {
 
 		Set<PropertyDTO> dataProperties = new HashSet<>();
 
-		// Iterate through all the data property domain axioms
-		for (OWLDataPropertyDomainAxiom dataDomainAxiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_DOMAIN)) {
-			OWLClassExpression domain = dataDomainAxiom.getDomain();
-			OWLDataProperty property = dataDomainAxiom.getProperty().asOWLDataProperty();
+		// Iterate over all axioms
+		for (OWLAxiom axiom : ontology.getAxioms()) {
+			OWLDataProperty property = null;
+			boolean isAssociated = false;
 
-			// Check if the domain of the axiom contains the class
-			if (domain.equals(owlClass) || domain.getClassesInSignature().contains(owlClass) && property != null) {
-				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA, true));
+			// Check if axiom is of data property domain
+			if (axiom.isOfType(AxiomType.DATA_PROPERTY_DOMAIN)) {
+				OWLDataPropertyDomainAxiom domainAxiom = (OWLDataPropertyDomainAxiom) axiom;
+				OWLClassExpression domain = domainAxiom.getDomain();
+				property = domainAxiom.getProperty().asOWLDataProperty();
+				isAssociated = domain.equals(owlClass) || domain.getClassesInSignature().contains(owlClass);
 			}
-		}
+			// Check if axiom is of range property domain
+			else if (axiom.isOfType(AxiomType.DATA_PROPERTY_RANGE)) {
+				OWLDataPropertyRangeAxiom rangeAxiom = (OWLDataPropertyRangeAxiom) axiom;
+				OWLDataRange range = rangeAxiom.getRange();
+				property = rangeAxiom.getProperty().asOWLDataProperty();
+				isAssociated = range.getClassesInSignature().contains(owlClass);
+			}
 
-		// Iterate through all the data property range axioms
-		for (OWLDataPropertyRangeAxiom dataRangeAxiom : ontology.getAxioms(AxiomType.DATA_PROPERTY_RANGE)) {
-			OWLDataRange range = dataRangeAxiom.getRange();
-			OWLDataProperty property = dataRangeAxiom.getProperty().asOWLDataProperty();
-
-			// Check if the range of the axiom contains the class
-			if (range.getClassesInSignature().contains(owlClass) && property != null) {
-				dataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA, true));
+			// If the property is associated to the class, add it to the list
+			if (property != null && isAssociated) {
+				String prefix = NameSpaceUtils.getPrefixForNamespace(namespacePrefixes, property.getIRI().getNamespace());
+				dataProperties.add(
+						createPropertyDTO((prefix != null ? prefix : "") + property.getIRI().getFragment(), PropertyTypeEnum.DATA, true));
 			}
 		}
 
 		// Get data properties not associated to a class
-		dataProperties.addAll(getUnassociatedDataProperties(ontology));
+		dataProperties.addAll(getUnassociatedDataProperties(ontology, namespacePrefixes));
 
 		return new ArrayList<>(dataProperties);
 	}
@@ -149,15 +161,18 @@ public final class OWLUtils {
 	 *
 	 * @param ontology
 	 *            The OWL ontology
+	 * @param namespacePrefixes
+	 *            The map with prefix and namespace
 	 * @return A Set of PropertyDTO
 	 */
-	public static Set<PropertyDTO> getUnassociatedDataProperties(OWLOntology ontology) {
+	public static Set<PropertyDTO> getUnassociatedDataProperties(OWLOntology ontology, Map<String, String> namespacePrefixes) {
 		Set<PropertyDTO> unassociatedDataProperties = new HashSet<>();
 
-		// Unassociated data properties
+		// Iterate over all data properties
 		for (OWLDataProperty property : ontology.dataPropertiesInSignature().collect(Collectors.toSet())) {
 			boolean isAssociated = false;
 
+			// Check if the property is associated with domain or range
 			for (OWLAxiom axiom : ontology.getAxioms(property)) {
 				if (axiom.isOfType(AxiomType.DATA_PROPERTY_DOMAIN, AxiomType.DATA_PROPERTY_RANGE)) {
 					isAssociated = true;
@@ -166,7 +181,9 @@ public final class OWLUtils {
 			}
 
 			if (!isAssociated) {
-				unassociatedDataProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.DATA, false));
+				String prefix = NameSpaceUtils.getPrefixForNamespace(namespacePrefixes, property.getIRI().getNamespace());
+				unassociatedDataProperties.add(
+						createPropertyDTO((prefix != null ? prefix : "") + property.getIRI().getFragment(), PropertyTypeEnum.DATA, false));
 			}
 		}
 
@@ -180,37 +197,44 @@ public final class OWLUtils {
 	 *            The OWL class
 	 * @param ontology
 	 *            The ontology in which to search for the object properties
-	 *
+	 * @param namespacePrefixes
+	 *            The map with prefix and namespace
 	 * @return A list of object properties
 	 */
-	public static List<PropertyDTO> getObjectProperties(OWLClass owlClass, OWLOntology ontology) {
+	public static List<PropertyDTO> getObjectProperties(OWLClass owlClass, OWLOntology ontology, Map<String, String> namespacePrefixes) {
 
 		Set<PropertyDTO> objectProperties = new HashSet<>();
 
-		// Iterate through all the object property domain axioms
-		for (OWLObjectPropertyDomainAxiom domainAxiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_DOMAIN)) {
-			OWLClassExpression domainExpression = domainAxiom.getDomain();
-			OWLObjectProperty property = domainAxiom.getProperty().asOWLObjectProperty();
+		// Iterate over all axioms
+		for (OWLAxiom axiom : ontology.getAxioms()) {
+			OWLObjectProperty property = null;
+			boolean isAssociated = false;
 
-			// Check if the domain of the axiom contains the class
-			if (domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass) && property != null) {
-				objectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT, true));
+			// Check if axiom is of object property domain
+			if (axiom.isOfType(AxiomType.OBJECT_PROPERTY_DOMAIN)) {
+				OWLObjectPropertyDomainAxiom domainAxiom = (OWLObjectPropertyDomainAxiom) axiom;
+				OWLClassExpression domainExpression = domainAxiom.getDomain();
+				property = domainAxiom.getProperty().asOWLObjectProperty();
+				isAssociated = domainExpression.equals(owlClass) || domainExpression.getClassesInSignature().contains(owlClass);
 			}
-		}
+			// Check if axiom is of object property range
+			else if (axiom.isOfType(AxiomType.OBJECT_PROPERTY_RANGE)) {
+				OWLObjectPropertyRangeAxiom rangeAxiom = (OWLObjectPropertyRangeAxiom) axiom;
+				OWLClassExpression rangeExpression = rangeAxiom.getRange();
+				property = rangeAxiom.getProperty().asOWLObjectProperty();
+				isAssociated = rangeExpression.equals(owlClass) || rangeExpression.getClassesInSignature().contains(owlClass);
+			}
 
-		// Iterate through all the object property range axioms
-		for (OWLObjectPropertyRangeAxiom rangeAxiom : ontology.getAxioms(AxiomType.OBJECT_PROPERTY_RANGE)) {
-			OWLClassExpression rangeExpression = rangeAxiom.getRange();
-			OWLObjectProperty property = rangeAxiom.getProperty().asOWLObjectProperty();
-
-			// Check if the range of the axiom contains the class
-			if (rangeExpression.equals(owlClass) || rangeExpression.getClassesInSignature().contains(owlClass) && property != null) {
-				objectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT, true));
+			// If the property is associated, add it to the result
+			if (property != null && isAssociated) {
+				String prefix = NameSpaceUtils.getPrefixForNamespace(namespacePrefixes, property.getIRI().getNamespace());
+				objectProperties.add(
+						createPropertyDTO((prefix != null ? prefix : "") + property.getIRI().getFragment(), PropertyTypeEnum.OBJECT, true));
 			}
 		}
 
 		// Get object properties not associated to a class
-		objectProperties.addAll(getUnassociatedObjectProperties(ontology));
+		objectProperties.addAll(getUnassociatedObjectProperties(ontology, namespacePrefixes));
 
 		return new ArrayList<>(objectProperties);
 	}
@@ -220,15 +244,18 @@ public final class OWLUtils {
 	 *
 	 * @param ontology
 	 *            The OWL ontology
+	 * @param namespacePrefixes
+	 *            The map with prefix and namespace
 	 * @return A Set of PropertyDTO
 	 */
-	public static Set<PropertyDTO> getUnassociatedObjectProperties(OWLOntology ontology) {
+	public static Set<PropertyDTO> getUnassociatedObjectProperties(OWLOntology ontology, Map<String, String> namespacePrefixes) {
 		Set<PropertyDTO> unassociatedObjectProperties = new HashSet<>();
 
-		// Unassociated object properties
+		// Iterate over all object properties
 		for (OWLObjectProperty property : ontology.objectPropertiesInSignature().collect(Collectors.toSet())) {
 			boolean isAssociated = false;
 
+			// Check if the property is associated with domain or range
 			for (OWLAxiom axiom : ontology.getAxioms(property)) {
 				if (axiom.isOfType(AxiomType.OBJECT_PROPERTY_DOMAIN, AxiomType.OBJECT_PROPERTY_RANGE)) {
 					isAssociated = true;
@@ -237,7 +264,9 @@ public final class OWLUtils {
 			}
 
 			if (!isAssociated) {
-				unassociatedObjectProperties.add(createPropertyDTO(property.getIRI().getFragment(), PropertyTypeEnum.OBJECT, false));
+				String prefix = NameSpaceUtils.getPrefixForNamespace(namespacePrefixes, property.getIRI().getNamespace());
+				unassociatedObjectProperties.add(createPropertyDTO((prefix != null ? prefix : "") + property.getIRI().getFragment(),
+						PropertyTypeEnum.OBJECT, false));
 			}
 		}
 
@@ -249,16 +278,22 @@ public final class OWLUtils {
 	 *
 	 * @param ontology
 	 *            the OWLOntology
+	 * @param namespacePrefixes
+	 *            The map with prefix and namespace
 	 * @return A list of annotation properties
 	 */
-	public static List<PropertyDTO> getAnnotationProperties(OWLOntology ontology) {
+	public static List<PropertyDTO> getAnnotationProperties(OWLOntology ontology, Map<String, String> namespacePrefixes) {
 
 		List<PropertyDTO> annotationProperties = new ArrayList<>();
 
 		// Get all annotation properties in the ontology
-		ontology.annotationPropertiesInSignature().forEach(annotationProperty -> annotationProperties
-				.add(createPropertyDTO(annotationProperty.getIRI().getFragment(), PropertyTypeEnum.ANNOTATION, false)));
+		for (OWLAnnotationProperty property : ontology.annotationPropertiesInSignature().collect(Collectors.toSet())) {
+			String prefix = NameSpaceUtils.getPrefixForNamespace(namespacePrefixes, property.getIRI().getNamespace());
 
+		annotationProperties
+				.add(createPropertyDTO((prefix != null ? prefix : "") + property.getIRI().getFragment(), PropertyTypeEnum.ANNOTATION,
+						false));
+		}
 		return annotationProperties;
 	}
 
