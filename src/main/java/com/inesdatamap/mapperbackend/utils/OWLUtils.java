@@ -134,7 +134,7 @@ public final class OWLUtils {
 				property = domainAxiom.getProperty().asOWLDataProperty();
 				isAssociated = domain.equals(owlClass) || domain.getClassesInSignature().contains(owlClass);
 			}
-			// Check if axiom is of range property domain
+			// Check if axiom is of data property range
 			else if (axiom.isOfType(AxiomType.DATA_PROPERTY_RANGE)) {
 				OWLDataPropertyRangeAxiom rangeAxiom = (OWLDataPropertyRangeAxiom) axiom;
 				OWLDataRange range = rangeAxiom.getRange();
