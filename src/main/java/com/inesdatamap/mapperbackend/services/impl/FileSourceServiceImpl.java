@@ -198,7 +198,7 @@ public class FileSourceServiceImpl implements FileSourceService {
 
 		String[] delimitedFields = fields.split(Constants.FIELD_DELIMITER_REGEX, -1);
 		// If the fields are delimited by not allow delimiter, delimited fields will have one string element
-		if (delimitedFields.length < 2) {
+		if (delimitedFields.length < Constants.NUMBER_2) {
 			throw new FileParserException("The CSV delimiter is not valid");
 		}
 
