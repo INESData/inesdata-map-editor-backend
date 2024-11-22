@@ -6,7 +6,7 @@
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
 	<changeSet author="gmv" id="1.1.0-update-data-source-fields">
-		<modifyDataType tableName="DATA_SOURCE" columnName="fields" newDataType="VARCHAR(800)"/>
+		<modifyDataType tableName="DATA_SOURCE" columnName="fields" newDataType="VARCHAR(1500)"/>
 	</changeSet>
 
 </databaseChangeLog>
