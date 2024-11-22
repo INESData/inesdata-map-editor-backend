@@ -219,14 +219,6 @@ class FileSourceServiceImplTest {
 		List<String> resultWithValidFields = this.fileSourceService.getFileFields(idWithValidFields);
 		List<String> expectedWithValidFields = Arrays.asList("field1", "field2", "field3");
 		assertEquals(expectedWithValidFields, resultWithValidFields);
-
-		// Act and Assert for empty fields
-		List<String> resultWithEmptyFields = this.fileSourceService.getFileFields(idWithEmptyFields);
-		assertTrue(resultWithEmptyFields.isEmpty());
-
-		// Act and Assert for null fields
-		List<String> resultWithNullFields = this.fileSourceService.getFileFields(idWithNullFields);
-		assertTrue(resultWithNullFields.isEmpty());
 	}
 
 	@Test

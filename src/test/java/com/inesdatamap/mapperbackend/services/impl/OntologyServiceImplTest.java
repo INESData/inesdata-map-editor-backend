@@ -2,7 +2,9 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
@@ -14,14 +16,13 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,6 +53,7 @@ import com.inesdatamap.mapperbackend.model.enums.PropertyTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
+import com.inesdatamap.mapperbackend.utils.NameSpaceUtils;
 import com.inesdatamap.mapperbackend.utils.OWLUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -373,44 +375,28 @@ class OntologyServiceImplTest {
 		doReturn(ontologyContent).when(ontologyService).getOntologyContent(ontology);
 
 		List<PropertyDTO> result = ontologyService.getClassProperties(id, className);
-		assertEquals("hasName", result.get(0).getName());
+		assertEquals("ex:hasName", result.get(0).getName());
 		assertEquals(PropertyTypeEnum.DATA, result.get(0).getPropertyType());
 
 	}
 
 	@Test
 	void testGetProperties_validInput() throws Exception {
-		// Arrange
-		String ontologyContent = "Ontology content";
-		String className = "Class1";
 
-		// Mock OWLOntologyManager and OWLOntology
+		String ontologyContent = buildOntologyContent();
+		String className = "Person";
 
-		// Mock for OWLOntologyManager and OWLOntology
-		OWLOntologyManager manager = mock(OWLOntologyManager.class);
-		OWLOntology owlOntology = mock(OWLOntology.class);
-		when(manager.loadOntologyFromOntologyDocument(any(StringDocumentSource.class))).thenReturn(owlOntology);
+		List<PropertyDTO> result = OWLUtils.getProperties(ontologyContent, className);
 
-		OWLClass owlClass = mock(OWLClass.class);
-		IRI iri = mock(IRI.class);
-
-		// Define behavior for mocks
-		when(owlOntology.classesInSignature()).thenReturn(Stream.of(owlClass));
-		when(owlClass.getIRI()).thenReturn(iri);
-		when(iri.getFragment()).thenReturn(className);
-
-		// Mock OWLManager static method
-		try (MockedStatic<OWLManager> mockedOWLManager = mockStatic(OWLManager.class)) {
-			mockedOWLManager.when(OWLManager::createOWLOntologyManager).thenReturn(manager);
-
-			// Act
-			List<PropertyDTO> result = OWLUtils.getProperties(ontologyContent, className);
-
-			// Assert
-			// Assuming getDataProperties returns a non-empty list for the purpose of this test
-			List<String> expectedProperties = new ArrayList<>();
-			assertEquals(expectedProperties, result);
+		boolean hasProperty = false;
+		for (PropertyDTO property : result) {
+			if ("ex:hasName".equals(property.getName())) {
+				hasProperty = true;
+				break;
+			}
 		}
+		assertTrue(hasProperty);
+		assertNotNull(result);
 	}
 
 	@Test
@@ -457,8 +443,10 @@ class OntologyServiceImplTest {
 		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
 
-		List<PropertyDTO> dataProperties = OWLUtils.getDataProperties(owlClass, owl);
-		assertEquals("hasName", dataProperties.get(0).getName());
+		Map<String, String> namespacePrefixes = NameSpaceUtils.getPrefixNamespaceMap(owl);
+
+		List<PropertyDTO> dataProperties = OWLUtils.getDataProperties(owlClass, owl, namespacePrefixes);
+		assertEquals("ex:hasName", dataProperties.get(0).getName());
 	}
 
 	@Test
@@ -470,21 +458,13 @@ class OntologyServiceImplTest {
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
 		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
+
 				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
 
-		List<PropertyDTO> objectProperties = OWLUtils.getObjectProperties(owlClass, owl);
-		assertEquals("hasFriend", objectProperties.get(0).getName());
-	}
+		Map<String, String> namespacePrefixes = NameSpaceUtils.getPrefixNamespaceMap(owl);
 
-
-
-	private static List<PropertyDTO> createPropertyDTO(String property, PropertyTypeEnum propertyEnum) {
-		List<PropertyDTO> properties = new ArrayList<>();
-		PropertyDTO propertyDTO = new PropertyDTO();
-		propertyDTO.setPropertyType(propertyEnum);
-		propertyDTO.setName(property);
-		properties.add(propertyDTO);
-		return properties;
+		List<PropertyDTO> objectProperties = OWLUtils.getObjectProperties(owlClass, owl, namespacePrefixes);
+		assertEquals("ex:hasFriend", objectProperties.get(0).getName());
 	}
 
 	private static String buildOntologyContent() {
