@@ -467,16 +467,29 @@ class OntologyServiceImplTest {
 		assertEquals("ex:hasFriend", objectProperties.get(0).getName());
 	}
 
+	@Test
+	void testGetAnnotationProperties() throws OWLOntologyCreationException {
+
+		String ontologyContent = buildOntologyContent();
+
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+
+		Map<String, String> namespacePrefixes = NameSpaceUtils.getPrefixNamespaceMap(owl);
+
+		List<PropertyDTO> annotationProperties = OWLUtils.getAnnotationProperties(owl, namespacePrefixes);
+		assertEquals("ex:author", annotationProperties.get(0).getName());
+	}
+
 	private static String buildOntologyContent() {
 
-		String content = "@prefix ex: <http://example.org/> .\n" + "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n"
-				+ "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" + "\n" + "ex:Person a rdfs:Class .\n"
-				+ "ex:hasName a rdf:Property ;\n" + "    rdfs:domain ex:Person ;\n" + "    rdfs:range rdfs:Literal .\n" + "\n"
-				+ "ex:hasFriend a rdf:Property, owl:ObjectProperty ;\n" + "    rdfs:domain ex:Person ;\n" + "    rdfs:range ex:Person .";
+		String content = "@prefix ex: <http://example.org/> .\n" + "@prefix dc: <http://purl.org/dc/terms/> .\n"
+				+ "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n"
+				+ "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" + "\n" + "ex:Person rdf:type rdfs:Class .\n" + "\n"
+				+ "ex:hasName rdf:type rdf:Property ;\n" + "    rdfs:domain ex:Person ;\n" + "    rdfs:range rdfs:Literal .\n" + "\n"
+				+ "ex:hasFriend rdf:type rdf:ObjectProperty ;\n" + "    rdfs:domain ex:Person ;\n" + "    rdfs:range ex:Person .\n" + "\n"
+				+ "ex:author rdf:type owl:AnnotationProperty .";
 
-		Ontology ontology = new Ontology();
-		ontology.setContent(content.getBytes(StandardCharsets.UTF_8));
-
-		return new String(ontology.getContent(), StandardCharsets.UTF_8);
+		return content;
 	}
 }
