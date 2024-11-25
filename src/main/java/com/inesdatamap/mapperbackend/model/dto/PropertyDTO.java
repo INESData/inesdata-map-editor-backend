@@ -19,4 +19,7 @@ public class PropertyDTO {
 	@NotNull
 	private String name;
 
+	@NotNull
+	private boolean isAssociated;
+
 }

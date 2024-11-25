@@ -13,6 +13,10 @@ public final class Constants {
 	 */
 	public static final int NUMBER_0 = 0;
 	/**
+	 * Constant representing the number 2
+	 */
+	public static final int NUMBER_2 = 2;
+	/**
 	 * Constant representing the number 10
 	 */
 	public static final int NUMBER_10 = 10;
@@ -63,7 +67,7 @@ public final class Constants {
 	/**
 	 * Constant for field delimiter regex
 	 */
-	public static final String FIELD_DELIMITER_REGEX = "[,]";
+	public static final String FIELD_DELIMITER_REGEX = "[,;\t]";
 
 	/**
 	 * Constant for path separator

@@ -27,6 +27,16 @@ public class FileParserException extends BaseException {
 	}
 
 	/**
+	 * Constructor
+	 *
+	 * @param message
+	 *            the message
+	 */
+	public FileParserException(String message) {
+		super(message);
+	}
+
+	/**
 	 * (non-javadoc)
 	 *
 	 * @see BaseException#getErrorCode()

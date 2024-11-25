@@ -12,5 +12,6 @@
 	<include file="classpath:db/changelog/1.1.0/dropTableNamespace.xml"/>
 	<include file="classpath:db/changelog/1.1.0/dropColumnOntology.xml"/>
 	<include file="classpath:db/changelog/1.1.0/addTableMappingOntology.xml"/>
+	<include file="classpath:db/changelog/1.1.0/updateDataSourceFields.xml"/>
 
 </databaseChangeLog>

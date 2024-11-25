@@ -190,13 +190,19 @@ public class FileSourceServiceImpl implements FileSourceService {
 	public List<String> getFileFields(Long id) {
 
 		FileSource fileSource = this.getEntity(id);
-
 		String fields = fileSource.getFields();
-		if (fields != null && !fields.isEmpty()) {
-			return Arrays.asList(fields.split(Constants.FIELD_DELIMITER_REGEX));
-		} else {
-			return Arrays.asList();
+
+		if (fields == null || fields.isEmpty()) {
+			throw new FileParserException("There are no fields in the file");
 		}
+
+		String[] delimitedFields = fields.split(Constants.FIELD_DELIMITER_REGEX, -1);
+		// If the fields are delimited by not allow delimiter, delimited fields will have one string element
+		if (delimitedFields.length < Constants.NUMBER_2) {
+			throw new FileParserException("The CSV delimiter is not valid");
+		}
+
+		return Arrays.asList(delimitedFields);
 
 	}
 
