@@ -14,6 +14,7 @@ The application runs on port 8080 and is executed by the user `mapper`.
 
 ## Build
 Build the image using the following command:
+
 ```
 docker build -f docker/Dockerfile --tag com.inesdata-map/mapper-backend .
 ```
