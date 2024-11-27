@@ -278,7 +278,7 @@ public class MappingServiceImpl implements MappingService {
 			RmlUtils.createSubjectMapNode(builder, mappingNode, field.getSubject().getTemplate(), field.getSubject().getClassName());
 
 			// Predicate-object maps
-			field.getPredicates().forEach(predicate -> {
+			field.getPredicates().forEach(predicate ->
 				predicate.getObjectMap().forEach(objectMap -> {
 					// Iterate through objectMaps and get new literal value
 					String literalValue = objectMap.getLiteralValue();
@@ -287,13 +287,10 @@ public class MappingServiceImpl implements MappingService {
 
 					// Keep value in mapping and change it in predicateObjectMapDTO to use it in rml
 					PredicateObjectMapDTO predicateObjectMapDTO = this.predicateObjectMapMapper.entityToDto(predicate);
-					predicateObjectMapDTO.getObjectMap().forEach(tempObjectMap -> {
-						tempObjectMap.setLiteralValue(modifiedLiteralValue);
-					});
+					predicateObjectMapDTO.getObjectMap().forEach(tempObjectMap -> tempObjectMap.setLiteralValue(modifiedLiteralValue));
 					RmlUtils.createPredicateObjectMapNode(builder, mappingNode, predicate.getPredicate(),
 							predicateObjectMapDTO.getObjectMap());
-				});
-			});
+			}));
 
 		});
 
