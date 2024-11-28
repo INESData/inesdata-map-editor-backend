@@ -48,7 +48,7 @@ public final class RmlUtils {
 				// rml:source
 				.add("rml:source", vf.createLiteral(sourcePath))
 				// rml:referenceFormulation
-				.add("rml:referenceFormulation", vf.createIRI(referenceFormulation));
+				.add("rml:referenceFormulation", vf.createLiteral(referenceFormulation));
 		if (iterator != null) {
 			builder.subject(logicalSourceNode)
 					// rml:iterator

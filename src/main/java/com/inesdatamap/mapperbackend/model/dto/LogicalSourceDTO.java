@@ -12,13 +12,12 @@ import lombok.Setter;
 @Setter
 public class LogicalSourceDTO extends BaseEntityDTO {
 
-	@NotNull
 	@Size(min = 1, max = 255)
 	private String source;
 
-	@NotNull
 	private String referenceFormulation;
 
+	@NotNull
 	private String iterator;
 
 	@Size(min = 1, max = 255)
