@@ -254,7 +254,7 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
-	 * Retrieves a map of namespaces and their associated prefixes from an ontology
+	 * Retrieves a map of namespaces and their prefixes from an ontology
 	 *
 	 * @param id
 	 *            the identifier of the ontology

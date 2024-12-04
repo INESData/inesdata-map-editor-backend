@@ -158,6 +158,10 @@ public class MappingServiceImpl implements MappingService {
 		// Delete files related to the mapping
 		this.deleteMappingFiles(mapping);
 
+		// Clear associated ontologies before deleting mapping
+		mapping.getOntologies().clear();
+		this.mappingRepo.save(mapping);
+
 		// Delete mapping
 		this.mappingRepo.deleteById(id);
 
