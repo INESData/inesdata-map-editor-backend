@@ -22,8 +22,10 @@ import com.inesdatamap.mapperbackend.exceptions.OntologyParserException;
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
+import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
+import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
@@ -44,6 +46,9 @@ public class OntologyServiceImpl implements OntologyService {
 
 	@Autowired
 	private OntologyMapper ontologyMapper;
+
+	@Autowired
+	private MappingRepository mappingRepo;
 
 	/**
 	 * Retrieves a list of all ontologies and maps them to their corresponding DTOs.
@@ -98,7 +103,13 @@ public class OntologyServiceImpl implements OntologyService {
 	public void deleteOntology(Long id) {
 
 		// Get entity if exists
-		this.getEntity(id);
+		Ontology ontology = this.getEntity(id);
+
+		// Check if ontology is being used by any mapping
+		List<Mapping> mappingsUsingOntology = this.mappingRepo.findAllByOntologiesContaining(ontology);
+		if (!mappingsUsingOntology.isEmpty()) {
+			throw new IllegalArgumentException("Ontology is being used in one or more mappings and it can not be deleted");
+		}
 
 		this.ontologyRepo.deleteById(id);
 
