@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
@@ -26,6 +27,7 @@ import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
+import com.inesdatamap.mapperbackend.utils.NameSpaceUtils;
 import com.inesdatamap.mapperbackend.utils.OWLUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -238,5 +240,30 @@ public class OntologyServiceImpl implements OntologyService {
 
 		// Convert bytes to String
 		return new String(contentBytes, StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * Retrieves a map of namespaces and their associated prefixes from an ontology
+	 *
+	 * @param id
+	 *            the identifier of the ontology
+	 * @return a map where the keys are prefix strings and the values are the corresponding namespace URIs
+	 */
+	@Override
+	public Map<String, String> getNameSpaceMap(Long id) {
+
+		Ontology ontology = this.getEntity(id);
+		String ontologyContent = this.getOntologyContent(ontology);
+
+		// Create OWLOntologyManager instance
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		try {
+			// Load ontology
+			OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+
+			return NameSpaceUtils.getPrefixNamespaceMap(owlOntology);
+		} catch (OWLOntologyCreationException e) {
+			throw new OntologyParserException("Failed getting namespace map from ontology with id: " + id, e);
+		}
 	}
 }
