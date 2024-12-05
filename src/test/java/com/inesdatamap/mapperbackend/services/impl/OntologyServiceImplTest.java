@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -491,18 +492,13 @@ class OntologyServiceImplTest {
 	@Test
 	void testGetNameSpaceMap() throws OWLOntologyCreationException {
 
-		Long ontologyId = 1L;
 		String ontologyContent = buildOntologyContent();
 		byte[] ontologyContentBytes = ontologyContent.getBytes(StandardCharsets.UTF_8);
-		Ontology ontology = mock(Ontology.class);
+		Ontology ontology = new Ontology();
+		ontology.setContent(ontologyContentBytes);
 
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
-
-		lenient().when(this.ontologyRepo.findById(ontologyId)).thenReturn(Optional.of(this.ontology));
-		lenient().when(ontology.getContent()).thenReturn(ontologyContentBytes);
-
-		Map<String, String> namespaceMap = NameSpaceUtils.getPrefixNamespaceMap(owlOntology);
+		when(this.ontologyRepo.findById(anyLong())).thenReturn(Optional.ofNullable(ontology));
+		Map<String, String> namespaceMap = this.ontologyService.getNameSpaceMap(1L);
 
 		assertNotNull(namespaceMap);
 		assertTrue(namespaceMap.containsKey("rdfs:"));
