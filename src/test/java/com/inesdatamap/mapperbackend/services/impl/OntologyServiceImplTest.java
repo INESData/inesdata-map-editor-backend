@@ -77,6 +77,9 @@ class OntologyServiceImplTest {
 	private OWLOntology owlOntology;
 
 	@Mock
+	private Ontology ontology;
+
+	@Mock
 	private MappingRepository mappingRepo;
 
 	@InjectMocks
@@ -488,10 +491,16 @@ class OntologyServiceImplTest {
 	@Test
 	void testGetNameSpaceMap() throws OWLOntologyCreationException {
 
+		Long ontologyId = 1L;
 		String ontologyContent = buildOntologyContent();
+		byte[] ontologyContentBytes = ontologyContent.getBytes(StandardCharsets.UTF_8);
+		Ontology ontology = mock(Ontology.class);
 
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+
+		lenient().when(this.ontologyRepo.findById(ontologyId)).thenReturn(Optional.of(this.ontology));
+		lenient().when(ontology.getContent()).thenReturn(ontologyContentBytes);
 
 		Map<String, String> namespaceMap = NameSpaceUtils.getPrefixNamespaceMap(owlOntology);
 
