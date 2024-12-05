@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -129,11 +130,14 @@ class DataSourceServiceImplTest {
 		DataSource dataSource = new DataSource();
 		when(this.dataSourceRepository.findById(id)).thenReturn(Optional.of(dataSource));
 
-		// Execute the method
+		// Data source is not in use
+		when(this.mappingFieldRepo.existsBySourceId(id)).thenReturn(false);
 		this.dataSourceService.deleteDataSource(id);
-
-		// Verify
 		verify(this.dataSourceRepository, times(1)).deleteById(id);
+
+		// Data source is in use
+		when(this.mappingFieldRepo.existsBySourceId(id)).thenReturn(true);
+		assertThrows(IllegalArgumentException.class, () -> this.dataSourceService.deleteDataSource(id));
 	}
 
 	@Test
