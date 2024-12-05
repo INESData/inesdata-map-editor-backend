@@ -486,9 +486,10 @@ class OntologyServiceImplTest {
 	}
 
 	@Test
-	void testGetNamespaceMap() throws OWLOntologyCreationException {
+	void testGetNameSpaceMap() throws OWLOntologyCreationException {
 
 		String ontologyContent = buildOntologyContent();
+
 		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 		OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
 
