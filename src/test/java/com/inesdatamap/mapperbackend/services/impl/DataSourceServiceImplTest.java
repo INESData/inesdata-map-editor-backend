@@ -1,5 +1,11 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -22,14 +28,9 @@ import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 import com.inesdatamap.mapperbackend.model.mappers.DataSourceMapper;
 import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
+import com.inesdatamap.mapperbackend.repositories.jpa.MappingFieldRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DataSourceServiceImplTest {
@@ -39,6 +40,9 @@ class DataSourceServiceImplTest {
 
 	@Mock
 	private DataSourceRepository<DataSource> dataSourceRepository;
+
+	@Mock
+	private MappingFieldRepository mappingFieldRepo;
 
 	@Mock
 	private DataSourceMapper dataSourceMapper;

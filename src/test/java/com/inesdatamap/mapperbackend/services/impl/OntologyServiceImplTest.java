@@ -52,7 +52,6 @@ import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.enums.PropertyTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
-import com.inesdatamap.mapperbackend.repositories.jpa.MappingFieldRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.utils.NameSpaceUtils;
@@ -79,9 +78,6 @@ class OntologyServiceImplTest {
 
 	@Mock
 	private MappingRepository mappingRepo;
-
-	@Mock
-	private MappingFieldRepository mappingFieldRepo;
 
 	@InjectMocks
 	private OntologyServiceImpl ontologyService;
