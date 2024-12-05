@@ -147,15 +147,23 @@ class OntologyServiceImplTest {
 		// Mock data
 		Long id = 1L;
 		Ontology ontology = new Ontology();
+		Mapping mapping = new Mapping();
+		List<Mapping> mappingsUsingOntology = List.of(mapping);
 
 		// Mock behavior
 		Mockito.when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontology));
+		Mockito.when(this.mappingRepo.findAllByOntologiesContaining(ontology)).thenReturn(mappingsUsingOntology);
 
-		// Test
+		// If ontology is in use
+		assertThrows(IllegalArgumentException.class, () -> {
+			this.ontologyService.deleteOntology(id);
+		});
+
+		// Ontology is not in use
+		List<Mapping> mappingsUsingOntologyEmpty = List.of();
+		Mockito.when(this.mappingRepo.findAllByOntologiesContaining(ontology)).thenReturn(mappingsUsingOntologyEmpty);
+
 		this.ontologyService.deleteOntology(id);
-
-		// Verify
-		Mockito.verify(this.ontologyRepo, Mockito.times(1)).deleteById(id);
 	}
 
 	@Test
