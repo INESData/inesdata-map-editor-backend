@@ -52,6 +52,8 @@ import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.enums.PropertyTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
+import com.inesdatamap.mapperbackend.repositories.jpa.MappingFieldRepository;
+import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.utils.NameSpaceUtils;
 import com.inesdatamap.mapperbackend.utils.OWLUtils;
@@ -74,6 +76,12 @@ class OntologyServiceImplTest {
 
 	@Mock
 	private OWLOntology owlOntology;
+
+	@Mock
+	private MappingRepository mappingRepo;
+
+	@Mock
+	private MappingFieldRepository mappingFieldRepo;
 
 	@InjectMocks
 	private OntologyServiceImpl ontologyService;
@@ -481,10 +489,23 @@ class OntologyServiceImplTest {
 		assertEquals("ex:author", annotationProperties.get(0).getName());
 	}
 
+	@Test
+	void testGetNamespaceMap() throws OWLOntologyCreationException {
+
+		String ontologyContent = buildOntologyContent();
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+
+		Map<String, String> namespaceMap = NameSpaceUtils.getPrefixNamespaceMap(owlOntology);
+
+		assertNotNull(namespaceMap);
+		assertTrue(namespaceMap.containsKey("rdfs:"));
+
+	}
+
 	private static String buildOntologyContent() {
 
-		String content = "@prefix ex: <http://example.org/> .\n" + "@prefix dc: <http://purl.org/dc/terms/> .\n"
-				+ "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n"
+		String content = "@prefix ex: <http://example.org/> .\n"
 				+ "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" + "\n" + "ex:Person rdf:type rdfs:Class .\n" + "\n"
 				+ "ex:hasName rdf:type rdf:Property ;\n" + "    rdfs:domain ex:Person ;\n" + "    rdfs:range rdfs:Literal .\n" + "\n"
 				+ "ex:hasFriend rdf:type rdf:ObjectProperty ;\n" + "    rdfs:domain ex:Person ;\n" + "    rdfs:range ex:Person .\n" + "\n"
