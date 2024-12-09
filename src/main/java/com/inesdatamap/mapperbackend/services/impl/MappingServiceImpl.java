@@ -38,9 +38,7 @@ import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.LogicalSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
-import com.inesdatamap.mapperbackend.model.jpa.ObjectMap;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
-import com.inesdatamap.mapperbackend.model.jpa.PredicateObjectMap;
 import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
 import com.inesdatamap.mapperbackend.model.mappers.PredicateObjectMapMapper;
 import com.inesdatamap.mapperbackend.properties.AppProperties;
@@ -279,20 +277,9 @@ public class MappingServiceImpl implements MappingService {
 
 			// Predicate-object maps
 			field.getPredicates().forEach(predicate -> {
-				predicate.getObjectMap().forEach(objectMap -> {
-					// Iterate through objectMaps and get new literal value
-					String literalValue = objectMap.getLiteralValue();
-					int lastSlashIndex = literalValue.lastIndexOf('/');
-					String modifiedLiteralValue = lastSlashIndex != -1 ? literalValue.substring(lastSlashIndex + 1) : literalValue;
-
-					// Keep value in mapping and change it in predicateObjectMapDTO to use it in rml
 					PredicateObjectMapDTO predicateObjectMapDTO = this.predicateObjectMapMapper.entityToDto(predicate);
-					predicateObjectMapDTO.getObjectMap().forEach(tempObjectMap -> {
-						tempObjectMap.setLiteralValue(modifiedLiteralValue);
-					});
 					RmlUtils.createPredicateObjectMapNode(builder, mappingNode, predicate.getPredicate(),
 							predicateObjectMapDTO.getObjectMap());
-				});
 			});
 
 		});
@@ -366,29 +353,6 @@ public class MappingServiceImpl implements MappingService {
 	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, MappingField field) {
 		RmlUtils.createLogicalSourceNode(builder, mappingNode, field.getLogicalSource().getSource(),
 				field.getLogicalSource().getReferenceFormulation(), field.getLogicalSource().getIterator());
-	}
-
-	/**
-	 * Finds and returns the first iterator value from the predicates in field
-	 *
-	 * @param field
-	 *            The MappingField
-	 * @return The part of the literal value
-	 */
-	private static String findIterator(MappingField field) {
-		// Iterate over each predicate
-		for (PredicateObjectMap predicate : field.getPredicates()) {
-			// Iterate over ObjectMap
-			for (ObjectMap objectMap : predicate.getObjectMap()) {
-				String literalValue = objectMap.getLiteralValue();
-				int lastSlashIndex = literalValue.lastIndexOf('/');
-				// Extract the part before the last separator
-				if (lastSlashIndex != -1) {
-					return literalValue.substring(0, lastSlashIndex);
-				}
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -578,7 +542,7 @@ public class MappingServiceImpl implements MappingService {
 				String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
 
 				// Find iterator
-				String iterator = findIterator(field);
+				String iterator = field.getLogicalSource() != null ? field.getLogicalSource().getIterator() : null;
 
 				// Set referenceFormulation according to file type
 				String referenceFormulation = switch (source.getFileType()) {
@@ -589,9 +553,11 @@ public class MappingServiceImpl implements MappingService {
 
 				// Create logicalSource and set values
 				LogicalSource logicalSource = new LogicalSource();
-				logicalSource.setIterator(iterator);
 				logicalSource.setReferenceFormulation(referenceFormulation);
 				logicalSource.setSource(sourcePath);
+				if (iterator != null) {
+					logicalSource.setIterator(iterator);
+				}
 
 				// Set logicalSource to field
 				field.setLogicalSource(logicalSource);

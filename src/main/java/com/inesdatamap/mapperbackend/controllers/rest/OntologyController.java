@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.controllers.rest;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -170,5 +171,21 @@ public class OntologyController {
 			@PathVariable(name = "ontologyClass") @Parameter(name = "ontologyClass", description = "Ontology class", required = true) String ontologyClass) {
 		List<PropertyDTO> classes = this.ontologyService.getClassProperties(id, ontologyClass);
 		return ResponseEntity.ok(classes);
+	}
+
+	/**
+	 * Gets ontology namespace map
+	 *
+	 * @param id
+	 *            ontology identifier
+	 *
+	 * @return ontology namespace map
+	 */
+	@GetMapping("/{id}/namespaces")
+	@Operation(summary = "Get ontology namespace and prefix map")
+	public ResponseEntity<Map<String, String>> getNameSpaceMap(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Ontology identifier", required = true) Long id) {
+		java.util.Map<String, String> map = this.ontologyService.getNameSpaceMap(id);
+		return ResponseEntity.ok(map);
 	}
 }

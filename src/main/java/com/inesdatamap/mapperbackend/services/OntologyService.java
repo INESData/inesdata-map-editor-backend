@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.services;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -99,5 +100,15 @@ public interface OntologyService {
 	 * @return Ontology class properties
 	 */
 	List<PropertyDTO> getClassProperties(Long id, String ontologyClass);
+
+	/**
+	 * Gets ontology namespace map
+	 *
+	 * @param id
+	 *            ontology identifier
+	 *
+	 * @return ontology namespace map
+	 */
+	Map<String, String> getNameSpaceMap(Long id);
 
 }

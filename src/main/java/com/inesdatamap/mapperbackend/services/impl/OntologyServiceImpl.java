@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
@@ -21,11 +22,14 @@ import com.inesdatamap.mapperbackend.exceptions.OntologyParserException;
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
+import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
+import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
+import com.inesdatamap.mapperbackend.utils.NameSpaceUtils;
 import com.inesdatamap.mapperbackend.utils.OWLUtils;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -42,6 +46,9 @@ public class OntologyServiceImpl implements OntologyService {
 
 	@Autowired
 	private OntologyMapper ontologyMapper;
+
+	@Autowired
+	private MappingRepository mappingRepo;
 
 	/**
 	 * Retrieves a list of all ontologies and maps them to their corresponding DTOs.
@@ -96,7 +103,13 @@ public class OntologyServiceImpl implements OntologyService {
 	public void deleteOntology(Long id) {
 
 		// Get entity if exists
-		this.getEntity(id);
+		Ontology ontology = this.getEntity(id);
+
+		// Check if ontology is being used by any mapping
+		List<Mapping> mappingsUsingOntology = this.mappingRepo.findAllByOntologiesContaining(ontology);
+		if (!mappingsUsingOntology.isEmpty()) {
+			throw new IllegalArgumentException("Ontology is being used in one or more mappings and it can not be deleted");
+		}
 
 		this.ontologyRepo.deleteById(id);
 
@@ -238,5 +251,30 @@ public class OntologyServiceImpl implements OntologyService {
 
 		// Convert bytes to String
 		return new String(contentBytes, StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * Retrieves a map of namespaces and their prefixes from an ontology
+	 *
+	 * @param id
+	 *            the identifier of the ontology
+	 * @return a map where the keys are prefix strings and the values are the corresponding namespace URIs
+	 */
+	@Override
+	public Map<String, String> getNameSpaceMap(Long id) {
+
+		Ontology ontology = this.getEntity(id);
+		String ontologyContent = this.getOntologyContent(ontology);
+
+		// Create OWLOntologyManager instance
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		try {
+			// Load ontology
+			OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+
+			return NameSpaceUtils.getPrefixNamespaceMap(owlOntology);
+		} catch (OWLOntologyCreationException e) {
+			throw new OntologyParserException("Failed getting namespace map from ontology with id: " + id, e);
+		}
 	}
 }

@@ -8,7 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -202,6 +204,22 @@ class OntologyControllerTest {
 		// Verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals(classProperties, result.getBody());
+	}
+
+	@Test
+	void testGetNamespaceMap() {
+
+		Long id = 1L;
+		Map<String, String> namespaceMap = new HashMap<>();
+		namespaceMap.put("solar", "https://w3id.org/solar/o/core#");
+		namespaceMap.put("schema", "https://schema.org/");
+		namespaceMap.put("skos", "http://www.w3.org/2004/02/skos/core#");
+
+		Mockito.when(this.ontologyService.getNameSpaceMap(id)).thenReturn(namespaceMap);
+
+		ResponseEntity<Map<String, String>> result = this.controller.getNameSpaceMap(id);
+
+		assertEquals(namespaceMap, result.getBody());
 	}
 
 }

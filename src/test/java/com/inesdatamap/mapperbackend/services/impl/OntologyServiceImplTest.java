@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -50,8 +51,10 @@ import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
 import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
 import com.inesdatamap.mapperbackend.model.enums.PropertyTypeEnum;
+import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
+import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.utils.NameSpaceUtils;
 import com.inesdatamap.mapperbackend.utils.OWLUtils;
@@ -74,6 +77,12 @@ class OntologyServiceImplTest {
 
 	@Mock
 	private OWLOntology owlOntology;
+
+	@Mock
+	private Ontology ontology;
+
+	@Mock
+	private MappingRepository mappingRepo;
 
 	@InjectMocks
 	private OntologyServiceImpl ontologyService;
@@ -139,15 +148,23 @@ class OntologyServiceImplTest {
 		// Mock data
 		Long id = 1L;
 		Ontology ontology = new Ontology();
+		Mapping mapping = new Mapping();
+		List<Mapping> mappingsUsingOntology = List.of(mapping);
 
 		// Mock behavior
 		Mockito.when(this.ontologyRepo.findById(id)).thenReturn(Optional.of(ontology));
+		Mockito.when(this.mappingRepo.findAllByOntologiesContaining(ontology)).thenReturn(mappingsUsingOntology);
 
-		// Test
+		// If ontology is in use
+		assertThrows(IllegalArgumentException.class, () -> {
+			this.ontologyService.deleteOntology(id);
+		});
+
+		// Ontology is not in use
+		List<Mapping> mappingsUsingOntologyEmpty = List.of();
+		Mockito.when(this.mappingRepo.findAllByOntologiesContaining(ontology)).thenReturn(mappingsUsingOntologyEmpty);
+
 		this.ontologyService.deleteOntology(id);
-
-		// Verify
-		Mockito.verify(this.ontologyRepo, Mockito.times(1)).deleteById(id);
 	}
 
 	@Test
@@ -481,10 +498,25 @@ class OntologyServiceImplTest {
 		assertEquals("ex:author", annotationProperties.get(0).getName());
 	}
 
+	@Test
+	void testGetNameSpaceMap() throws OWLOntologyCreationException {
+
+		String ontologyContent = buildOntologyContent();
+		byte[] ontologyContentBytes = ontologyContent.getBytes(StandardCharsets.UTF_8);
+		Ontology ontology = new Ontology();
+		ontology.setContent(ontologyContentBytes);
+
+		when(this.ontologyRepo.findById(anyLong())).thenReturn(Optional.ofNullable(ontology));
+		Map<String, String> namespaceMap = this.ontologyService.getNameSpaceMap(1L);
+
+		assertNotNull(namespaceMap);
+		assertTrue(namespaceMap.containsKey("rdfs:"));
+
+	}
+
 	private static String buildOntologyContent() {
 
-		String content = "@prefix ex: <http://example.org/> .\n" + "@prefix dc: <http://purl.org/dc/terms/> .\n"
-				+ "@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n"
+		String content = "@prefix ex: <http://example.org/> .\n"
 				+ "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n" + "\n" + "ex:Person rdf:type rdfs:Class .\n" + "\n"
 				+ "ex:hasName rdf:type rdf:Property ;\n" + "    rdfs:domain ex:Person ;\n" + "    rdfs:range rdfs:Literal .\n" + "\n"
 				+ "ex:hasFriend rdf:type rdf:ObjectProperty ;\n" + "    rdfs:domain ex:Person ;\n" + "    rdfs:range ex:Person .\n" + "\n"

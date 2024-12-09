@@ -1,6 +1,5 @@
 package com.inesdatamap.mapperbackend.model.dto;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,11 +11,9 @@ import lombok.Setter;
 @Setter
 public class LogicalSourceDTO extends BaseEntityDTO {
 
-	@NotNull
 	@Size(min = 1, max = 255)
 	private String source;
 
-	@NotNull
 	private String referenceFormulation;
 
 	private String iterator;

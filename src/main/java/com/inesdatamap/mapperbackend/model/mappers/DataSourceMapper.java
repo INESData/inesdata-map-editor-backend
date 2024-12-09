@@ -1,6 +1,7 @@
 package com.inesdatamap.mapperbackend.model.mappers;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -50,6 +51,9 @@ public abstract class DataSourceMapper implements BaseEntityMapper<DataSourceDTO
 	 *            the DataBaseSource entity to be converted.
 	 * @return the corresponding DataSourceDTO.
 	 */
+	@Mapping(target = "type", constant = "DATABASE")
+	@Mapping(target = "dataBaseType", source = "databaseType")
+	@Mapping(target = "fileType", ignore = true)
 	public abstract DataSourceDTO dataBaseToDTO(DataBaseSource dataBaseSource);
 
 	/**
@@ -59,5 +63,8 @@ public abstract class DataSourceMapper implements BaseEntityMapper<DataSourceDTO
 	 *            the FileSource entity to be converted.
 	 * @return the corresponding DataSourceDTO.
 	 */
+	@Mapping(target = "type", constant = "FILE")
+	@Mapping(target = "fileType", source = "fileType")
+	@Mapping(target = "dataBaseType", ignore = true)
 	public abstract DataSourceDTO dataFileToDTO(FileSource fileSource);
 }

@@ -74,7 +74,7 @@ public class Mapping extends BaseEntity implements Serializable {
 	/**
 	 * The ontologies associated with the mapping.
 	 */
-	@ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "mapping_ontology", joinColumns = @JoinColumn(name = "mapping_id", nullable = false), inverseJoinColumns = @JoinColumn(name = "ontology_id", nullable = false))
 	private Set<Ontology> ontologies = new HashSet<>();
 
