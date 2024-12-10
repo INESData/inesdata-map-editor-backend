@@ -1,7 +1,5 @@
 package com.inesdatamap.mapperbackend.model.dto;
 
-import com.inesdatamap.mapperbackend.model.enums.DataBaseTypeEnum;
-import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
 
 import jakarta.validation.constraints.NotNull;
@@ -21,9 +19,4 @@ public class DataSourceDTO extends BaseEntityDTO {
 	private String name;
 
 	private DataSourceTypeEnum type;
-
-	private DataFileTypeEnum fileType;
-
-	private DataBaseTypeEnum dataBaseType;
-
 }
