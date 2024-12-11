@@ -48,7 +48,7 @@ public final class RmlUtils {
 				// rml:source
 				.add("rml:source", vf.createLiteral(sourcePath))
 				// rml:referenceFormulation
-				.add("rml:referenceFormulation", vf.createLiteral(referenceFormulation));
+				.add("rml:referenceFormulation", vf.createIRI(referenceFormulation));
 		if (iterator != null) {
 			builder.subject(logicalSourceNode)
 					// rml:iterator
@@ -130,7 +130,16 @@ public final class RmlUtils {
 		objectMapDTO.forEach(objectMap -> {
 
 			if (objectMap.getLiteralValue() != null) {
-				builder.subject(parentNode).add(objectMap.getKey(), vf.createLiteral(objectMap.getLiteralValue()));
+				String key = objectMap.getKey();
+				String value = "";
+
+				if ("rr:termType".equals(key) || "rr:datatype".equals(key)) {
+					value = prefixToUri(objectMap.getLiteralValue());
+					builder.subject(parentNode).add(objectMap.getKey(), vf.createIRI(value));
+				} else {
+					value = objectMap.getLiteralValue();
+					builder.subject(parentNode).add(objectMap.getKey(), vf.createLiteral(value));
+				}
 			}
 
 			if (!CollectionUtils.isEmpty(objectMap.getObjectValue())) {
@@ -144,6 +153,33 @@ public final class RmlUtils {
 		});
 
 		return parentNode;
+	}
+
+	/**
+	 * Converts a prefix into its corresponding full URI
+	 *
+	 * @param prefix
+	 *            the prefixed value
+	 * @return the full URI corresponding to the prefix
+	 *
+	 */
+	private static String prefixToUri(String prefix) {
+		String uri;
+		switch (prefix) {
+		case "rr:Literal":
+			uri = "http://www.w3.org/ns/r2rml#Literal";
+			break;
+		case "rr:IRI":
+			uri = "http://www.w3.org/ns/r2rml#IRI";
+			break;
+		case "xsd:string":
+			uri = "http://www.w3.org/2001/XMLSchema#string";
+			break;
+		default:
+			uri = prefix;
+			break;
+		}
+		return uri;
 	}
 
 }
