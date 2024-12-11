@@ -57,6 +57,12 @@ public class Mapping extends BaseEntity implements Serializable {
 	private List<Execution> executions = new ArrayList<>();
 
 	/**
+	 * Namespaces related to a mapping.
+	 */
+	@OneToMany(mappedBy = "mapping", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Namespace> namespaces = new ArrayList<>();
+
+	/**
 	 * Resource Mapping Language (RML) associated with the mapping.
 	 */
 	@Lob

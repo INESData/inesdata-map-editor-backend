@@ -1,7 +1,6 @@
 package com.inesdatamap.mapperbackend.model.dto;
 
 import java.util.List;
-import java.util.Map;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -30,6 +29,6 @@ public class MappingDTO extends BaseEntityDTO {
 	@NotNull
 	private List<Long> ontologyIds;
 
-	private Map<String, String> namespaces;
+	private List<NamespaceDTO> namespaces;
 
 }
