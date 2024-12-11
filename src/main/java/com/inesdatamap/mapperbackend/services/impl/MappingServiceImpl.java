@@ -9,7 +9,6 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -37,6 +36,7 @@ import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.LogicalSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
+import com.inesdatamap.mapperbackend.model.jpa.Namespace;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
 import com.inesdatamap.mapperbackend.model.mappers.PredicateObjectMapMapper;
@@ -193,7 +193,7 @@ public class MappingServiceImpl implements MappingService {
 		buildLogicalSource(mapping);
 
 		// Build RML and set it to the mapping
-		byte[] rml = buildRml(mapping, mappingDTO.getNamespaces());
+		byte[] rml = buildRml(mapping);
 		mapping.setRml(rml);
 
 		return mapping;
@@ -247,19 +247,17 @@ public class MappingServiceImpl implements MappingService {
 	 *
 	 * @param mapping
 	 *            the mapping to build the RML for
-	 * @param namespaces
-	 *            selected namespaces in ontology
 	 *
 	 * @return the RML for the mapping
 	 */
-	private byte[] buildRml(Mapping mapping, Map<String, String> namespaces) {
+	private byte[] buildRml(Mapping mapping) {
 
 		ModelBuilder builder = new ModelBuilder();
 		SimpleValueFactory vf = SimpleValueFactory.getInstance();
 		byte[] rmlContent;
 
 		String baseUri = mapping.getBaseUrl();
-		setNamespaces(builder, mapping, namespaces);
+		setNamespaces(builder, mapping);
 
 		mapping.getFields().forEach(field -> {
 
@@ -309,7 +307,7 @@ public class MappingServiceImpl implements MappingService {
 	 * @param namespaces
 	 *            selected namespaces in ontology
 	 */
-	private static void setNamespaces(ModelBuilder builder, Mapping mapping, Map<String, String> namespaces) {
+	private void setNamespaces(ModelBuilder builder, Mapping mapping) {
 
 		// Define namespaces and base IRI
 		builder.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
@@ -322,18 +320,30 @@ public class MappingServiceImpl implements MappingService {
 
 	    int counter = 1;
 
+		// Namespaces list
+		if (mapping.getNamespaces() != null) {
+			for (Namespace namespace : mapping.getNamespaces()) {
+				// Assign a new prefix
+				String generatedPrefix = "ns" + counter;
+				builder.setNamespace(generatedPrefix, namespace.getIri());
+
+				namespace.setPrefix(generatedPrefix);
+				counter++;
+			}
+		}
+
 		// Ontology-mappings prefixes
 	    for (Ontology ontology : mapping.getOntologies()) {
-			builder.setNamespace("ns" + counter, ontology.getUrl());
-			counter++;
-	    }
+			String generatedPrefix = "ns" + counter;
 
-		// Namespaces list
-	    if (namespaces != null) {
-	        for (Map.Entry<String, String> entry : namespaces.entrySet()) {
-				builder.setNamespace("ns" + counter, entry.getValue());
-				counter++;
-	        }
+			builder.setNamespace(generatedPrefix, ontology.getUrl());
+
+			Namespace namespaceEntity = new Namespace();
+			namespaceEntity.setPrefix(generatedPrefix);
+			namespaceEntity.setIri(ontology.getUrl());
+
+			mapping.getNamespaces().add(namespaceEntity);
+			counter++;
 	    }
 	}
 
@@ -512,7 +522,7 @@ public class MappingServiceImpl implements MappingService {
 		buildLogicalSource(mappingSource);
 
 		// Create new rml
-		byte[] rml = this.buildRml(mappingSource, mappingDto.getNamespaces());
+		byte[] rml = this.buildRml(mappingSource);
 		mappingSource.setRml(rml);
 
 		// Updated mapping
