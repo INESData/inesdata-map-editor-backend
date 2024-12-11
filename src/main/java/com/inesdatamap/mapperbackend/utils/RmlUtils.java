@@ -163,7 +163,7 @@ public final class RmlUtils {
 	 * @return the full URI corresponding to the prefix
 	 *
 	 */
-	private static String prefixToUri(String prefix) {
+	public static String prefixToUri(String prefix) {
 		String uri;
 		switch (prefix) {
 		case "rr:Literal":
