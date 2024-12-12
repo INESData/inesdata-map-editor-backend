@@ -304,10 +304,8 @@ public class MappingServiceImpl implements MappingService {
 	 *            the model builder
 	 * @param mapping
 	 *            the mapping containing ontologies
-	 * @param namespaces
-	 *            selected namespaces in ontology
 	 */
-	private void setNamespaces(ModelBuilder builder, Mapping mapping) {
+	protected void setNamespaces(ModelBuilder builder, Mapping mapping) {
 
 		// Define namespaces and base IRI
 		builder.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
