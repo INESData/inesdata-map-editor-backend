@@ -334,16 +334,26 @@ public class MappingServiceImpl implements MappingService {
 
 		// Ontology-mappings prefixes
 	    for (Ontology ontology : mapping.getOntologies()) {
-			String generatedPrefix = "ns" + counter;
 
-			builder.setNamespace(generatedPrefix, ontology.getUrl());
+			boolean exists = false;
+			for (Namespace existingNamespace : mapping.getNamespaces()) {
+				if (existingNamespace.getIri().equals(ontology.getUrl())) {
+					exists = true;
+					break;
+				}
+			}
 
-			Namespace namespaceEntity = new Namespace();
-			namespaceEntity.setPrefix(generatedPrefix);
-			namespaceEntity.setIri(ontology.getUrl());
+			if (!exists) {
+				String generatedPrefix = "ns" + counter;
+				builder.setNamespace(generatedPrefix, ontology.getUrl());
 
-			mapping.getNamespaces().add(namespaceEntity);
-			counter++;
+				Namespace namespaceEntity = new Namespace();
+				namespaceEntity.setPrefix(generatedPrefix);
+				namespaceEntity.setIri(ontology.getUrl());
+				mapping.getNamespaces().add(namespaceEntity);
+
+				counter++;
+			}
 	    }
 	}
 
