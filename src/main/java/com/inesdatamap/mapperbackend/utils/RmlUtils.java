@@ -6,6 +6,7 @@ import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.semanticweb.owlapi.vocab.Namespaces;
 import org.springframework.util.CollectionUtils;
 
 import com.inesdatamap.mapperbackend.model.dto.ObjectMapDTO;
@@ -134,7 +135,7 @@ public final class RmlUtils {
 				String value = "";
 
 				if ("rr:termType".equals(key) || "rr:datatype".equals(key)) {
-					value = prefixToUri(objectMap.getLiteralValue());
+					value = literalValueToUri(objectMap.getLiteralValue());
 					builder.subject(parentNode).add(objectMap.getKey(), vf.createIRI(value));
 				} else {
 					value = objectMap.getLiteralValue();
@@ -156,27 +157,26 @@ public final class RmlUtils {
 	}
 
 	/**
-	 * Converts a prefix into its corresponding full URI
+	 * Converts a literalValue into its corresponding full URI
 	 *
-	 * @param prefix
-	 *            the prefixed value
-	 * @return the full URI corresponding to the prefix
+	 * @param literalValue
+	 *            the literal value
+	 * @return the full URI corresponding to the literal value
 	 *
 	 */
-	public static String prefixToUri(String prefix) {
+	public static String literalValueToUri(String literalValue) {
 		String uri;
-		switch (prefix) {
-		case "rr:Literal":
-			uri = "http://www.w3.org/ns/r2rml#Literal";
+		String[] splittedliteralValue = literalValue.split(":");
+
+		switch (splittedliteralValue[0]) {
+		case "rr":
+			uri = Namespaces.R2RML + splittedliteralValue[1];
 			break;
-		case "rr:IRI":
-			uri = "http://www.w3.org/ns/r2rml#IRI";
-			break;
-		case "xsd:string":
-			uri = "http://www.w3.org/2001/XMLSchema#string";
+		case "xsd":
+			uri = Namespaces.XSD + splittedliteralValue[1];
 			break;
 		default:
-			uri = prefix;
+			uri = literalValue;
 			break;
 		}
 		return uri;
