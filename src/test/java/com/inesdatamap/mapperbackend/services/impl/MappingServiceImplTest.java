@@ -16,11 +16,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
@@ -44,6 +46,7 @@ import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
+import com.inesdatamap.mapperbackend.model.jpa.Namespace;
 import com.inesdatamap.mapperbackend.model.jpa.ObjectMap;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.jpa.PredicateObjectMap;
@@ -307,6 +310,32 @@ class MappingServiceImplTest {
 		MappingDTO result = mappingService.save(mapping);
 
 		assertEquals(mapping.getName(), result.getName());
+	}
+
+	@Test
+	void testSetnamespaces() {
+
+		ModelBuilder builder = new ModelBuilder();
+		Mapping mapping = new Mapping();
+
+		List<Namespace> namespaces = new ArrayList<>();
+		Namespace ns1 = new Namespace();
+		ns1.setPrefix("ns1");
+		ns1.setIri("http://www.w3.org/2004/02/skos/core#");
+		namespaces.add(ns1);
+		mapping.setNamespaces(namespaces);
+
+		Set<Ontology> ontologies = new HashSet<>();
+		Ontology ontology = new Ontology();
+		ontology.setUrl("http://www.w3.org/ns/lemon/ontolex#");
+		ontologies.add(ontology);
+		mapping.setOntologies(ontologies);
+
+		this.mappingService.setNamespaces(builder, mapping);
+
+		assertEquals("ns1", mapping.getNamespaces().get(0).getPrefix());
+		assertEquals("http://www.w3.org/2004/02/skos/core#", mapping.getNamespaces().get(0).getIri());
+
 	}
 
 	private static Mapping buildMapping() {
