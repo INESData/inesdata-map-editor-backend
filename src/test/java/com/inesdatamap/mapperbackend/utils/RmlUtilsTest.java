@@ -207,14 +207,14 @@ class RmlUtilsTest {
 
 	@Test
 	void testPredefinedPrefix() {
-		assertEquals("http://www.w3.org/ns/r2rml#Literal", RmlUtils.prefixToUri("rr:Literal"));
-		assertEquals("http://www.w3.org/ns/r2rml#IRI", RmlUtils.prefixToUri("rr:IRI"));
+		assertEquals("http://www.w3.org/ns/r2rml#Literal", RmlUtils.literalValueToUri("rr:Literal"));
+		assertEquals("http://www.w3.org/ns/r2rml#IRI", RmlUtils.literalValueToUri("rr:IRI"));
 	}
 
 	@Test
 	void testDefaultPrefix() {
 		String customPrefix = "custom:prefix";
-		assertEquals(customPrefix, RmlUtils.prefixToUri(customPrefix));
+		assertEquals(customPrefix, RmlUtils.literalValueToUri(customPrefix));
 	}
 
 }
