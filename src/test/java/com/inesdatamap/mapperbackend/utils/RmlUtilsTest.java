@@ -1,5 +1,6 @@
 package com.inesdatamap.mapperbackend.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.StringWriter;
@@ -202,6 +203,18 @@ class RmlUtilsTest {
 		assertTrue(out.toString().contains("rr:predicate ex:hasAge"));
 		assertTrue(out.toString().contains("rml:reference \"people/person/age\""));
 
+	}
+
+	@Test
+	void testPredefinedPrefix() {
+		assertEquals("http://www.w3.org/ns/r2rml#Literal", RmlUtils.literalValueToUri("rr:Literal"));
+		assertEquals("http://www.w3.org/ns/r2rml#IRI", RmlUtils.literalValueToUri("rr:IRI"));
+	}
+
+	@Test
+	void testDefaultPrefix() {
+		String customPrefix = "custom:prefix";
+		assertEquals(customPrefix, RmlUtils.literalValueToUri(customPrefix));
 	}
 
 }

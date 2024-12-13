@@ -8,9 +8,7 @@ import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -38,6 +36,7 @@ import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.LogicalSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
+import com.inesdatamap.mapperbackend.model.jpa.Namespace;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
 import com.inesdatamap.mapperbackend.model.mappers.PredicateObjectMapMapper;
@@ -258,8 +257,7 @@ public class MappingServiceImpl implements MappingService {
 		byte[] rmlContent;
 
 		String baseUri = mapping.getBaseUrl();
-		Map<String, String> generatedPrefixes = setNamespacePrefixes(mapping);
-		setNamespaces(builder, generatedPrefixes);
+		setNamespaces(builder, mapping);
 
 		mapping.getFields().forEach(field -> {
 
@@ -304,10 +302,10 @@ public class MappingServiceImpl implements MappingService {
 	 *
 	 * @param builder
 	 *            the model builder
-	 * @param generatedPrefixes
-	 *            the namespaces generated prefixes
+	 * @param mapping
+	 *            the mapping containing ontologies
 	 */
-	private static void setNamespaces(ModelBuilder builder, Map<String, String> generatedPrefixes) {
+	protected void setNamespaces(ModelBuilder builder, Mapping mapping) {
 
 		// Define namespaces and base IRI
 		builder.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
@@ -318,26 +316,43 @@ public class MappingServiceImpl implements MappingService {
 
 				.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
 
-		generatedPrefixes.forEach(builder::setNamespace);
+	    int counter = 1;
 
-	}
+		// Namespaces list
+		if (mapping.getNamespaces() != null) {
+			for (Namespace namespace : mapping.getNamespaces()) {
+				// Assign a new prefix
+				String generatedPrefix = "ns" + counter;
+				builder.setNamespace(generatedPrefix, namespace.getIri());
 
-	/**
-	 * Sets namespace prefixes for the RML
-	 *
-	 * @param mapping
-	 *            the mapping containing the fields to get the urls
-	 * @return a map with keys and ontology urls
-	 */
-	private static Map<String, String> setNamespacePrefixes(Mapping mapping) {
-
-		Map<String, String> prefixes = new LinkedHashMap<>();
-		int counter = 1;
-		for (Ontology ontology : mapping.getOntologies()) {
-			prefixes.put("ns" + counter, ontology.getUrl());
-			counter++;
+				namespace.setPrefix(generatedPrefix);
+				counter++;
+			}
 		}
-		return prefixes;
+
+		// Ontology-mappings prefixes
+	    for (Ontology ontology : mapping.getOntologies()) {
+
+			boolean exists = false;
+			for (Namespace existingNamespace : mapping.getNamespaces()) {
+				if (existingNamespace.getIri().equals(ontology.getUrl())) {
+					exists = true;
+					break;
+				}
+			}
+
+			if (!exists) {
+				String generatedPrefix = "ns" + counter;
+				builder.setNamespace(generatedPrefix, ontology.getUrl());
+
+				Namespace namespaceEntity = new Namespace();
+				namespaceEntity.setPrefix(generatedPrefix);
+				namespaceEntity.setIri(ontology.getUrl());
+				mapping.getNamespaces().add(namespaceEntity);
+
+				counter++;
+			}
+	    }
 	}
 
 	/**
@@ -546,8 +561,8 @@ public class MappingServiceImpl implements MappingService {
 
 				// Set referenceFormulation according to file type
 				String referenceFormulation = switch (source.getFileType()) {
-				case CSV -> "ql:CSV";
-				case XML -> "ql:XPath";
+				case CSV -> "http://semweb.mmlab.be/ns/ql#CSV";
+				case XML -> "http://semweb.mmlab.be/ns/ql#XPath";
 				default -> throw new IllegalArgumentException("Unsupported file type: " + source.getFileType());
 				};
 

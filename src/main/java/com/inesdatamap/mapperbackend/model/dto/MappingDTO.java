@@ -29,4 +29,6 @@ public class MappingDTO extends BaseEntityDTO {
 	@NotNull
 	private List<Long> ontologyIds;
 
+	private List<NamespaceDTO> namespaces;
+
 }
