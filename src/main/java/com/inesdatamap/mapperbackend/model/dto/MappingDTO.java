@@ -19,7 +19,16 @@ public class MappingDTO extends BaseEntityDTO {
 	@Size(min = 1, max = 255)
 	private String name;
 
+	@NotNull
+	@Size(min = 1, max = 255)
+	private String baseUrl;
+
 	@NotEmpty
 	private List<MappingFieldDTO> fields;
+
+	@NotNull
+	private List<Long> ontologyIds;
+
+	private List<NamespaceDTO> namespaces;
 
 }

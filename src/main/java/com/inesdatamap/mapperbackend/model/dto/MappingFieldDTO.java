@@ -15,14 +15,13 @@ public class MappingFieldDTO extends BaseEntityDTO {
 
 	private LogicalTableDTO logicalTable;
 
+	private LogicalSourceDTO logicalSource;
+
 	private SubjectMapDTO subject;
 
 	private List<PredicateObjectMapDTO> predicates;
 
 	@NotNull
 	private Long dataSourceId;
-
-	@NotNull
-	private Long ontologyId;
 
 }

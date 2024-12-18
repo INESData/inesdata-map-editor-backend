@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,9 +48,9 @@ public class MappingController {
 	 * This constructor initializes the controller with the provided MappingService
 	 *
 	 * @param mappingService
-	 * 	the mapping service
+	 *            the mapping service
 	 * @param executionService
-	 * 	the execution service
+	 *            the execution service
 	 */
 	public MappingController(MappingService mappingService, ExecutionService executionService) {
 		this.mappingService = mappingService;
@@ -60,9 +61,9 @@ public class MappingController {
 	 * Lists all mappings.
 	 *
 	 * @param page
-	 * 	page number
+	 *            page number
 	 * @param size
-	 * 	page size
+	 *            page size
 	 *
 	 * @return List of all mappings
 	 */
@@ -77,7 +78,7 @@ public class MappingController {
 	 * Creates a new mapping
 	 *
 	 * @param mappingDTO
-	 * 	the mapping to create
+	 *            the mapping to create
 	 *
 	 * @return the created mapping
 	 */
@@ -93,7 +94,7 @@ public class MappingController {
 	 * Deletes mapping
 	 *
 	 * @param id
-	 * 	mapping identifier
+	 *            mapping identifier
 	 *
 	 * @return status code response
 	 */
@@ -101,7 +102,7 @@ public class MappingController {
 	@Operation(summary = "Delete mapping")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public ResponseEntity<Void> deleteMapping(
-		@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to delete", required = true) Long id) {
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to delete", required = true) Long id) {
 		this.mappingService.deleteMapping(id);
 		return ResponseEntity.noContent().build();
 	}
@@ -110,7 +111,7 @@ public class MappingController {
 	 * Materialize a mapping
 	 *
 	 * @param id
-	 * 	the mapping identifier
+	 *            the mapping identifier
 	 *
 	 * @return the response
 	 */
@@ -118,7 +119,7 @@ public class MappingController {
 	@Operation(summary = "Materialize a mapping")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public ResponseEntity<Void> materializeMapping(
-		@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to materialize", required = true) Long id) {
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to materialize", required = true) Long id) {
 		this.mappingService.materialize(id);
 		return ResponseEntity.noContent().build();
 	}
@@ -127,11 +128,11 @@ public class MappingController {
 	 * List all executions for a mapping
 	 *
 	 * @param id
-	 * 	mapping identifier
+	 *            mapping identifier
 	 * @param page
-	 * 	page number
+	 *            page number
 	 * @param size
-	 * 	page size
+	 *            page size
 	 *
 	 * @return List of all executions
 	 */
@@ -143,5 +144,36 @@ public class MappingController {
 		Page<ExecutionDTO> executions = this.executionService.listExecutions(id,
 				PageRequest.of(page, size, Sort.by(Constants.SORT_BY_DATE).descending()));
 		return ResponseEntity.ok(new PagedModel<>(executions));
+	}
+
+	/**
+	 * Get the given mapping
+	 *
+	 * @param id
+	 *            identifier
+	 * @return The mapping
+	 */
+	@GetMapping("/{id}")
+	@Operation(summary = "Gets given mapping")
+	public ResponseEntity<MappingDTO> getMapping(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier", required = true) Long id) {
+		return ResponseEntity.ok(this.mappingService.getMappingById(id));
+	}
+
+	/**
+	 * Updates the given mapping
+	 *
+	 * @param id
+	 *            mapping identifier
+	 * @param mappingDto
+	 *            to update
+	 * @return updated mapping
+	 */
+	@PutMapping("/{id}")
+	@Operation(summary = "Update given mapping")
+	public ResponseEntity<MappingDTO> updateMapping(
+			@PathVariable(name = "id") @Parameter(name = "id", description = "Mapping identifier to update", required = true) Long id,
+			@RequestBody @Parameter(name = "mapping", description = "The mapping to update", required = true) MappingDTO mappingDto) {
+		return ResponseEntity.ok(this.mappingService.updateMapping(id, mappingDto));
 	}
 }

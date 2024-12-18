@@ -12,6 +12,11 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
@@ -20,6 +25,7 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.mime.MediaType;
 import org.springframework.web.multipart.MultipartFile;
+import org.xml.sax.SAXException;
 
 import com.inesdatamap.mapperbackend.exceptions.FileCreationException;
 import com.inesdatamap.mapperbackend.exceptions.FileDeleteException;
@@ -68,6 +74,19 @@ public final class FileUtils {
 			metadata.set(TikaCoreProperties.RESOURCE_NAME_KEY, file.getOriginalFilename());
 
 			MediaType mimetype = tika.getDetector().detect(tikaInputStream, metadata);
+
+			if (mimetype.equals(MediaType.APPLICATION_XML) || mimetype.equals(MediaType.text("xml")) || mimetype.equals(
+				MediaType.TEXT_HTML)) {
+
+				// Check if XML is a valid file
+				FileUtils.isValidXML(file);
+
+				if (mimetype.equals(MediaType.TEXT_HTML)) {
+					// Tika detects XML files as text/html if they contain HTML characters such as '<' or '>' codified
+					mimetype = MediaType.APPLICATION_XML;
+				}
+			}
+
 			validateFileExtension(mimetype.toString());
 		} catch (IOException | TikaException e) {
 			throw new FileCreationException("File validation error", e);
@@ -226,4 +245,30 @@ public final class FileUtils {
 		return String.join(File.separator, dataProcessingPath, Constants.DATA_OUTPUT_FOLDER_NAME, mappingId.toString(),
 			String.valueOf(executionTime.toEpochSecond()), fileName);
 	}
+
+	/**
+	 * Validates if the provided MultipartFile contains a valid XML structure.
+	 *
+	 * @param file
+	 * 	the MultipartFile representing the file to be validated
+	 *
+	 * @throws FileCreationException
+	 * 	if the file is not a valid XML or if an error occurs during parsing
+	 */
+	public static void isValidXML(MultipartFile file) {
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			dbf.setFeature(Constants.DOCTYPE_DECL, true);
+			dbf.setXIncludeAware(false);
+
+			// Parse the XML file using the secured DocumentBuilderFactory
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			db.parse(file.getInputStream());
+
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			throw new FileCreationException("File is not a valid XML", e);
+		}
+	}
+
 }

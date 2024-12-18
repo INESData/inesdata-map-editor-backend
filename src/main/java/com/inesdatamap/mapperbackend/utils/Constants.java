@@ -13,6 +13,10 @@ public final class Constants {
 	 */
 	public static final int NUMBER_0 = 0;
 	/**
+	 * Constant representing the number 2
+	 */
+	public static final int NUMBER_2 = 2;
+	/**
 	 * Constant representing the number 10
 	 */
 	public static final int NUMBER_10 = 10;
@@ -63,7 +67,22 @@ public final class Constants {
 	/**
 	 * Constant for field delimiter regex
 	 */
-	public static final String FIELD_DELIMITER_REGEX = "[,]";
+	public static final String FIELD_DELIMITER_REGEX = "[,;\t]";
+
+	/**
+	 * Constant for path separator
+	 */
+	public static final String PATH_SEPARATOR = "/";
+	/**
+	 * Constant for path attribute selector
+	 */
+	public static final String ATTRIBUTE_SELECTOR = "/@";
+
+	// URLs
+	/**
+	 * Constant for doctype-decl
+	 */
+	public static final String DOCTYPE_DECL = "http://apache.org/xml/features/disallow-doctype-decl";
 
 	private Constants() {
 		// Empty constructor to avoid initialization

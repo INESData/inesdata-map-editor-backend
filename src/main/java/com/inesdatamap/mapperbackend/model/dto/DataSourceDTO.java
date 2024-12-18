@@ -19,5 +19,4 @@ public class DataSourceDTO extends BaseEntityDTO {
 	private String name;
 
 	private DataSourceTypeEnum type;
-
 }

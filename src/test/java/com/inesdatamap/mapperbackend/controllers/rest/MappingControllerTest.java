@@ -120,4 +120,37 @@ class MappingControllerTest {
 
 		verify(this.executionService).listExecutions(mappingId, pageRequest);
 	}
+
+	@Test
+	void testGetMapping() {
+
+		Long id = 1L;
+		MappingDTO expectedMapping = new MappingDTO();
+
+		when(this.mappingService.getMappingById(id)).thenReturn(expectedMapping);
+
+		ResponseEntity<MappingDTO> response = this.mappingController.getMapping(id);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(expectedMapping, response.getBody());
+
+		verify(this.mappingService).getMappingById(id);
+	}
+
+	@Test
+	void testUpdateMapping() {
+
+		Long id = 1L;
+		MappingDTO mappingDto = new MappingDTO();
+		MappingDTO updatedMapping = new MappingDTO();
+
+		when(this.mappingService.updateMapping(id, mappingDto)).thenReturn(updatedMapping);
+
+		ResponseEntity<MappingDTO> response = this.mappingController.updateMapping(id, mappingDto);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(updatedMapping, response.getBody());
+
+		verify(this.mappingService).updateMapping(id, mappingDto);
+	}
 }

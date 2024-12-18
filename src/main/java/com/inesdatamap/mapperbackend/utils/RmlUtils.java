@@ -6,6 +6,7 @@ import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.ModelBuilder;
+import org.semanticweb.owlapi.vocab.Namespaces;
 import org.springframework.util.CollectionUtils;
 
 import com.inesdatamap.mapperbackend.model.dto.ObjectMapDTO;
@@ -23,27 +24,37 @@ public final class RmlUtils {
 	}
 
 	/**
-	 * Create a CSV logical source node.
+	 * Create a logical source node.
 	 *
 	 * @param builder
-	 * 	the model builder
+	 *            the model builder
 	 * @param mappingNode
-	 * 	the parent mapping node
-	 * @param source
-	 * 	the path to the CSV file
+	 *            the parent mapping node
+	 * @param sourcePath
+	 *            the path to the source file
+	 * @param referenceFormulation
+	 *            the reference formulation IRI ("ql:CSV" or "ql:XPath")
+	 * @param iterator
+	 *            the rml iterator
 	 */
-	public static void createCsvLogicalSourceNode(ModelBuilder builder, Resource mappingNode, String source) {
+	public static void createLogicalSourceNode(ModelBuilder builder, Resource mappingNode, String sourcePath, String referenceFormulation,
+			String iterator) {
 		SimpleValueFactory vf = SimpleValueFactory.getInstance();
 
 		BNode logicalSourceNode = vf.createBNode();
 		builder.subject(mappingNode)
-			// rml:logicalSource
-			.add("rml:logicalSource", logicalSourceNode);
+				// rml:logicalSource
+				.add("rml:logicalSource", logicalSourceNode);
 		builder.subject(logicalSourceNode)
-			// rml:source
-			.add("rml:source", vf.createLiteral(source))
-			// rml:referenceFormulation
-			.add("rml:referenceFormulation", vf.createIRI("ql:CSV"));
+				// rml:source
+				.add("rml:source", vf.createLiteral(sourcePath))
+				// rml:referenceFormulation
+				.add("rml:referenceFormulation", vf.createIRI(referenceFormulation));
+		if (iterator != null) {
+			builder.subject(logicalSourceNode)
+					// rml:iterator
+					.add("rml:iterator", vf.createLiteral(iterator));
+		}
 	}
 
 	/**
@@ -120,7 +131,16 @@ public final class RmlUtils {
 		objectMapDTO.forEach(objectMap -> {
 
 			if (objectMap.getLiteralValue() != null) {
-				builder.subject(parentNode).add(objectMap.getKey(), vf.createLiteral(objectMap.getLiteralValue()));
+				String key = objectMap.getKey();
+				String value = "";
+
+				if ("rr:termType".equals(key) || "rr:datatype".equals(key)) {
+					value = literalValueToUri(objectMap.getLiteralValue());
+					builder.subject(parentNode).add(objectMap.getKey(), vf.createIRI(value));
+				} else {
+					value = objectMap.getLiteralValue();
+					builder.subject(parentNode).add(objectMap.getKey(), vf.createLiteral(value));
+				}
 			}
 
 			if (!CollectionUtils.isEmpty(objectMap.getObjectValue())) {
@@ -134,6 +154,32 @@ public final class RmlUtils {
 		});
 
 		return parentNode;
+	}
+
+	/**
+	 * Converts a literalValue into its corresponding full URI
+	 *
+	 * @param literalValue
+	 *            the literal value
+	 * @return the full URI corresponding to the literal value
+	 *
+	 */
+	public static String literalValueToUri(String literalValue) {
+		String uri;
+		String[] splittedliteralValue = literalValue.split(":");
+
+		switch (splittedliteralValue[0]) {
+		case "rr":
+			uri = Namespaces.R2RML + splittedliteralValue[1];
+			break;
+		case "xsd":
+			uri = Namespaces.XSD + splittedliteralValue[1];
+			break;
+		default:
+			uri = literalValue;
+			break;
+		}
+		return uri;
 	}
 
 }

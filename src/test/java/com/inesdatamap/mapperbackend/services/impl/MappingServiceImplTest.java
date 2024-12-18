@@ -1,13 +1,28 @@
 package com.inesdatamap.mapperbackend.services.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import org.eclipse.rdf4j.model.util.ModelBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
@@ -31,6 +46,7 @@ import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
+import com.inesdatamap.mapperbackend.model.jpa.Namespace;
 import com.inesdatamap.mapperbackend.model.jpa.ObjectMap;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.jpa.PredicateObjectMap;
@@ -49,15 +65,6 @@ import com.inesdatamap.mapperbackend.services.GraphEngineService;
 
 import jakarta.persistence.EntityNotFoundException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
-
 /**
  * Unit tests for the {@link MappingServiceImpl}
  *
@@ -65,7 +72,7 @@ import static org.mockito.Mockito.when;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = { AppProperties.class, MappingServiceImpl.class, MappingMapperImpl.class, MappingFieldMapperImpl.class,
-	PredicateObjectMapMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
+		PredicateObjectMapMapperImpl.class }, initializers = ConfigDataApplicationContextInitializer.class)
 class MappingServiceImplTest {
 
 	@MockBean
@@ -146,6 +153,23 @@ class MappingServiceImplTest {
 	}
 
 	@Test
+	void testGetMappingById() {
+		Long id = 1L;
+		Mapping mapping = new Mapping();
+		mapping.setId(id);
+		mapping.setName("Test mapping");
+
+		when(this.mappingRepo.findById(id)).thenReturn(Optional.of(mapping));
+
+		MappingDTO resultDto = this.mappingService.getMappingById(id);
+
+		assertEquals(id, resultDto.getId());
+		assertEquals("Test mapping", resultDto.getName());
+
+		Mockito.verify(this.mappingRepo, Mockito.times(1)).findById(id);
+	}
+
+	@Test
 	void materializeMappingTest() {
 
 		Mapping mapping = buildMapping();
@@ -166,6 +190,45 @@ class MappingServiceImplTest {
 			mockFiles.verify(() -> Files.createDirectories(any()));
 			mockFiles.verify(() -> Files.write(any(), any(byte[].class)));
 		}
+	}
+
+	@Test
+	void testUpdateMapping() {
+
+		Long id = 1L;
+
+		// Check if dto is null
+		assertThrows(IllegalArgumentException.class, () -> {
+			this.mappingService.updateMapping(id, null);
+		});
+
+		String fileName = "people.csv";
+		String filePath = String.join(File.separator, "path", "to");
+
+		FileSource source = buildFileSource(filePath, fileName, DataFileTypeEnum.CSV, DataSourceTypeEnum.FILE);
+		SubjectMap subjectMap = buildSubjectMap("http://example.org/Person", "http://example.org/person/{id}");
+		ObjectMap objectMap = buildObjectMap("rml:reference", "name");
+		PredicateObjectMap predicateObjectMap = buildPredicateObjectMap("http://example.org/hasName", List.of(objectMap));
+		MappingField field1 = buildMappingField(source, subjectMap, List.of(predicateObjectMap));
+		Ontology ontology = buildOntology();
+
+		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
+
+		Mapping mappingDB = new Mapping();
+		Mapping mappingSource = new Mapping();
+		Mapping updatedMapping = new Mapping();
+		updatedMapping.setName("Mapping DTO");
+
+		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(ontology);
+		when(this.dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+		when(this.fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+		when(this.mappingRepo.findById(id)).thenReturn(Optional.of(mappingDB));
+		when(this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB))).thenReturn(updatedMapping);
+
+		MappingDTO result = this.mappingService.updateMapping(id, this.mappingMapper.entityToDto(mapping));
+		assertNotNull(result);
+
+		verify(this.mappingRepo).saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB));
 	}
 
 	@Test
@@ -194,19 +257,46 @@ class MappingServiceImplTest {
 		ObjectMap objectMap = buildObjectMap("rml:reference", "name");
 		PredicateObjectMap predicateObjectMap = buildPredicateObjectMap("http://example.org/hasName", List.of(objectMap));
 		MappingField field1 = buildMappingField(source, subjectMap, List.of(predicateObjectMap));
+		Ontology ontology = buildOntology();
 
 		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
 
-		when(mappingRepo.save(mapping)).thenReturn(mapping);
-		when(ontologyRepository.getReferenceById(anyLong())).thenReturn(field1.getOntology());
-		when(dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
-		when(fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+		when(this.mappingRepo.save(mapping)).thenReturn(mapping);
+		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(ontology);
+		when(this.dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+		when(this.fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
 
-		Mapping result = mappingService.create(mappingMapper.entityToDto(mapping));
+		Mapping result = this.mappingService.create(this.mappingMapper.entityToDto(mapping));
+
+		assertNotNull(result);
+		assertEquals(source, result.getFields().get(0).getSource());
+
+	}
+
+	@Test
+	void testbuildRml() {
+
+		String fileName = "file.csv";
+		String filePath = String.join(File.separator, "path", "to");
+
+		FileSource source = buildFileSource(filePath, fileName, DataFileTypeEnum.CSV, DataSourceTypeEnum.FILE);
+		SubjectMap subjectMap = buildSubjectMap("http://example.org/Person", "http://example.org/person/{id}");
+		ObjectMap objectMap = buildObjectMap("rml:reference", "name");
+		PredicateObjectMap predicateObjectMap = buildPredicateObjectMap("http://example.org/hasName", List.of(objectMap));
+		MappingField field1 = buildMappingField(source, subjectMap, List.of(predicateObjectMap));
+		Ontology ontology = buildOntology();
+		Mapping mapping = buildMapping("CSV Mapping", List.of(field1));
+
+		when(this.mappingRepo.save(mapping)).thenReturn(mapping);
+		when(this.ontologyRepository.getReferenceById(anyLong())).thenReturn(ontology);
+		when(this.dataSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+		when(this.fileSourceRepository.getReferenceById(anyLong())).thenReturn(source);
+
+		Mapping result = this.mappingService.create(this.mappingMapper.entityToDto(mapping));
 
 		String rmlContent = new String(result.getRml(), StandardCharsets.UTF_8);
 
-		assertTrue(rmlContent.contains("rr:predicate ex:hasName"));
+		assertTrue(rmlContent.contains("rr:predicate ns1:hasName"));
 		assertTrue(rmlContent.contains("rml:reference \"name\""));
 
 	}
@@ -222,16 +312,44 @@ class MappingServiceImplTest {
 		assertEquals(mapping.getName(), result.getName());
 	}
 
+	@Test
+	void testSetnamespaces() {
+
+		ModelBuilder builder = new ModelBuilder();
+		Mapping mapping = new Mapping();
+
+		List<Namespace> namespaces = new ArrayList<>();
+		Namespace ns1 = new Namespace();
+		ns1.setPrefix("ns1");
+		ns1.setIri("http://www.w3.org/2004/02/skos/core#");
+		namespaces.add(ns1);
+		mapping.setNamespaces(namespaces);
+
+		Set<Ontology> ontologies = new HashSet<>();
+		Ontology ontology = new Ontology();
+		ontology.setUrl("http://www.w3.org/ns/lemon/ontolex#");
+		ontologies.add(ontology);
+		mapping.setOntologies(ontologies);
+
+		this.mappingService.setNamespaces(builder, mapping);
+
+		assertEquals("ns1", mapping.getNamespaces().get(0).getPrefix());
+		assertEquals("http://www.w3.org/2004/02/skos/core#", mapping.getNamespaces().get(0).getIri());
+
+	}
+
 	private static Mapping buildMapping() {
 		Mapping mapping = new Mapping();
+		Set<Ontology> ontologies = new HashSet<>();
+		Ontology ontology = buildOntology();
+		ontologies.add(ontology);
+
 		mapping.setRml("RML CONTENT".getBytes());
 		mapping.setId(1L);
 		mapping.setName("Test Mapping");
+		mapping.setOntologies(ontologies);
 
 		MappingField field1 = new MappingField();
-		Ontology ontology = new Ontology();
-		ontology.setName("Ontology1");
-		field1.setOntology(ontology);
 
 		DataSource source = new DataSource();
 		source.setName("Source1");
@@ -243,8 +361,13 @@ class MappingServiceImplTest {
 
 	private static Mapping buildMapping(String name, List<MappingField> fields) {
 		Mapping mapping = new Mapping();
+		Set<Ontology> ontologies = new HashSet<>();
+		Ontology ontology = buildOntology();
+		ontologies.add(ontology);
+		mapping.setOntologies(ontologies);
 		mapping.setId(1L);
 		mapping.setName(name);
+		mapping.setBaseUrl("http://example.org/");
 		mapping.setFields(fields);
 		return mapping;
 	}
@@ -252,11 +375,6 @@ class MappingServiceImplTest {
 	private static MappingField buildMappingField(FileSource source, SubjectMap subjectMap, List<PredicateObjectMap> predicates) {
 		MappingField field = new MappingField();
 
-		Ontology ontology = new Ontology();
-		ontology.setId(1L);
-		ontology.setName("Ontology1");
-
-		field.setOntology(ontology);
 		field.setSource(source);
 		field.setSubject(subjectMap);
 		field.setPredicates(predicates);
@@ -292,5 +410,13 @@ class MappingServiceImplTest {
 		objectMap.setKey(key);
 		objectMap.setLiteralValue(literalValue);
 		return objectMap;
+	}
+
+	private static Ontology buildOntology() {
+		Ontology ontology = new Ontology();
+		ontology.setId(1L);
+		ontology.setName("Ontology1");
+		ontology.setUrl("http://example.org/");
+		return ontology;
 	}
 }

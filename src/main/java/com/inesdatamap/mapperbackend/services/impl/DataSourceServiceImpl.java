@@ -17,6 +17,7 @@ import com.inesdatamap.mapperbackend.model.mappers.DataSourceMapper;
 import com.inesdatamap.mapperbackend.model.routing.ClientDataSourceRouter;
 import com.inesdatamap.mapperbackend.properties.AppProperties;
 import com.inesdatamap.mapperbackend.repositories.jpa.DataSourceRepository;
+import com.inesdatamap.mapperbackend.repositories.jpa.MappingFieldRepository;
 import com.inesdatamap.mapperbackend.services.DataSourceService;
 import com.inesdatamap.mapperbackend.utils.Constants;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
@@ -37,6 +38,9 @@ public class DataSourceServiceImpl implements DataSourceService {
 
 	@Autowired
 	private DataSourceRepository<DataSource> dataSourceRepository;
+
+	@Autowired
+	private MappingFieldRepository mappingFieldRepo;
 
 	@Autowired
 	private DataSourceMapper dataSourceMapper;
@@ -88,6 +92,12 @@ public class DataSourceServiceImpl implements DataSourceService {
 
 		// Delete files related to the data source
 		this.deleteDataSourceFiles(id);
+
+		// Check if data source is being used by any mapping
+		boolean isInUse = this.mappingFieldRepo.existsBySourceId(id);
+		if (isInUse) {
+			throw new IllegalArgumentException("The data source is being used in one or more mappings and it can not be deleted");
+		}
 
 		this.dataSourceRepository.deleteById(id);
 

@@ -6,8 +6,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -26,7 +29,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
+import com.inesdatamap.mapperbackend.model.enums.PropertyTypeEnum;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 import com.inesdatamap.mapperbackend.utils.Constants;
 
@@ -151,13 +156,13 @@ class OntologyControllerTest {
 
 		List<SearchOntologyDTO> ontologies = Arrays.asList(ontology1, ontology2);
 
-		// Configurar mock para el servicio
+		// Configure mock for service
 		Mockito.when(this.ontologyService.getOntologies(Sort.by(Constants.SORT_BY_NAME).ascending())).thenReturn(ontologies);
 
-		// Actuar: Llamar al método del controlador
+		// Act: Call the controller method
 		ResponseEntity<List<SearchOntologyDTO>> result = this.controller.getOntologies();
 
-		// Verificaciones y aserciones
+		// Verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals(ontologies, result.getBody());
 	}
@@ -168,33 +173,53 @@ class OntologyControllerTest {
 		Long ontologyId = 1L;
 		List<String> ontologyClasses = Arrays.asList("Class1", "Class2", "Class3");
 
-		// Configurar mock para el servicio
+		// Configure mock for service
 		Mockito.when(this.ontologyService.getOntologyClasses(ontologyId)).thenReturn(ontologyClasses);
 
-		// Actuar: Llamar al método del controlador
+		// Act: Call the controller method
 		ResponseEntity<List<String>> result = this.controller.getOntologyClasses(ontologyId);
 
-		// Verificaciones y aserciones
+		// Verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());
 		assertEquals(ontologyClasses, result.getBody());
 	}
 
 	@Test
-	void testGetOntologyAttributes() {
+	void testGetClassProperties() {
 		// Arrange
 		Long ontologyId = 1L;
 		String ontologyClass = "TestOntologyClass";
-		List<String> ontologyAttributes = Arrays.asList("Attribute1", "Attribute2", "Attribute3");
+		PropertyDTO property = new PropertyDTO();
+		property.setName("Property1");
+		property.setPropertyType(PropertyTypeEnum.OBJECT);
+		List<PropertyDTO> classProperties = new ArrayList<>();
+		classProperties.add(property);
 
-		// Configurar mock para el servicio
-		Mockito.when(this.ontologyService.getOntologyAttributes(ontologyId, ontologyClass)).thenReturn(ontologyAttributes);
+		// Configure mock for service
+		Mockito.when(this.ontologyService.getClassProperties(ontologyId, ontologyClass)).thenReturn(classProperties);
 
-		// Actuar: Llamar al método del controlador
-		ResponseEntity<List<String>> result = this.controller.getOntologyAttributes(ontologyId, ontologyClass);
+		// Act: Call the controller method
+		ResponseEntity<List<PropertyDTO>> result = this.controller.getClassProperties(ontologyId, ontologyClass);
 
-		// Verificaciones y aserciones
+		// Verifies & asserts
 		assertEquals(HttpStatus.OK, result.getStatusCode());
-		assertEquals(ontologyAttributes, result.getBody());
+		assertEquals(classProperties, result.getBody());
+	}
+
+	@Test
+	void testGetNamespaceMap() {
+
+		Long id = 1L;
+		Map<String, String> namespaceMap = new HashMap<>();
+		namespaceMap.put("solar", "https://w3id.org/solar/o/core#");
+		namespaceMap.put("schema", "https://schema.org/");
+		namespaceMap.put("skos", "http://www.w3.org/2004/02/skos/core#");
+
+		Mockito.when(this.ontologyService.getNameSpaceMap(id)).thenReturn(namespaceMap);
+
+		ResponseEntity<Map<String, String>> result = this.controller.getNameSpaceMap(id);
+
+		assertEquals(namespaceMap, result.getBody());
 	}
 
 }

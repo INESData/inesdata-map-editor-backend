@@ -7,7 +7,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,13 +29,14 @@ import com.inesdatamap.mapperbackend.exceptions.RmlWriteException;
 import com.inesdatamap.mapperbackend.model.dto.MappingDTO;
 import com.inesdatamap.mapperbackend.model.dto.PredicateObjectMapDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchMappingDTO;
-import com.inesdatamap.mapperbackend.model.enums.DataFileTypeEnum;
 import com.inesdatamap.mapperbackend.model.enums.DataSourceTypeEnum;
 import com.inesdatamap.mapperbackend.model.jpa.DataSource;
 import com.inesdatamap.mapperbackend.model.jpa.Execution;
 import com.inesdatamap.mapperbackend.model.jpa.FileSource;
+import com.inesdatamap.mapperbackend.model.jpa.LogicalSource;
 import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.MappingField;
+import com.inesdatamap.mapperbackend.model.jpa.Namespace;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.MappingMapper;
 import com.inesdatamap.mapperbackend.model.mappers.PredicateObjectMapMapper;
@@ -93,7 +96,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Retrieves a list of all mappings and maps them to their corresponding DTOs.
 	 *
 	 * @param pageable
-	 * 	pageable
+	 *            pageable
 	 *
 	 * @return List of MappingsDTOs
 	 */
@@ -111,14 +114,17 @@ public class MappingServiceImpl implements MappingService {
 			searchMapping.setId(mapping.getId());
 			searchMapping.setName(mapping.getName());
 
+			// Iterate mapping and set values to ontologies
 			List<String> ontologies = new ArrayList<>();
-			List<String> dataSources = new ArrayList<>();
-
-			// Iterate fields list and set values to ontologies and sources list
-			for (MappingField field : mapping.getFields()) {
-				if (field.getOntology() != null && field.getOntology().getName() != null) {
-					ontologies.add(field.getOntology().getName());
+			for (Ontology ontology : mapping.getOntologies()) {
+				if (ontology.getName() != null) {
+					ontologies.add(ontology.getName());
 				}
+			}
+
+			// Iterate fields list and set values to sources list
+			List<String> dataSources = new ArrayList<>();
+			for (MappingField field : mapping.getFields()) {
 				if (field.getSource() != null && field.getSource().getName() != null) {
 					dataSources.add(field.getSource().getName());
 				}
@@ -140,7 +146,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Deletes a mapping by its id.
 	 *
 	 * @param id
-	 * 	the ID of the mapping to delete
+	 *            the ID of the mapping to delete
 	 */
 	@Override
 	public void deleteMapping(Long id) {
@@ -160,7 +166,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Retrieves a MappingField entity by its ID.
 	 *
 	 * @param id
-	 * 	the ID of the MappingField to retrieve
+	 *            the ID of the MappingField to retrieve
 	 *
 	 * @return the MappingField entity corresponding to the given ID
 	 */
@@ -173,26 +179,32 @@ public class MappingServiceImpl implements MappingService {
 	 * Creates a new mapping.
 	 *
 	 * @param mappingDTO
-	 * 	the mapping to create
+	 *            the mapping to create
 	 *
 	 * @return the created mapping
 	 */
 	@Override
 	public Mapping create(MappingDTO mappingDTO) {
 
+		// Set relationships and map DTO to entity
 		Mapping mapping = setRelationships(mappingDTO);
 
+		// Build logical source
+		buildLogicalSource(mapping);
+
+		// Build RML and set it to the mapping
 		byte[] rml = buildRml(mapping);
 		mapping.setRml(rml);
 
 		return mapping;
+
 	}
 
 	/**
 	 * Saves a mapping.
 	 *
 	 * @param mapping
-	 * 	the mapping to save
+	 *            the mapping to save
 	 *
 	 * @return the saved mapping
 	 */
@@ -205,24 +217,25 @@ public class MappingServiceImpl implements MappingService {
 	 * Sets the relationships of a mapping.
 	 *
 	 * @param mappingDTO
-	 * 	the mapping dto
+	 *            the mapping dto
 	 *
 	 * @return the mapping with the relationships set
 	 */
 	private Mapping setRelationships(MappingDTO mappingDTO) {
 
-		Mapping mapping = mappingMapper.dtoToEntity(mappingDTO);
+		Mapping mapping = this.mappingMapper.dtoToEntity(mappingDTO);
+
+		Set<Ontology> ontologies = new HashSet<>();
+		mappingDTO.getOntologyIds().forEach(ontologyId -> {
+			Ontology ontology = this.ontologyRepository.getReferenceById(ontologyId);
+			ontologies.add(ontology);
+		});
+		mapping.setOntologies(ontologies);
 
 		if (!CollectionUtils.isEmpty(mapping.getFields())) {
-
 			mapping.getFields().forEach(field -> {
-
-				Ontology ontology = this.ontologyRepository.getReferenceById(field.getOntology().getId());
 				DataSource dataSource = this.dataSourceRepository.getReferenceById(field.getSource().getId());
-
-				field.setOntology(ontology);
 				field.setSource(dataSource);
-
 			});
 		}
 
@@ -233,7 +246,7 @@ public class MappingServiceImpl implements MappingService {
 	 * Builds the RML for a mapping.
 	 *
 	 * @param mapping
-	 * 	the mapping to build the RML for
+	 *            the mapping to build the RML for
 	 *
 	 * @return the RML for the mapping
 	 */
@@ -243,9 +256,8 @@ public class MappingServiceImpl implements MappingService {
 		SimpleValueFactory vf = SimpleValueFactory.getInstance();
 		byte[] rmlContent;
 
-		// TODO: ¿En función de qué va?
-		String baseUri = "http://example.org/";
-		setNamespaces(builder, baseUri);
+		String baseUri = mapping.getBaseUrl();
+		setNamespaces(builder, mapping);
 
 		mapping.getFields().forEach(field -> {
 
@@ -255,8 +267,7 @@ public class MappingServiceImpl implements MappingService {
 
 			// Logical source or logical table
 			if (field.getSource().getType().equals(DataSourceTypeEnum.FILE)) {
-				FileSource fileSource = fileSourceRepository.getReferenceById(field.getSource().getId());
-				createLogicalSource(builder, mappingNode, fileSource);
+				createLogicalSource(builder, mappingNode, field);
 			}
 
 			// Subject map
@@ -264,8 +275,9 @@ public class MappingServiceImpl implements MappingService {
 
 			// Predicate-object maps
 			field.getPredicates().forEach(predicate -> {
-				PredicateObjectMapDTO predicateObjectMapDTO = predicateObjectMapMapper.entityToDto(predicate);
-				RmlUtils.createPredicateObjectMapNode(builder, mappingNode, predicate.getPredicate(), predicateObjectMapDTO.getObjectMap());
+					PredicateObjectMapDTO predicateObjectMapDTO = this.predicateObjectMapMapper.entityToDto(predicate);
+					RmlUtils.createPredicateObjectMapNode(builder, mappingNode, predicate.getPredicate(),
+							predicateObjectMapDTO.getObjectMap());
 			});
 
 		});
@@ -289,49 +301,80 @@ public class MappingServiceImpl implements MappingService {
 	 * Sets the namespaces for the RML.
 	 *
 	 * @param builder
-	 * 	the model builder
-	 * @param baseUri
-	 * 	the base URI
+	 *            the model builder
+	 * @param mapping
+	 *            the mapping containing ontologies
 	 */
-	private static void setNamespaces(ModelBuilder builder, String baseUri) {
+	protected void setNamespaces(ModelBuilder builder, Mapping mapping) {
 
 		// Define namespaces and base IRI
 		builder.setNamespace("rr", "http://www.w3.org/ns/r2rml#")
 
-			.setNamespace("rml", "http://semweb.mmlab.be/ns/rml#")
+				.setNamespace("rml", "http://semweb.mmlab.be/ns/rml#")
 
-			.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
+				.setNamespace("ql", "http://semweb.mmlab.be/ns/ql#")
 
-			.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#")
+				.setNamespace("xsd", "http://www.w3.org/2001/XMLSchema#");
 
-			.setNamespace("ex", baseUri);
+	    int counter = 1;
 
+		// Namespaces list
+		if (mapping.getNamespaces() != null) {
+			for (Namespace namespace : mapping.getNamespaces()) {
+				// Assign a new prefix
+				String generatedPrefix = "ns" + counter;
+				builder.setNamespace(generatedPrefix, namespace.getIri());
+
+				namespace.setPrefix(generatedPrefix);
+				counter++;
+			}
+		}
+
+		// Ontology-mappings prefixes
+	    for (Ontology ontology : mapping.getOntologies()) {
+
+			boolean exists = false;
+			for (Namespace existingNamespace : mapping.getNamespaces()) {
+				if (existingNamespace.getIri().equals(ontology.getUrl())) {
+					exists = true;
+					break;
+				}
+			}
+
+			if (!exists) {
+				String generatedPrefix = "ns" + counter;
+				builder.setNamespace(generatedPrefix, ontology.getUrl());
+
+				Namespace namespaceEntity = new Namespace();
+				namespaceEntity.setPrefix(generatedPrefix);
+				namespaceEntity.setIri(ontology.getUrl());
+				mapping.getNamespaces().add(namespaceEntity);
+
+				counter++;
+			}
+	    }
 	}
 
 	/**
 	 * Creates a logical source node.
 	 *
 	 * @param builder
-	 * 	the model builder
+	 *            the model builder
 	 * @param mappingNode
-	 * 	the parent mapping node
-	 * @param source
-	 * 	the source
+	 *            the parent mapping node
+	 * @param field
+	 *            the mapping field
 	 */
-	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, FileSource source) {
-
-		if (source.getFileType().equals(DataFileTypeEnum.CSV)) {
-			String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
-			RmlUtils.createCsvLogicalSourceNode(builder, mappingNode, sourcePath);
-		}
-
+	private static void createLogicalSource(ModelBuilder builder, BNode mappingNode, MappingField field) {
+		RmlUtils.createLogicalSourceNode(builder, mappingNode, field.getLogicalSource().getSource(),
+				field.getLogicalSource().getReferenceFormulation(), field.getLogicalSource().getIterator());
 	}
 
 	/**
 	 * Materializes a mapping by its id.
 	 *
 	 * @param id
-	 * 	the ID of the mapping to materialize
+	 *            the ID of the mapping to materialize
 	 *
 	 * @return the results of the materialization
 	 */
@@ -363,9 +406,9 @@ public class MappingServiceImpl implements MappingService {
 	 * Gets the mapping file path.
 	 *
 	 * @param mappingId
-	 * 	the mapping id
+	 *            the mapping id
 	 * @param executionTime
-	 * 	the execution time
+	 *            the execution time
 	 *
 	 * @return the mapping file path
 	 */
@@ -378,9 +421,9 @@ public class MappingServiceImpl implements MappingService {
 	 * Gets the knowledge graph output file path.
 	 *
 	 * @param mappingId
-	 * 	the mapping id
+	 *            the mapping id
 	 * @param executionTime
-	 * 	the execution time
+	 *            the execution time
 	 *
 	 * @return the knowledge graph output file path
 	 */
@@ -393,9 +436,9 @@ public class MappingServiceImpl implements MappingService {
 	 * Gets the log file path.
 	 *
 	 * @param mappingId
-	 * 	the mapping id
+	 *            the mapping id
 	 * @param executionTime
-	 * 	the execution time
+	 *            the execution time
 	 *
 	 * @return the log file path
 	 */
@@ -408,18 +451,18 @@ public class MappingServiceImpl implements MappingService {
 	 * Saves an execution.
 	 *
 	 * @param mapping
-	 * 	the mapping
+	 *            the mapping
 	 * @param executionDateTime
-	 * 	the execution date time
+	 *            the execution date time
 	 * @param mappingFilePath
-	 * 	the mapping file path
+	 *            the mapping file path
 	 * @param knowledgeGraphOutputFilePath
-	 * 	the knowledge graph output file path
+	 *            the knowledge graph output file path
 	 * @param logFilePath
-	 * 	the log file path
+	 *            the log file path
 	 */
 	private void saveExecution(Mapping mapping, OffsetDateTime executionDateTime, String mappingFilePath,
-		String knowledgeGraphOutputFilePath, String logFilePath) {
+			String knowledgeGraphOutputFilePath, String logFilePath) {
 
 		Execution execution = new Execution();
 
@@ -447,6 +490,94 @@ public class MappingServiceImpl implements MappingService {
 
 		FileUtils.deleteDirectory(Paths.get(executionsFolderPath));
 
+	}
+
+	/**
+	 * Retrieves a MappingDTO by its identifier
+	 *
+	 * @param id
+	 *            the unique identifier of the mapping entity
+	 * @return the mapping dto corresponding to the given ID
+	 */
+	@Override
+	public MappingDTO getMappingById(Long id) {
+		return this.mappingMapper.entityToDto(this.getEntity(id));
+	}
+
+	/**
+	 * Updates an existing mapping in the database.
+	 *
+	 * @param id
+	 *            The ID of the mapping to be updated
+	 * @param mappingDto
+	 *            The MappingDTO
+	 * @return The updated MappingDTO
+	 * @throws IllegalArgumentException
+	 *             If the provided mappingDto is null.
+	 */
+	@Override
+	public MappingDTO updateMapping(Long id, MappingDTO mappingDto) {
+
+		if (mappingDto == null) {
+			throw new IllegalArgumentException("The mapping has no data to update");
+		}
+
+		// Get DB entity
+		Mapping mappingDB = this.getEntity(id);
+
+		// Set relationships on the DTO
+		Mapping mappingSource = this.setRelationships(mappingDto);
+		buildLogicalSource(mappingSource);
+
+		// Create new rml
+		byte[] rml = this.buildRml(mappingSource);
+		mappingSource.setRml(rml);
+
+		// Updated mapping
+		Mapping updatedMapping = this.mappingRepo.saveAndFlush(this.mappingMapper.merge(mappingSource, mappingDB));
+
+		return this.mappingMapper.entityToDto(updatedMapping);
+	}
+
+	/**
+	 * Add the logical source to each field of a mapping
+	 *
+	 * @param mapping
+	 *            The Mapping
+	 */
+	private void buildLogicalSource(Mapping mapping) {
+
+		// Loop through fields and process file sources
+		mapping.getFields().forEach(field -> {
+
+			if (field.getSource().getType().equals(DataSourceTypeEnum.FILE)) {
+				FileSource source = this.fileSourceRepository.getReferenceById(field.getSource().getId());
+
+				// Full file path
+				String sourcePath = String.join(File.separator, source.getFilePath(), source.getFileName());
+
+				// Find iterator
+				String iterator = field.getLogicalSource() != null ? field.getLogicalSource().getIterator() : null;
+
+				// Set referenceFormulation according to file type
+				String referenceFormulation = switch (source.getFileType()) {
+				case CSV -> "http://semweb.mmlab.be/ns/ql#CSV";
+				case XML -> "http://semweb.mmlab.be/ns/ql#XPath";
+				default -> throw new IllegalArgumentException("Unsupported file type: " + source.getFileType());
+				};
+
+				// Create logicalSource and set values
+				LogicalSource logicalSource = new LogicalSource();
+				logicalSource.setReferenceFormulation(referenceFormulation);
+				logicalSource.setSource(sourcePath);
+				if (iterator != null) {
+					logicalSource.setIterator(iterator);
+				}
+
+				// Set logicalSource to field
+				field.setLogicalSource(logicalSource);
+			}
+		});
 	}
 
 }

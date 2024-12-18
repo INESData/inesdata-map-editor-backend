@@ -18,7 +18,7 @@ public interface MappingService {
 	 * Retrieves all mappings.
 	 *
 	 * @param pageable
-	 * 	pageable
+	 *            pageable
 	 *
 	 * @return List of mappings
 	 */
@@ -28,7 +28,7 @@ public interface MappingService {
 	 * Creates a new mapping.
 	 *
 	 * @param mappingDTO
-	 * 	the mapping to create
+	 *            the mapping to create
 	 *
 	 * @return the created mapping
 	 */
@@ -38,7 +38,7 @@ public interface MappingService {
 	 * Saves a mapping.
 	 *
 	 * @param mappingDTO
-	 * 	the mapping to save
+	 *            the mapping to save
 	 *
 	 * @return the saved mapping
 	 */
@@ -48,7 +48,7 @@ public interface MappingService {
 	 * Deletes a mapping by its id.
 	 *
 	 * @param id
-	 * 	the ID of the mapping to delete
+	 *            the ID of the mapping to delete
 	 */
 	void deleteMapping(Long id);
 
@@ -56,7 +56,7 @@ public interface MappingService {
 	 * Gets entity by its id.
 	 *
 	 * @param id
-	 * 	the ID of the mapping to get
+	 *            the ID of the mapping to get
 	 *
 	 * @return Mapping
 	 */
@@ -66,10 +66,31 @@ public interface MappingService {
 	 * Materializes a mapping by its id.
 	 *
 	 * @param id
-	 * 	the ID of the mapping to materialize
+	 *            the ID of the mapping to materialize
 	 *
 	 * @return the result of the materialization
 	 */
 	List<String> materialize(Long id);
+
+	/**
+	 * Get mapping by id
+	 *
+	 * @param id
+	 *            Id
+	 * @return The mapping
+	 */
+	MappingDTO getMappingById(Long id);
+
+	/**
+	 * Updates a mapping identified by its ID.
+	 *
+	 * @param id
+	 *            the ID of the mapping to update
+	 * @param mappingDto
+	 *            the MappingDTO
+	 *
+	 * @return the updated mapping
+	 */
+	MappingDTO updateMapping(Long id, MappingDTO mappingDto);
 
 }

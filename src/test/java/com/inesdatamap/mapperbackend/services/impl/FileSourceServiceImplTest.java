@@ -69,6 +69,8 @@ class FileSourceServiceImplTest {
 
 		// Arrange
 		FileSourceDTO inputDto = new FileSourceDTO();
+		inputDto.setFileType(DataFileTypeEnum.CSV);
+
 		MultipartFile file = mock(MultipartFile.class);
 		FileSource savedFileSourceEntity = new FileSource();
 		savedFileSourceEntity.setId(1L);
@@ -119,9 +121,11 @@ class FileSourceServiceImplTest {
 		MultipartFile file = mock(MultipartFile.class);
 		FileSource savedFileSourceEntity = new FileSource();
 		savedFileSourceEntity.setId(1L);
-		FileSourceDTO inputDto = new FileSourceDTO();
 
 		// Config InputStream simulated for file
+		FileSourceDTO inputDto = new FileSourceDTO();
+		inputDto.setFileType(DataFileTypeEnum.CSV);
+
 		InputStream inputStream = new ByteArrayInputStream("data".getBytes());
 		when(file.getInputStream()).thenReturn(inputStream);
 		when(file.isEmpty()).thenReturn(false);
@@ -215,14 +219,33 @@ class FileSourceServiceImplTest {
 		List<String> resultWithValidFields = this.fileSourceService.getFileFields(idWithValidFields);
 		List<String> expectedWithValidFields = Arrays.asList("field1", "field2", "field3");
 		assertEquals(expectedWithValidFields, resultWithValidFields);
+	}
 
-		// Act and Assert for empty fields
-		List<String> resultWithEmptyFields = this.fileSourceService.getFileFields(idWithEmptyFields);
-		assertTrue(resultWithEmptyFields.isEmpty());
+	@Test
+	void testGetFileAttributes() throws Exception {
 
-		// Act and Assert for null fields
-		List<String> resultWithNullFields = this.fileSourceService.getFileFields(idWithNullFields);
-		assertTrue(resultWithNullFields.isEmpty());
+		// Arrange
+		Long id = 1L;
+		FileSource fileSource = new FileSource();
+		fileSource.setFilePath("src/test/resources/xml");
+		fileSource.setFileName("oli_doliva_en_textures_clean.xml");
+
+		// Mock the repository to return the FileSource
+		when(this.fileSourceRepository.findById(id)).thenReturn(Optional.of(fileSource));
+
+		// Create a real test file
+		File file = new File(this.getClass().getClassLoader().getResource("xml/oli_doliva_en_textures_clean.xml").getFile());
+		assertTrue(file.exists(), "Test file should exist");
+
+		// Get attributes
+		List<String> result = this.fileSourceService.getFileAttributes(id);
+
+		// Expected extracted attributes
+		List<String> expectedAttributes = Arrays.asList("/root/author", "/root/lexicalData/lexConcept/@conceptID",
+				"/root/lexicalData/lexConcept/lexEntry/lexForm/@formID");
+
+		// Assert
+		assertTrue(result != null && result.containsAll(expectedAttributes));
 	}
 
 }

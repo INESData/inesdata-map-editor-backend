@@ -2,17 +2,15 @@ package com.inesdatamap.mapperbackend.services.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.StringDocumentSource;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.search.EntitySearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,12 +20,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.inesdatamap.mapperbackend.exceptions.OntologyParserException;
 import com.inesdatamap.mapperbackend.model.dto.OntologyDTO;
+import com.inesdatamap.mapperbackend.model.dto.PropertyDTO;
 import com.inesdatamap.mapperbackend.model.dto.SearchOntologyDTO;
+import com.inesdatamap.mapperbackend.model.jpa.Mapping;
 import com.inesdatamap.mapperbackend.model.jpa.Ontology;
 import com.inesdatamap.mapperbackend.model.mappers.OntologyMapper;
+import com.inesdatamap.mapperbackend.repositories.jpa.MappingRepository;
 import com.inesdatamap.mapperbackend.repositories.jpa.OntologyRepository;
 import com.inesdatamap.mapperbackend.services.OntologyService;
 import com.inesdatamap.mapperbackend.utils.FileUtils;
+import com.inesdatamap.mapperbackend.utils.NameSpaceUtils;
+import com.inesdatamap.mapperbackend.utils.OWLUtils;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -43,6 +46,9 @@ public class OntologyServiceImpl implements OntologyService {
 
 	@Autowired
 	private OntologyMapper ontologyMapper;
+
+	@Autowired
+	private MappingRepository mappingRepo;
 
 	/**
 	 * Retrieves a list of all ontologies and maps them to their corresponding DTOs.
@@ -97,7 +103,13 @@ public class OntologyServiceImpl implements OntologyService {
 	public void deleteOntology(Long id) {
 
 		// Get entity if exists
-		this.getEntity(id);
+		Ontology ontology = this.getEntity(id);
+
+		// Check if ontology is being used by any mapping
+		List<Mapping> mappingsUsingOntology = this.mappingRepo.findAllByOntologiesContaining(ontology);
+		if (!mappingsUsingOntology.isEmpty()) {
+			throw new IllegalArgumentException("Ontology is being used in one or more mappings and it can not be deleted");
+		}
 
 		this.ontologyRepo.deleteById(id);
 
@@ -172,17 +184,18 @@ public class OntologyServiceImpl implements OntologyService {
 		try {
 
 			// Get entity from DB
-			Ontology ontologyEntity = this.getEntity(id);
+			Ontology ontology = this.getEntity(id);
 
 			// Read ontology file content
-			String ontologyContent = this.getOntologyContent(ontologyEntity);
+			String ontologyContent = this.getOntologyContent(ontology);
 
 			// Create OWLOntologyManager instance and load the ontology
 			OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
 			OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
 
 			// Get all classes in ontology and return list
-			classList = this.getClasses(owl);
+			classList = OWLUtils.getClasses(owl);
+			Collections.sort(classList);
 
 		} catch (OWLOntologyCreationException e) {
 			throw new OntologyParserException("Failed getting classes from ontology with id: " + id, e);
@@ -193,49 +206,17 @@ public class OntologyServiceImpl implements OntologyService {
 	}
 
 	/**
-	 * Retrieves all the class names from the provided OWL ontology.
-	 *
-	 * @param owl
-	 *            the OWL ontology from which to retrieve class names
-	 * @return a list of class names
-	 * @throws OWLOntologyCreationException
-	 *             if there is an error accessing or processing the ontology
-	 */
-	public List<String> getClasses(OWLOntology owl) throws OWLOntologyCreationException {
-
-		// Get all the classes in the ontology
-		Set<OWLClass> classes = owl.getClassesInSignature();
-
-		// List to store the classes
-		List<String> classesList = new ArrayList<>();
-
-		// Iterate over all classes
-		for (OWLClass owlClass : classes) {
-			// Extract the class name from its IRI fragment
-			String className = owlClass.getIRI().getFragment();
-
-			// Add the class name to the list only if it is not null or empty
-			if (className != null && !className.isEmpty()) {
-				classesList.add(className);
-			}
-
-		}
-
-		return classesList;
-	}
-
-	/**
-	 * Retrieves a list of attributes for a specified class from an ontology identified by its ID.
+	 * Retrieves a list of properties for a specified class from an ontology identified by its ID.
 	 *
 	 * @param id
 	 *            The ID of the ontology entity to retrieve.
 	 * @param className
-	 *            The name of the class whose attributes are to be retrieved.
-	 * @return A list of attributes for the specified class from the ontology.
+	 *            The name of the class whose properties are to be retrieved.
+	 * @return A list of properties for the specified class from the ontology.
 	 *
 	 */
 	@Override
-	public List<String> getOntologyAttributes(Long id, String className) {
+	public List<PropertyDTO> getClassProperties(Long id, String className) {
 
 		// Get entity
 		Ontology ontology = this.getEntity(id);
@@ -244,82 +225,10 @@ public class OntologyServiceImpl implements OntologyService {
 		String ontologyContent = this.getOntologyContent(ontology);
 
 		try {
-			return this.getAttributes(ontologyContent, className);
+			return OWLUtils.getProperties(ontologyContent, className);
 		} catch (OWLOntologyCreationException e) {
-			throw new OntologyParserException("Failed getting attributes from ontology: " + ontology.getName(), e);
+			throw new OntologyParserException("Failed getting properties from ontology class: " + className, e);
 		}
-	}
-
-	/**
-	 * Retrieves the data properties associated with a specified class from the given ontology
-	 *
-	 * @param ontologyContent
-	 *            The content of the ontology as a string
-	 * @param className
-	 *            The name of the class for which the data properties are to be retrieved
-	 * @return A list of attributes associated with the specified class
-	 * @throws OWLOntologyCreationException
-	 *             if there is an error during the ontology creation process
-	 */
-	public List<String> getAttributes(String ontologyContent, String className) throws OWLOntologyCreationException {
-
-		if (ontologyContent == null || ontologyContent.isEmpty()) {
-			throw new IllegalArgumentException("Ontology content is empty.");
-		}
-		if (className == null || className.isEmpty()) {
-			throw new IllegalArgumentException("Class name is empty.");
-		}
-
-		// Create OWLOntologyManager instance and load the ontology
-		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
-		OWLOntology owl = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
-
-		// Find the owlClass by className
-		OWLClass owlClass = owl.classesInSignature().filter(clazz -> clazz.getIRI().getFragment().equals(className)).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Class " + className + " not found in the ontology"));
-
-		List<String> attributes = new ArrayList<>();
-
-		// Collect data properties
-		attributes.addAll(this.getDataProperties(owlClass, owl));
-
-		return attributes;
-
-	}
-
-	/**
-	 * Retrieves the data properties associated with a specified OWL class in the ontology
-	 *
-	 * @param owlClass
-	 *            The OWL class whose properties are to be retrieved
-	 * @param ontology
-	 *            The OWL ontology from which to retrieve the properties
-	 * @return A list of data property names associated with the specified class
-	 */
-	public List<String> getDataProperties(OWLClass owlClass, OWLOntology ontology) {
-
-		List<String> properties = new ArrayList<>();
-
-		// Get class name from owlClass
-		String classFragment = owlClass.getIRI().getFragment();
-
-		if (classFragment == null || classFragment.isEmpty()) {
-			throw new IllegalArgumentException("There is no class in the ontology.");
-		}
-
-		// Find data properties for class
-		Set<OWLDataProperty> dataProperties = ontology.getDataPropertiesInSignature();
-		for (OWLDataProperty dataProperty : dataProperties) {
-
-			// Check if the class is a domain of the data property
-			boolean isDomain = EntitySearcher.getDomains(dataProperty, ontology).anyMatch(domain -> domain.equals(owlClass));
-
-			if (isDomain) {
-				properties.add(dataProperty.getIRI().getFragment());
-			}
-		}
-
-		return properties;
 	}
 
 	/**
@@ -344,4 +253,28 @@ public class OntologyServiceImpl implements OntologyService {
 		return new String(contentBytes, StandardCharsets.UTF_8);
 	}
 
+	/**
+	 * Retrieves a map of namespaces and their prefixes from an ontology
+	 *
+	 * @param id
+	 *            the identifier of the ontology
+	 * @return a map where the keys are prefix strings and the values are the corresponding namespace URIs
+	 */
+	@Override
+	public Map<String, String> getNameSpaceMap(Long id) {
+
+		Ontology ontology = this.getEntity(id);
+		String ontologyContent = this.getOntologyContent(ontology);
+
+		// Create OWLOntologyManager instance
+		OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+		try {
+			// Load ontology
+			OWLOntology owlOntology = manager.loadOntologyFromOntologyDocument(new StringDocumentSource(ontologyContent));
+
+			return NameSpaceUtils.getPrefixNamespaceMap(owlOntology);
+		} catch (OWLOntologyCreationException e) {
+			throw new OntologyParserException("Failed getting namespace map from ontology with id: " + id, e);
+		}
+	}
 }
